@@ -3,3 +3,15 @@
 /.specify/
 /specs/
 /CLAUDE.md/
+
+# Rust
+/target/
+Cargo.lock
+
+# codegen (Python)
+__pycache__/
+*.pyc
+/tools/codegen/.venv/
+
+# secretlint local-only denylist (company/personal terms — never committed)
+.secretlintrc.local.json
