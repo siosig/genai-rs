@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Reads `methods.toml` plus `contracts/parity-matrix.md` and emits
-`docs/parity.md`: the Python name -> Rust name -> Status -> Test(s) table that
-records how much of google-genai's Gemini Developer API surface this crate
-covers.
+`docs/parity.md` (and its Japanese twin `docs/parity.ja.md`): the Python name
+-> Rust name -> Status -> Test(s) table that records how much of google-genai's
+Gemini Developer API surface this crate covers.
 
 Two jobs:
 
@@ -14,11 +14,18 @@ Two jobs:
    names the offending rows.
 2. **Render.** Emit `docs/parity.md` from `methods.toml` (the inventory),
    the parity matrix (the agreed statuses), and a scan of the repository's
-   test functions (the "Test(s)" column).
+   test functions (the "Test(s)" column). The same model is rendered once
+   per locale: `LOCALE_EN` below for English, `parity_strings.ja.toml` for
+   Japanese. Every key in `LOCALE_EN` must exist in the Japanese file and
+   vice versa; `load_locales` exits non-zero otherwise, so adding a string
+   to one side forces the other.
 
 The contract document is written in Japanese while `docs/parity.md` is
 English-only, so the few cells quoted verbatim from it are translated through
-`MATRIX_CELL_TRANSLATIONS` below.
+`MATRIX_CELL_TRANSLATIONS` below. `docs/parity.ja.md` quotes those same cells
+verbatim instead. The Japanese prose lives outside this script because the
+repository's pre-commit hook rejects CJK outside `*.ja*` files, and
+backslash-escaping a whole document's prose would be unreadable.
 
 See specs/001-port-genai-rust/contracts/codegen.md, "methods.toml /
 gen_blocking.py / gen_parity.py". DO NOT hand-edit the generated output;
@@ -55,7 +62,9 @@ METHODS_TOML = TOOLS_DIR / "methods.toml"
 # into the English output go through MATRIX_CELL_TRANSLATIONS below.
 PARITY_MATRIX = TOOLS_DIR / "parity-matrix.ja.md"
 OUT_DIR = REPO_ROOT / "docs"
-OUT_FILE = OUT_DIR / "parity.md"
+# Japanese strings for the second rendering. Output paths come from each
+# locale's `out_file`, so this script never hard-codes `parity.ja.md`.
+STRINGS_JA = TOOLS_DIR / "parity_strings.ja.toml"
 
 TYPES_DIR = REPO_ROOT / "src" / "types" / "generated"
 
@@ -139,20 +148,9 @@ CJK_RE = re.compile(
 #
 # Two ✅ rows in the matrix's per-module method table describe types, not
 # callable methods, so they can have no `[[method]]` entry. Both are covered
-# elsewhere.
-NON_METHOD_ROWS = {
-    "pagers": (
-        "`Pager` / `AsyncPager` are types, not methods. Rust implements them as "
-        "`crate::pager::Pager<T>` (`page()` / `name()` / `page_size()` / "
-        "`config()` / `next_page()`), verified by the `#[cfg(test)]` tests in "
-        "`src/pager.rs` and by the tests for each `list` method."
-    ),
-    "errors": (
-        "The `APIError` family are types, not methods. Rust implements them as the "
-        "`crate::error::Error` enum (`Api` / `Function*` / `UnknownApiResponse` "
-        "and friends), verified by the `#[cfg(test)]` tests in `src/error.rs`."
-    ),
-}
+# elsewhere; the rationale text is per-locale (see `LOCALE_EN["non_method_rows"]`
+# and the `[non_method_rows]` table in parity_strings.ja.toml).
+NON_METHOD_ROWS: tuple[str, ...] = ("pagers", "errors")
 
 # --- marked ✅ in the matrix, but not ported to Rust ------------------------
 #
@@ -160,28 +158,204 @@ NON_METHOD_ROWS = {
 # below is Vertex AI-only in google-genai 2.19.0: in Gemini Developer API mode
 # (`vertexai=False`) the Python implementation always raises `ValueError`.
 # This crate targets the Gemini Developer API alone (see the out-of-scope
-# section of contracts/parity-matrix.md), so they are not ported. Each entry
-# cites the relevant spot in the Python SDK.
-NOT_PORTED: dict[tuple[str, str], str] = {
-    ("models", "edit_image"): (
-        "`models.py::_edit_image` opens with `if not self._api_client.vertexai: raise ValueError"
-        "('This method is only supported in Gemini Enterprise Agent Platform mode, ...')`, "
-        "so it cannot be called on the Gemini Developer API."
+# section of the parity matrix), so they are not ported. The per-method
+# justification, citing the relevant spot in the Python SDK, is per-locale:
+# `LOCALE_EN["not_ported"]` and `[not_ported]` in parity_strings.ja.toml,
+# keyed `"<module>.<name>"`.
+NOT_PORTED: tuple[tuple[str, str], ...] = (
+    ("models", "edit_image"),
+    ("models", "upscale_image"),
+    ("models", "recontext_image"),
+    ("models", "segment_image"),
+    ("tunings", "validate_reward"),
+)
+
+# --- locale strings ----------------------------------------------------------
+#
+# Every user-visible string in the rendered document, keyed so that
+# `parity_strings.ja.toml` can supply the same set in Japanese. `{...}`
+# placeholders are filled with `str.format`. Keep this English-only: the
+# english-only-content commit hook applies to this file.
+LOCALE_EN: dict[str, Any] = {
+    "title": "Python → Rust parity table",
+    "cross_link": "Japanese version: [parity.ja.md](parity.ja.md)",
+    "out_file": "docs/parity.md",
+    "baseline": (
+        "**Baseline**: google-genai {version} | "
+        "**Crate**: `gemini-genai` (`gemini_genai`) | "
+        "**Source of truth**: `tools/codegen/parity-matrix.ja.md`"
     ),
-    ("models", "upscale_image"): (
-        "`models.py::_upscale_image` carries the same `vertexai` guard. Vertex AI only."
+    "toc": "Table of Contents",
+    "h_overview": "Overview",
+    "h_generated": "How this document is generated",
+    "h_legend": "Legend",
+    "h_summary": "Per-module summary",
+    "h_mapping": "Method mapping",
+    "h_client": "Client construction",
+    "h_types": "Types",
+    "h_scope": "Out of scope (with rationale)",
+    "overview_p1": (
+        "Coverage of the **{total}** public methods that google-genai {version} (Python) "
+        "exposes for the Gemini Developer API, plus the Rust-specific accessors. "
+        "**{ok}** are implemented, **{unsupported}** are Vertex AI-only and ship as stubs "
+        "returning `UnsupportedByBackend`, and **{not_ported}** are Vertex AI-only and not "
+        "ported at all. A test function was found automatically for **{tested}** of them."
     ),
-    ("models", "recontext_image"): (
-        "`models.py::recontext_image` carries the same `vertexai` guard. Vertex AI only."
+    "overview_p2": (
+        "This table is generated from `tools/codegen/methods.toml` (the method ledger) and "
+        "`tools/codegen/parity-matrix.ja.md` (the agreed source of truth). "
+        "If an entry the parity matrix marks ✅ is missing from the ledger, `gen_parity.py` "
+        "exits non-zero and CI's `codegen-check` fails."
     ),
-    ("models", "segment_image"): (
-        "`models.py::segment_image` carries the same `vertexai` guard. Vertex AI only."
+    "mermaid_missing": "missing ✅ entry",
+    "mermaid_exit": "non-zero exit",
+    "legend_col_status": "Status",
+    "legend_col_meaning": "Meaning",
+    "legend_st_unsupported": "⚠️ `UnsupportedByBackend`",
+    "legend_impl_desc": "A matching Rust method exists and is covered by tests",
+    "legend_unsup_desc": (
+        "Vertex AI-only in Python. Only the signature is ported; calling it always returns an error"
     ),
-    ("tunings", "validate_reward"): (
-        "`tunings.py::validate_reward` carries the same `vertexai` guard. Vertex AI only "
-        "(reward model validation is a Vertex AI tuning feature)."
+    "legend_not_ported_desc": (
+        "Out of scope because the Python side raises `ValueError` when `vertexai=False`"
     ),
+    "legend_note": (
+        "The \"Test(s)\" column comes from scanning `tests/**.rs` and the `#[cfg(test)]` "
+        "modules under `src/**` for test functions containing a chained "
+        "`.<module>().<method>(` call (within a module's own `#[cfg(test)]`, a plain "
+        "`.<method>(` call; failing both, an accessor call plus the method name). "
+        "**Treat it as a heuristic, not as proof of coverage.** "
+        "At most {max_tests} are listed per method."
+    ),
+    "sum_col_module": "Module",
+    "sum_col_methods": "Methods",
+    "sum_col_impl": "Implemented",
+    "sum_col_not_ported": "Not ported",
+    "sum_col_tests": "Tests found",
+    "sum_total": "**Total**",
+    "col_python": "Python",
+    "col_rust": "Rust",
+    "col_status": "Status",
+    "col_tests": "Test(s)",
+    "st_impl": "✅ Implemented",
+    "st_unsupported": "⚠️ `UnsupportedByBackend` (Vertex AI only)",
+    "st_not_ported": "⏭ Not ported (Vertex AI only)",
+    "status_notes": "{status} ({notes})",
+    "note_join": ", ",
+    "note_deprecated": "`#[deprecated]`",
+    "note_private": "private helper",
+    "note_async_only": "async only, no sync variant",
+    "note_sync_handwritten": "sync variant is hand-written",
+    "more_tests": "and {count} more",
+    "no_test": "— (no test found)",
+    "rust_specific": "— (Rust-specific accessor)",
+    "client_p": (
+        "Building a `Client` and picking a backend are not individual methods, so they fall "
+        "outside `methods.toml`. The matching table from the source of truth is reproduced "
+        "here."
+    ),
+    "types_p1": (
+        "`tools/codegen/gen_types.py` turns `google.genai.types` into **{structs} structs / "
+        "{enums} enums** (`src/types/generated/structs.rs`, "
+        "`src/types/generated/enums.rs`). Type and field names match Python one for one "
+        "(snake_case), so the mapping is 1:1 and is not listed here."
+    ),
+    "types_p2": (
+        "Parity on the type side is `gen_types.py`'s own job: the moment it meets an "
+        "annotation missing from its mapping table it prints the class and field name and "
+        "exits non-zero, so anything overlooked surfaces in CI's `codegen-check` (see "
+        "\"gen_types.py\" in `specs/001-port-genai-rust/contracts/codegen.md`)."
+    ),
+    "scope_col_item": "Item",
+    "scope_col_reason": "Rationale",
+    "scope_row_suffix": " (row in the source of truth)",
+    "scope_per_sot": " (per the source of truth)",
+    "scope_tail": (
+        "Whole backends that are out of scope (Vertex AI / NextGen / `local_tokenizer` / "
+        "replay) are covered by the out-of-scope section of "
+        "`tools/codegen/parity-matrix.ja.md`."
+    ),
+    "not_ported": {
+        "models.edit_image": (
+            "`models.py::_edit_image` opens with `if not self._api_client.vertexai: raise ValueError"
+            "('This method is only supported in Gemini Enterprise Agent Platform mode, ...')`, "
+            "so it cannot be called on the Gemini Developer API."
+        ),
+        "models.upscale_image": (
+            "`models.py::_upscale_image` carries the same `vertexai` guard. Vertex AI only."
+        ),
+        "models.recontext_image": (
+            "`models.py::recontext_image` carries the same `vertexai` guard. Vertex AI only."
+        ),
+        "models.segment_image": (
+            "`models.py::segment_image` carries the same `vertexai` guard. Vertex AI only."
+        ),
+        "tunings.validate_reward": (
+            "`tunings.py::validate_reward` carries the same `vertexai` guard. Vertex AI only "
+            "(reward model validation is a Vertex AI tuning feature)."
+        ),
+    },
+    "non_method_rows": {
+        "pagers": (
+            "`Pager` / `AsyncPager` are types, not methods. Rust implements them as "
+            "`crate::pager::Pager<T>` (`page()` / `name()` / `page_size()` / "
+            "`config()` / `next_page()`), verified by the `#[cfg(test)]` tests in "
+            "`src/pager.rs` and by the tests for each `list` method."
+        ),
+        "errors": (
+            "The `APIError` family are types, not methods. Rust implements them as the "
+            "`crate::error::Error` enum (`Api` / `Function*` / `UnknownApiResponse` "
+            "and friends), verified by the `#[cfg(test)]` tests in `src/error.rs`."
+        ),
+    },
 }
+
+
+def load_locales() -> dict[str, dict[str, Any]]:
+    """Returns `{"en": LOCALE_EN, "ja": <parity_strings.ja.toml>}`.
+
+    A key present in one locale but missing from the other is a hard error:
+    the two documents must stay structurally identical, and silently falling
+    back to English inside the Japanese file would leak untranslated prose
+    without anything failing.
+    """
+    japanese = tomllib.loads(STRINGS_JA.read_text(encoding="utf-8"))
+    locales = {"en": LOCALE_EN, "ja": japanese}
+
+    def flat_keys(strings: dict[str, Any]) -> set[str]:
+        keys: set[str] = set()
+        for key, value in strings.items():
+            if isinstance(value, dict):
+                keys.update(f"{key}.{sub}" for sub in value)
+            else:
+                keys.add(key)
+        return keys
+
+    reference = flat_keys(LOCALE_EN)
+    problems: list[str] = []
+    for code, strings in locales.items():
+        keys = flat_keys(strings)
+        for missing in sorted(reference - keys):
+            problems.append(f"  {code}: missing {missing!r}")
+        for extra in sorted(keys - reference):
+            problems.append(f"  {code}: unexpected {extra!r} (not in LOCALE_EN)")
+    if problems:
+        sys.exit(
+            "gen_parity.py: locale strings are out of sync between LOCALE_EN and "
+            f"{STRINGS_JA.relative_to(REPO_ROOT)}:\n" + "\n".join(problems)
+        )
+    return locales
+
+
+def slug(heading: str) -> str:
+    """GitHub's heading anchor: lowercased, punctuation dropped, spaces to `-`.
+
+    Works for both scripts: `Out of scope (with rationale)` becomes
+    `out-of-scope-with-rationale`, and the Japanese heading with full-width
+    parentheses loses them the same way.
+    """
+    return re.sub(r"[^\w\- ]", "", heading.lower()).replace(" ", "-")
+
 
 # --- test discovery --------------------------------------------------------
 #
@@ -402,33 +576,39 @@ def rust_name(method: dict[str, Any]) -> str:
     return f"`{owner}::{method['name']}`"
 
 
-def method_status(method: dict[str, Any]) -> str:
-    if method["kind"] in WIRE_KINDS and not method.get("path"):
-        return "⚠️ `UnsupportedByBackend` (Vertex AI only)"
+def is_unsupported(method: dict[str, Any]) -> bool:
+    return method["kind"] in WIRE_KINDS and not method.get("path")
+
+
+def method_status(method: dict[str, Any], s: dict[str, Any]) -> str:
+    if is_unsupported(method):
+        return s["st_unsupported"]
     notes = []
     if method.get("deprecated"):
-        notes.append("`#[deprecated]`")
+        notes.append(s["note_deprecated"])
     if method.get("visibility") == "private":
-        notes.append("private helper")
+        notes.append(s["note_private"])
     if method["owner"].startswith("crate::live"):
-        notes.append("async only, no sync variant")
+        notes.append(s["note_async_only"])
     elif method["kind"] in {"session", "manual"}:
-        notes.append("sync variant is hand-written")
-    return "✅ Implemented" + (f" ({', '.join(notes)})" if notes else "")
+        notes.append(s["note_sync_handwritten"])
+    if not notes:
+        return s["st_impl"]
+    return s["status_notes"].format(status=s["st_impl"], notes=s["note_join"].join(notes))
 
 
-def format_tests(test_ids: list[str]) -> str:
+def format_tests(test_ids: list[str], s: dict[str, Any]) -> str:
     if not test_ids:
-        return "— (no test found)"
+        return s["no_test"]
     shown = [f"`{t}`" for t in test_ids[:MAX_TESTS_SHOWN]]
     if len(test_ids) > MAX_TESTS_SHOWN:
-        shown.append(f"and {len(test_ids) - MAX_TESTS_SHOWN} more")
+        shown.append(s["more_tests"].format(count=len(test_ids) - MAX_TESTS_SHOWN))
     return "<br>".join(shown)
 
 
-def python_name(method: dict[str, Any]) -> str:
+def python_name(method: dict[str, Any], s: dict[str, Any]) -> str:
     py = method.get("python") or ""
-    return f"`{py}`" if py else "— (Rust-specific accessor)"
+    return f"`{py}`" if py else s["rust_specific"]
 
 
 def anchor(module: str) -> str:
@@ -442,7 +622,12 @@ def render(
     client_rows: list[dict[str, str]],
     method_rows: list[dict[str, str]],
     tests: list[tuple[str, str, str]],
+    s: dict[str, Any],
+    translate: Any,
 ) -> str:
+    """Renders one locale. `s` is that locale's string table; `translate` maps
+    a cell quoted from the (Japanese) parity matrix into the output language
+    -- `translate_cell` for English, identity for Japanese."""
     modules: list[str] = []
     for m in methods:
         if m["module"] not in modules:
@@ -456,183 +641,147 @@ def render(
 
     for m in methods:
         module = m["module"]
-        status = method_status(m)
         found = find_tests(m, tests)
         stats[module]["total"] += 1
-        if status.startswith("⚠️"):
+        if is_unsupported(m):
             stats[module]["unsupported"] += 1
         else:
             stats[module]["ok"] += 1
         if found:
             stats[module]["tested"] += 1
         rows_by_module[module].append(
-            f"| {python_name(m)} | {rust_name(m)} | {status} | {format_tests(found)} |"
+            f"| {python_name(m, s)} | {rust_name(m)} | {method_status(m, s)} | "
+            f"{format_tests(found, s)} |"
         )
 
-    for (module, name), reason in sorted(NOT_PORTED.items()):
+    for module, name in sorted(NOT_PORTED):
         if module not in rows_by_module:
             rows_by_module[module] = []
             stats[module] = {"total": 0, "ok": 0, "unsupported": 0, "not_ported": 0, "tested": 0}
             modules.append(module)
         stats[module]["total"] += 1
         stats[module]["not_ported"] += 1
-        rows_by_module[module].append(
-            f"| `{module}.{name}` | — | ⏭ Not ported (Vertex AI only) | — |"
-        )
-        del reason  # rendered in the out-of-scope section instead
+        rows_by_module[module].append(f"| `{module}.{name}` | — | {s['st_not_ported']} | — |")
 
     out: list[str] = [HEADER]
-    out.append("# Python → Rust parity table\n")
-    out.append(
-        f"**Baseline**: google-genai {GENAI_VERSION} | "
-        "**Crate**: `gemini-genai` (`gemini_genai`) | "
-        "**Source of truth**: `tools/codegen/parity-matrix.ja.md`\n"
-    )
+    out.append(f"# {s['title']}\n")
+    out.append(s["baseline"].format(version=GENAI_VERSION) + "\n")
+    out.append(s["cross_link"] + "\n")
 
     # --- table of contents ---
-    out.append("## Table of Contents\n")
-    out.append("- [Overview](#overview)")
-    out.append("- [How this document is generated](#how-this-document-is-generated)")
-    out.append("- [Legend](#legend)")
-    out.append("- [Per-module summary](#per-module-summary)")
-    out.append("- [Method mapping](#method-mapping)")
+    out.append(f"## {s['toc']}\n")
+    for heading in ("h_overview", "h_generated", "h_legend", "h_summary", "h_mapping"):
+        out.append(f"- [{s[heading]}](#{slug(s[heading])})")
     for module in modules:
         out.append(f"  - [{module}](#{anchor(module)})")
-    out.append("- [Client construction](#client-construction)")
-    out.append("- [Types](#types)")
-    out.append("- [Out of scope (with rationale)](#out-of-scope-with-rationale)")
+    for heading in ("h_client", "h_types", "h_scope"):
+        out.append(f"- [{s[heading]}](#{slug(s[heading])})")
     out.append("")
 
     # --- overview ---
-    total = sum(s["total"] for s in stats.values())
-    ok = sum(s["ok"] for s in stats.values())
-    unsupported = sum(s["unsupported"] for s in stats.values())
-    not_ported = sum(s["not_ported"] for s in stats.values())
-    tested = sum(s["tested"] for s in stats.values())
-    out.append("## Overview\n")
+    total = sum(x["total"] for x in stats.values())
+    ok = sum(x["ok"] for x in stats.values())
+    unsupported = sum(x["unsupported"] for x in stats.values())
+    not_ported = sum(x["not_ported"] for x in stats.values())
+    tested = sum(x["tested"] for x in stats.values())
+    out.append(f"## {s['h_overview']}\n")
     out.append(
-        f"Coverage of the **{total}** public methods that google-genai {GENAI_VERSION} (Python) "
-        f"exposes for the Gemini Developer API, plus the Rust-specific accessors. "
-        f"**{ok}** are implemented, **{unsupported}** are Vertex AI-only and ship as stubs "
-        f"returning `UnsupportedByBackend`, and **{not_ported}** are Vertex AI-only and not "
-        f"ported at all. A test function was found automatically for **{tested}** of them.\n"
+        s["overview_p1"].format(
+            total=total,
+            version=GENAI_VERSION,
+            ok=ok,
+            unsupported=unsupported,
+            not_ported=not_ported,
+            tested=tested,
+        )
+        + "\n"
     )
-    out.append(
-        "This table is generated from `tools/codegen/methods.toml` (the method ledger) and "
-        "`tools/codegen/parity-matrix.ja.md` (the agreed source of truth). "
-        "If an entry the parity matrix marks ✅ is missing from the ledger, `gen_parity.py` "
-        "exits non-zero and CI's `codegen-check` fails.\n"
-    )
+    out.append(s["overview_p2"] + "\n")
 
     # --- how it is generated ---
-    out.append("## How this document is generated\n")
+    out.append(f"## {s['h_generated']}\n")
     out.append("```mermaid")
     out.append("flowchart LR")
     out.append("  M[(tools/codegen/methods.toml)] --> GP[gen_parity.py]")
-    out.append("  PM[(contracts/parity-matrix.md)] --> GP")
+    out.append("  PM[(tools/codegen/parity-matrix.ja.md)] --> GP")
     out.append("  T[(tests/**.rs<br/>src/**#91;cfg#40;test#41;#93;)] --> GP")
-    out.append("  GP --> D[docs/parity.md]")
-    out.append("  GP -. missing ✅ entry .-> X[[non-zero exit]]")
+    out.append(f"  GP --> D[{s['out_file']}]")
+    out.append(f"  GP -. {s['mermaid_missing']} .-> X[[{s['mermaid_exit']}]]")
     out.append("  M --> GB[gen_blocking.py] --> B[src/blocking/generated.rs]")
     out.append("```\n")
 
     # --- legend ---
-    out.append("## Legend\n")
-    out.append("| Status | Meaning |")
+    out.append(f"## {s['h_legend']}\n")
+    out.append(f"| {s['legend_col_status']} | {s['legend_col_meaning']} |")
     out.append("|---|---|")
-    out.append("| ✅ Implemented | A matching Rust method exists and is covered by tests |")
-    out.append(
-        "| ⚠️ `UnsupportedByBackend` | Vertex AI-only in Python. "
-        "Only the signature is ported; calling it always returns an error |"
-    )
-    out.append(
-        "| ⏭ Not ported (Vertex AI only) | Out of scope because the Python side raises "
-        "`ValueError` when `vertexai=False` |"
-    )
+    out.append(f"| {s['st_impl']} | {s['legend_impl_desc']} |")
+    out.append(f"| {s['legend_st_unsupported']} | {s['legend_unsup_desc']} |")
+    out.append(f"| {s['st_not_ported']} | {s['legend_not_ported_desc']} |")
     out.append("")
-    out.append(
-        "The \"Test(s)\" column comes from scanning `tests/**.rs` and the `#[cfg(test)]` "
-        "modules under `src/**` for test functions containing a chained "
-        "`.<module>().<method>(` call (within a module's own `#[cfg(test)]`, a plain "
-        "`.<method>(` call; failing both, an accessor call plus the method name). "
-        "**Treat it as a heuristic, not as proof of coverage.** "
-        f"At most {MAX_TESTS_SHOWN} are listed per method.\n"
-    )
+    out.append(s["legend_note"].format(max_tests=MAX_TESTS_SHOWN) + "\n")
 
     # --- summary ---
-    out.append("## Per-module summary\n")
-    out.append("| Module | Methods | Implemented | `UnsupportedByBackend` | Not ported | Tests found |")
+    out.append(f"## {s['h_summary']}\n")
+    out.append(
+        f"| {s['sum_col_module']} | {s['sum_col_methods']} | {s['sum_col_impl']} | "
+        f"`UnsupportedByBackend` | {s['sum_col_not_ported']} | {s['sum_col_tests']} |"
+    )
     out.append("|---|---:|---:|---:|---:|---:|")
     for module in modules:
-        s = stats[module]
+        x = stats[module]
         out.append(
-            f"| [{module}](#{anchor(module)}) | {s['total']} | {s['ok']} | "
-            f"{s['unsupported']} | {s['not_ported']} | {s['tested']} |"
+            f"| [{module}](#{anchor(module)}) | {x['total']} | {x['ok']} | "
+            f"{x['unsupported']} | {x['not_ported']} | {x['tested']} |"
         )
-    out.append(f"| **Total** | **{total}** | **{ok}** | **{unsupported}** | **{not_ported}** | **{tested}** |")
+    out.append(
+        f"| {s['sum_total']} | **{total}** | **{ok}** | **{unsupported}** | "
+        f"**{not_ported}** | **{tested}** |"
+    )
     out.append("")
 
     # --- the table itself ---
-    out.append("## Method mapping\n")
+    out.append(f"## {s['h_mapping']}\n")
     for module in modules:
         out.append(f"### {module}\n")
-        out.append("| Python | Rust | Status | Test(s) |")
+        out.append(f"| {s['col_python']} | {s['col_rust']} | {s['col_status']} | {s['col_tests']} |")
         out.append("|---|---|---|---|")
         out.extend(rows_by_module[module])
         out.append("")
 
     # --- client ---
-    out.append("## Client construction\n")
-    out.append(
-        "Building a `Client` and picking a backend are not individual methods, so they fall "
-        "outside `methods.toml`. The matching table from the source of truth is reproduced "
-        "here.\n"
-    )
-    out.append("| Python | Rust | Status |")
+    out.append(f"## {s['h_client']}\n")
+    out.append(s["client_p"] + "\n")
+    out.append(f"| {s['col_python']} | {s['col_rust']} | {s['col_status']} |")
     out.append("|---|---|---|")
     for row in client_rows:
         out.append(
-            f"| {translate_cell(row['python'])} | {translate_cell(row['rust'])} | "
-            f"{translate_cell(row['raw_status'])} |"
+            f"| {translate(row['python'])} | {translate(row['rust'])} | "
+            f"{translate(row['raw_status'])} |"
         )
     out.append("")
 
     # --- types ---
-    out.append("## Types\n")
+    out.append(f"## {s['h_types']}\n")
     structs, enums = count_types()
-    out.append(
-        f"`tools/codegen/gen_types.py` turns `google.genai.types` into **{structs} structs / "
-        f"{enums} enums** (`src/types/generated/structs.rs`, "
-        "`src/types/generated/enums.rs`). Type and field names match Python one for one "
-        "(snake_case), so the mapping is 1:1 and is not listed here.\n"
-    )
-    out.append(
-        "Parity on the type side is `gen_types.py`'s own job: the moment it meets an "
-        "annotation missing from its mapping table it prints the class and field name and "
-        "exits non-zero, so anything overlooked surfaces in CI's `codegen-check` (see "
-        "\"gen_types.py\" in `specs/001-port-genai-rust/contracts/codegen.md`).\n"
-    )
+    out.append(s["types_p1"].format(structs=structs, enums=enums) + "\n")
+    out.append(s["types_p2"] + "\n")
 
     # --- out of scope ---
-    out.append("## Out of scope (with rationale)\n")
-    out.append("| Item | Rationale |")
+    out.append(f"## {s['h_scope']}\n")
+    out.append(f"| {s['scope_col_item']} | {s['scope_col_reason']} |")
     out.append("|---|---|")
-    for (module, name), reason in sorted(NOT_PORTED.items()):
-        out.append(f"| `{module}.{name}` | {reason} |")
-    for module, reason in sorted(NON_METHOD_ROWS.items()):
-        out.append(f"| `{module}` (row in the source of truth) | {reason} |")
+    for module, name in sorted(NOT_PORTED):
+        out.append(f"| `{module}.{name}` | {s['not_ported'][f'{module}.{name}']} |")
+    for module in sorted(NON_METHOD_ROWS):
+        out.append(f"| `{module}`{s['scope_row_suffix']} | {s['non_method_rows'][module]} |")
     for row in method_rows:
         if row["status"] != "✅":
             out.append(
                 f"| `{row['matrix_module']}.{row['name']}` | "
-                f"{translate_cell(row['raw_status'])} (per the source of truth) |"
+                f"{translate(row['raw_status'])}{s['scope_per_sot']} |"
             )
     out.append("")
-    out.append(
-        "Whole backends that are out of scope (Vertex AI / NextGen / `local_tokenizer` / "
-        "replay) are covered by the out-of-scope section of "
-        "`specs/001-port-genai-rust/contracts/parity-matrix.md`.\n"
-    )
+    out.append(s["scope_tail"] + "\n")
 
     del client_modules  # inventory shape is exercised by gen_blocking.py
     return "\n".join(out)
@@ -695,12 +844,20 @@ def main() -> None:
         sys.exit(1)
 
     tests = collect_tests()
-    document = render(client_modules, methods, client_rows, method_rows, tests)
-
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    OUT_FILE.write_text(document, encoding="utf-8")
+    written: list[str] = []
+    for code, strings in load_locales().items():
+        # The English document must not contain Japanese (the commit hook
+        # enforces it), so cells quoted from the Japanese matrix go through
+        # MATRIX_CELL_TRANSLATIONS there. The Japanese document quotes them as
+        # they are.
+        translate = translate_cell if code == "en" else (lambda cell: cell.strip())
+        document = render(client_modules, methods, client_rows, method_rows, tests, strings, translate)
+        out_file = REPO_ROOT / strings["out_file"]
+        out_file.write_text(document, encoding="utf-8")
+        written.append(out_file.relative_to(REPO_ROOT).as_posix())
     print(
-        f"gen_parity.py: wrote {OUT_FILE.relative_to(REPO_ROOT)} "
+        f"gen_parity.py: wrote {', '.join(written)} "
         f"({len(methods)} methods, {len(tests)} test fns scanned)",
         file=sys.stderr,
     )

@@ -1,10 +1,5 @@
 # Japanese strings for gen_parity.py (renders docs/parity.ja.md).
 #
-# NOT CURRENTLY USED. The locale support in gen_parity.py that reads this file is
-# not in the tree, so the generator emits docs/parity.md only. Kept because it is
-# hand-written input, not generated output: when the locale support lands, this
-# is what it consumes. See CONTRIBUTING.md, "Language policy".
-#
 # Kept out of gen_parity.py itself because the repository's pre-commit hook
 # rejects CJK outside `*.ja*` files, and `\uXXXX`-escaping a whole document's
 # prose would be unreadable. Every key below is required: gen_parity.py exits
@@ -15,7 +10,7 @@ title = "Python → Rust 対応表"
 cross_link = "English version: [parity.md](parity.md)"
 out_file = "docs/parity.ja.md"
 
-baseline = "**基準**: google-genai {version} | **クレート**: `gemini-genai`（`gemini_genai`） | **真実の源**: `specs/001-port-genai-rust/contracts/parity-matrix.md`"
+baseline = "**基準**: google-genai {version} | **クレート**: `gemini-genai`（`gemini_genai`） | **真実の源**: `tools/codegen/parity-matrix.ja.md`"
 
 toc = "目次"
 
@@ -30,7 +25,7 @@ h_scope = "対象外（理由付き）"
 
 overview_p1 = "google-genai {version}（Python）が Gemini Developer API 向けに公開している **{total}** 個の公開メソッド（＋ Rust 固有のアクセサ）のカバレッジ。**{ok}** 個が実装済み、**{unsupported}** 個は Vertex AI 専用のため `UnsupportedByBackend` を返すスタブ、**{not_ported}** 個は Vertex AI 専用で移植していない。うち **{tested}** 個についてはテスト関数を自動検出できた。"
 
-overview_p2 = "この表は `tools/codegen/methods.toml`（メソッド台帳）と `specs/001-port-genai-rust/contracts/parity-matrix.md`（合意済みの真実の源）から生成している。対応表が ✅ と記した項目が台帳から欠けていれば `gen_parity.py` は非ゼロ終了し、CI の `codegen-check` が落ちる。"
+overview_p2 = "この表は `tools/codegen/methods.toml`（メソッド台帳）と `tools/codegen/parity-matrix.ja.md`（合意済みの真実の源）から生成している。対応表が ✅ と記した項目が台帳から欠けていれば `gen_parity.py` は非ゼロ終了し、CI の `codegen-check` が落ちる。"
 
 mermaid_missing = "✅ の項目が欠落"
 mermaid_exit = "非ゼロ終了"
@@ -82,7 +77,7 @@ scope_col_reason = "理由"
 scope_row_suffix = "（真実の源側の行）"
 scope_per_sot = "（真実の源に準拠）"
 
-scope_tail = "バックエンド単位で対象外としているもの（Vertex AI / NextGen / `local_tokenizer` / replay）は、`specs/001-port-genai-rust/contracts/parity-matrix.md` の対象外セクションで扱っている。"
+scope_tail = "バックエンド単位で対象外としているもの（Vertex AI / NextGen / `local_tokenizer` / replay）は、`tools/codegen/parity-matrix.ja.md` の対象外セクションで扱っている。"
 
 [not_ported]
 "models.edit_image" = "`models.py::_edit_image` は冒頭が `if not self._api_client.vertexai: raise ValueError('This method is only supported in Gemini Enterprise Agent Platform mode, ...')` なので、Gemini Developer API では呼べない。"

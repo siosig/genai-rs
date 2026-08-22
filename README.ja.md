@@ -523,8 +523,8 @@ fn retryable(error: &Error) -> bool {
 
 ## Python と Rust の対応
 
-- [`docs/parity.md`](docs/parity.md) — 自動生成。Python の全メソッド・全型と、その Rust 側の
-  対応物、そして意図的に移植していないものの一覧（英語）。
+- [`docs/parity.ja.md`](docs/parity.ja.md) — 自動生成。Python の全メソッド・全型と、その Rust 側の
+  対応物、そして意図的に移植していないものの一覧。
 - [`docs/migrating-from-python.ja.md`](docs/migrating-from-python.ja.md) — イディオムの違い（設定
   構造体、`Contents` の変換、ストリーム、ページャ、エラー）についてのガイド。
 

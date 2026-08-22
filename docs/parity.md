@@ -21,6 +21,8 @@
 
 **Baseline**: google-genai 2.19.0 | **Crate**: `gemini-genai` (`gemini_genai`) | **Source of truth**: `tools/codegen/parity-matrix.ja.md`
 
+Japanese version: [parity.ja.md](parity.ja.md)
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -55,7 +57,7 @@ This table is generated from `tools/codegen/methods.toml` (the method ledger) an
 ```mermaid
 flowchart LR
   M[(tools/codegen/methods.toml)] --> GP[gen_parity.py]
-  PM[(contracts/parity-matrix.md)] --> GP
+  PM[(tools/codegen/parity-matrix.ja.md)] --> GP
   T[(tests/**.rs<br/>src/**#91;cfg#40;test#41;#93;)] --> GP
   GP --> D[docs/parity.md]
   GP -. missing ✅ entry .-> X[[non-zero exit]]
@@ -267,4 +269,4 @@ Parity on the type side is `gen_types.py`'s own job: the moment it meets an anno
 | `live.AsyncSession.send` | ⏭ out of scope (deprecated, replacement available) (per the source of truth) |
 | `live.AsyncSession.start_stream` | ⏭ out of scope (deprecated, replacement available) (per the source of truth) |
 
-Whole backends that are out of scope (Vertex AI / NextGen / `local_tokenizer` / replay) are covered by the out-of-scope section of `specs/001-port-genai-rust/contracts/parity-matrix.md`.
+Whole backends that are out of scope (Vertex AI / NextGen / `local_tokenizer` / replay) are covered by the out-of-scope section of `tools/codegen/parity-matrix.ja.md`.

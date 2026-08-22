@@ -20,6 +20,7 @@ comments.
     src/blocking/generated.rs
     tests/fixtures/converters/
     docs/parity.md
+    docs/parity.ja.md
 
 Each of those files carries the same notice in its own header, except for the
 JSON fixtures under tests/fixtures/converters/, which cannot carry comments;

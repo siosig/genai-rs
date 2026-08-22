@@ -114,7 +114,7 @@ These are produced by `tools/codegen/*.py` and **must not be hand-edited**:
 - `src/converters/generated/`
 - `src/blocking/generated.rs`
 - `tests/fixtures/converters/`
-- `docs/parity.md`
+- `docs/parity.md`, `docs/parity.ja.md`
 
 Their inputs -- `tools/codegen/methods.toml`, `tools/codegen/parity-matrix.ja.md`,
 `tools/codegen/fixtures_cases.py` -- are tracked and hand-edited.
@@ -149,10 +149,10 @@ the original with a `.ja` in its name: `README.ja.md`, `SECURITY.ja.md`,
 parity generator reads, and it carries the suffix for exactly that reason.
 
 A generated document that needs a Japanese version keeps its strings in a `.ja`
-data file (`tools/codegen/parity_strings.ja.toml`) rather than as escapes inside
-the generator. That file is currently unused: the locale support in
-`gen_parity.py` that would consume it is not in the tree yet, so `docs/parity.md`
-is English-only.
+data file rather than as escapes inside the generator: `gen_parity.py` renders
+`docs/parity.md` from its built-in `LOCALE_EN` table and `docs/parity.ja.md` from
+`tools/codegen/parity_strings.ja.toml`, and refuses to run if the two string
+sets disagree on a key -- adding a string to one side forces the other.
 
 Commit messages are English too (`hooks/commit-msg`).
 

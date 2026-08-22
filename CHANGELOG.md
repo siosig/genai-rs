@@ -82,6 +82,10 @@ Python SDK's own policy. Always finish a struct literal with
 
 ### Added
 
+- `docs/parity.ja.md`, a Japanese rendering of the parity table. `gen_parity.py`
+  now renders the same model once per locale -- English from its built-in
+  `LOCALE_EN`, Japanese from `tools/codegen/parity_strings.ja.toml` -- and
+  exits non-zero if the two string sets disagree on a key.
 - `NOTICE` at the repository root, plus SPDX attribution headers on every
   generated file, recording that the generated types, converters, blocking
   wrappers, parity table and converter fixtures are derived from

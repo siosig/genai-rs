@@ -114,7 +114,7 @@ cargo +nightly fmt --all
 - `src/converters/generated/`
 - `src/blocking/generated.rs`
 - `tests/fixtures/converters/`
-- `docs/parity.md`
+- `docs/parity.md`, `docs/parity.ja.md`
 
 入力側の `tools/codegen/methods.toml`、`tools/codegen/parity-matrix.ja.md`、
 `tools/codegen/fixtures_cases.py` は追跡されていて手で編集する。
@@ -146,9 +146,9 @@ pydantic モデルの集合がバージョンで変わる（3.12 は `BlobImageU
 parity 生成器が読む日本語の契約文書で、まさにその理由でサフィックスが付いている。
 
 日本語版が必要な生成物は、文字列を生成器内のエスケープではなく `.ja` のデータ
-ファイル（`tools/codegen/parity_strings.ja.toml`）に外出しする。同ファイルは現状
-未使用で、これを消費する `gen_parity.py` の locale 対応がまだツリーに無いため
-`docs/parity.md` は英語のみ。
+ファイルに外出しする。`gen_parity.py` は内蔵の `LOCALE_EN` から `docs/parity.md` を、
+`tools/codegen/parity_strings.ja.toml` から `docs/parity.ja.md` を描画し、両者で
+キーが食い違えば実行を拒否する — 片方に文字列を足せばもう片方も強制される。
 
 コミットメッセージも英語（`hooks/commit-msg`）。
 

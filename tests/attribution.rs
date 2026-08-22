@@ -149,6 +149,7 @@ fn notice_lists_derived_paths_that_all_exist() {
         "src/blocking/generated.rs",
         "tests/fixtures/converters/",
         "docs/parity.md",
+        "docs/parity.ja.md",
     ];
     for path in derived {
         assert!(
