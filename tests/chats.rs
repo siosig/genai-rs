@@ -6,7 +6,7 @@ mod common;
 
 use common::test_client;
 use futures_util::StreamExt;
-use google_genai::types::{Content, Part};
+use gemini_genai::types::{Content, Part};
 use wiremock::matchers::method;
 use wiremock::{Mock, MockServer, ResponseTemplate};
 

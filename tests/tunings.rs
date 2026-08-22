@@ -6,8 +6,8 @@
 mod common;
 
 use common::test_client;
-use google_genai::Error;
-use google_genai::types::{
+use gemini_genai::Error;
+use gemini_genai::types::{
     CancelTuningJobConfig, CreateTuningJobConfig, JobState, TuningDataset, TuningExample,
 };
 use wiremock::matchers::{body_json, method, path};

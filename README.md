@@ -1,7 +1,13 @@
-# google-genai-rs
+# gemini-genai
 
-Rust port of the [Google Gen AI Python SDK](https://github.com/googleapis/python-genai)
-(`google-genai` 2.19.0) for the **Gemini Developer API**.
+> **Unofficial.** An independent Rust port of the
+> [Google Gen AI Python SDK](https://github.com/googleapis/python-genai)
+> (`google-genai` 2.19.0) for the **Gemini Developer API**. Not affiliated
+> with, endorsed by, or sponsored by Google. Portions are derived from
+> `google-genai`, Copyright 2025 Google LLC, licensed under the Apache
+> License, Version 2.0 — see [NOTICE](NOTICE).
+
+Rust port of the Google Gen AI Python SDK for the Gemini Developer API.
 
 ## Table of Contents
 
@@ -39,7 +45,7 @@ rather than half-working.
 
 ```mermaid
 flowchart LR
-    App["Your code"] --> C["google_genai::Client"]
+    App["Your code"] --> C["gemini_genai::Client"]
     C --> M["models()"]
     C --> Ch["chats()"]
     C --> F["files()"]
@@ -54,8 +60,8 @@ flowchart LR
     L --> W["WebSocket · BidiGenerateContent"]
 ```
 
-Note the naming split: the **crate** is `google-genai-rs`, the **library** is
-`google_genai`. You install the former and `use` the latter.
+Note the naming split: the **crate** is `gemini-genai`, the **library** is
+`gemini_genai`. You install the former and `use` the latter.
 
 ## Installation
 
@@ -68,24 +74,24 @@ rather not have one.
 
 ```toml
 [dependencies]
-google-genai-rs = { git = "https://github.com/siosig/genai-rs", branch = "main" }
+gemini-genai = { git = "https://github.com/siosig/genai-rs", branch = "main" }
 ```
 
-or, equivalently, `cargo add --git https://github.com/siosig/genai-rs google-genai-rs`.
+or, equivalently, `cargo add --git https://github.com/siosig/genai-rs gemini-genai`.
 
 Cargo records the resolved commit in your `Cargo.lock`, but `branch = "main"`
 still moves whenever you run `cargo update`. Pin it explicitly if you would
 rather upgrade deliberately:
 
 ```toml
-google-genai-rs = { git = "https://github.com/siosig/genai-rs", rev = "5d38819" }
+gemini-genai = { git = "https://github.com/siosig/genai-rs", rev = "5d38819" }
 ```
 
 ### From a local checkout
 
 ```toml
 [dependencies]
-google-genai-rs = { path = "../genai-rs" }
+gemini-genai = { path = "../genai-rs" }
 ```
 
 A `path` dependency is the better choice over adding the checkout to your own
@@ -116,14 +122,14 @@ a plain `generate_content` call needs nothing else on this list.
 Then, noting the crate/library naming split:
 
 ```rust
-use google_genai::Client;
+use gemini_genai::Client;
 ```
 
 A dependency-only smoke test, if you want to confirm the wiring before writing
 anything real:
 
 ```sh
-cargo build && cargo tree -p google-genai-rs --depth 0
+cargo build && cargo tree -p gemini-genai --depth 0
 ```
 
 ## Authentication
@@ -141,9 +147,9 @@ Neither key set is an `Error::Validation`, not a panic. To skip the environment
 entirely:
 
 ```rust,no_run
-# fn main() -> google_genai::Result<()> {
-use google_genai::Client;
-use google_genai::types::{HttpOptions, HttpRetryOptions};
+# fn main() -> gemini_genai::Result<()> {
+use gemini_genai::Client;
+use gemini_genai::types::{HttpOptions, HttpRetryOptions};
 
 let client = Client::builder()
     .api_key(std::env::var("MY_OWN_KEY_VAR").unwrap_or_default())
@@ -166,14 +172,14 @@ let client = Client::builder()
 | `rustls-tls` | ✅ | TLS through `rustls` + `webpki-roots` for both HTTPS and WebSocket. No system OpenSSL needed. |
 | `native-tls` | — | TLS through the platform's native stack instead. Turn `default-features` off to avoid pulling in both. |
 | `live` | ✅ | `client.live()`: the bidirectional realtime (WebSocket) API, plus `client.live().music()`. |
-| `blocking` | — | `google_genai::blocking`: a synchronous (`fn`, not `async fn`) mirror of the whole API, minus Live. |
-| `mcp` | — | `google_genai::mcp::mcp_tools`: exposes an MCP server's tools to the model as function-calling tools. |
+| `blocking` | — | `gemini_genai::blocking`: a synchronous (`fn`, not `async fn`) mirror of the whole API, minus Live. |
+| `mcp` | — | `gemini_genai::mcp::mcp_tools`: exposes an MCP server's tools to the model as function-calling tools. |
 
 To use `native-tls` instead of the default `rustls`:
 
 ```toml
 [dependencies]
-google-genai-rs = { git = "https://github.com/siosig/genai-rs", branch = "main", default-features = false, features = ["native-tls", "live"] }
+gemini-genai = { git = "https://github.com/siosig/genai-rs", branch = "main", default-features = false, features = ["native-tls", "live"] }
 ```
 
 Always pair a feature override with `default-features = false`; otherwise
@@ -190,7 +196,7 @@ Every snippet below assumes `GOOGLE_API_KEY` (or `GEMINI_API_KEY`) is set.
 ### 1. Text generation
 
 ```rust,no_run
-use google_genai::{Client, Result};
+use gemini_genai::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -213,8 +219,8 @@ async fn main() -> Result<()> {
 just a `Vec<Part>`:
 
 ```rust,no_run
-# async fn run(client: google_genai::Client, png: Vec<u8>) -> google_genai::Result<()> {
-use google_genai::types::Part;
+# async fn run(client: gemini_genai::Client, png: Vec<u8>) -> gemini_genai::Result<()> {
+use gemini_genai::types::Part;
 
 let contents = vec![
     Part::from_text("What is in this image?"),
@@ -233,7 +239,7 @@ let response = client
 
 ```rust,no_run
 use futures_util::StreamExt;
-use google_genai::{Client, Result};
+use gemini_genai::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -260,7 +266,7 @@ A mid-stream failure surfaces as one `Err` item, after which the stream ends.
 `chats.Chat`.
 
 ```rust,no_run
-use google_genai::{Client, Result};
+use gemini_genai::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -288,8 +294,8 @@ via [`schemars`](https://docs.rs/schemars), and defaults `response_mime_type` to
 `application/json`. The reply then deserializes straight back into `T`.
 
 ```rust,no_run
-use google_genai::Client;
-use google_genai::types::GenerateContentConfig;
+use gemini_genai::Client;
+use gemini_genai::types::GenerateContentConfig;
 
 #[derive(Debug, serde::Deserialize, schemars::JsonSchema)]
 struct RecipeIdea {
@@ -332,9 +338,9 @@ call/response loop (up to `maximum_remote_calls`, default 10) before returning t
 final answer.
 
 ```rust,no_run
-use google_genai::afc::function_tool;
-use google_genai::types::{GenerateContentConfig, Tool};
-use google_genai::{Client, Result};
+use gemini_genai::afc::function_tool;
+use gemini_genai::types::{GenerateContentConfig, Tool};
+use gemini_genai::{Client, Result};
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
 struct GetWeatherArgs {
@@ -391,7 +397,7 @@ function-call parts back instead and drive the loop yourself.
 <summary>Paging through list endpoints</summary>
 
 ```rust,no_run
-# async fn run(client: google_genai::Client) -> google_genai::Result<()> {
+# async fn run(client: gemini_genai::Client) -> gemini_genai::Result<()> {
 use futures_util::StreamExt;
 
 let pager = client.models().list(None).await?;
@@ -416,8 +422,8 @@ Python's `IndexError`.
 <summary>Uploading a file</summary>
 
 ```rust,no_run
-# async fn run(client: google_genai::Client) -> google_genai::Result<()> {
-use google_genai::files::UploadSource;
+# async fn run(client: gemini_genai::Client) -> gemini_genai::Result<()> {
+use gemini_genai::files::UploadSource;
 
 // From a path (MIME type inferred from the extension)...
 let file = client.files().upload("./notes.txt", None).await?;
@@ -447,9 +453,9 @@ client.files().delete(&name, None).await?;
 <summary>Synchronous API (<code>blocking</code> feature)</summary>
 
 ```rust,no_run
-use google_genai::blocking::Client;
+use gemini_genai::blocking::Client;
 
-fn main() -> google_genai::Result<()> {
+fn main() -> gemini_genai::Result<()> {
     let client = Client::new()?;
     let response = client
         .models()
@@ -471,9 +477,9 @@ async-only in the Python SDK too.
 <summary>Live (realtime WebSocket) sessions</summary>
 
 ```rust,no_run
-# async fn run(client: google_genai::Client) -> google_genai::Result<()> {
+# async fn run(client: gemini_genai::Client) -> gemini_genai::Result<()> {
 use futures_util::StreamExt;
-use google_genai::types::Content;
+use gemini_genai::types::Content;
 
 let mut session = client
     .live()
@@ -506,7 +512,7 @@ music-generation sessions.
 <summary>Error handling</summary>
 
 ```rust
-use google_genai::Error;
+use gemini_genai::Error;
 
 fn retryable(error: &Error) -> bool {
     match error {
@@ -559,6 +565,10 @@ GOOGLE_API_KEY=... cargo run --example structured_output
 
 ## Development
 
+Contributing guide: [CONTRIBUTING.md](CONTRIBUTING.md) — one-time hook setup,
+the five quality gates, the codegen workflow, and how the pinned dependencies
+are updated. Security issues: [SECURITY.md](SECURITY.md).
+
 Most of `src/types/generated/`, `src/converters/generated/`,
 `src/blocking/generated.rs`, and `tests/fixtures/` is generated from the installed
 Python SDK. Do not hand-edit those; change the generator or its overrides under
@@ -607,6 +617,13 @@ GEMINI_API_KEY=... GENAI_E2E_EXPENSIVE=1 \
 
 ## License
 
-Apache-2.0.
+Apache-2.0 — see [LICENSE](LICENSE) for the full text.
 
-This is an independent port and is not an official Google product.
+Portions of this crate are derived from the Google Gen AI Python SDK
+(`google-genai` 2.19.0), Copyright 2025 Google LLC, also licensed under
+Apache-2.0. [NOTICE](NOTICE) records which paths those are and what was
+changed.
+
+"Google" and "Gemini" are trademarks of Google LLC. Apache-2.0 grants no
+trademark rights (Section 6); this project is not affiliated with, endorsed
+by, or sponsored by Google.

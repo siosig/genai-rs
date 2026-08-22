@@ -1,7 +1,7 @@
 //! Integration tests for automatic function calling (AFC), covering both
 //! the low-level building blocks (`Tool` construction,
 //! `GenerateContentResponse::function_calls`, `Part::from_function_response`)
-//! and the [`google_genai::afc`] loop wired into
+//! and the [`gemini_genai::afc`] loop wired into
 //! `client.models().generate_content(...)`. Runs against the public API
 //! only, via `wiremock`, mirroring `tests/chats.rs`'s conventions
 //! (`test_client`/`model_reply` helpers, sequencing responses with
@@ -12,10 +12,10 @@ mod common;
 use std::collections::HashMap;
 
 use common::test_client;
-use google_genai::Error;
-use google_genai::afc::function_tool;
-use google_genai::error::FunctionCallError;
-use google_genai::types::{
+use gemini_genai::Error;
+use gemini_genai::afc::function_tool;
+use gemini_genai::error::FunctionCallError;
+use gemini_genai::types::{
     AutomaticFunctionCallingConfig, Content, FunctionDeclaration, GenerateContentConfig, Part,
     Schema, Tool, Type,
 };

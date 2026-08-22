@@ -1,0 +1,17 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/siosig/genai-rs/security/advisories/new
+    about: >
+      Do not open a public issue. Use private vulnerability reporting so the
+      details stay private until a fix is available. See SECURITY.md.
+  - name: Gemini API itself
+    url: https://ai.google.dev/gemini-api/docs
+    about: >
+      For questions about the API's own behaviour, quotas, or model outputs.
+      This repository only maintains the Rust client.
+  - name: Upstream Python SDK
+    url: https://github.com/googleapis/python-genai
+    about: >
+      This crate is a port of google-genai. A bug in the shared design may need
+      reporting there as well.

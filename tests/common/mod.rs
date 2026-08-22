@@ -13,8 +13,8 @@
 
 pub mod ws_server;
 
-use google_genai::Client;
-use google_genai::types::HttpOptions;
+use gemini_genai::Client;
+use gemini_genai::types::HttpOptions;
 
 /// Builds a [`Client`] talking to `base_url` (typically a `wiremock`
 /// `MockServer`'s `uri()`) with a dummy API key.
@@ -51,7 +51,7 @@ pub fn test_client_with_api_key(base_url: String, api_key: &str) -> Client {
         .unwrap()
 }
 
-/// Builds a [`google_genai::blocking::Client`] talking to `base_url`.
+/// Builds a [`gemini_genai::blocking::Client`] talking to `base_url`.
 ///
 /// Separate from [`test_client`] because `blocking::Client` is a distinct
 /// type wrapping its own `Runtime`, not the async `Client`.
@@ -60,8 +60,8 @@ pub fn test_client_with_api_key(base_url: String, api_key: &str) -> Client {
     clippy::unwrap_used,
     reason = "test helper: a broken Client::builder() here is a test-setup bug, not a runtime condition"
 )]
-pub fn blocking_test_client(base_url: String) -> google_genai::blocking::Client {
-    google_genai::blocking::Client::builder()
+pub fn blocking_test_client(base_url: String) -> gemini_genai::blocking::Client {
+    gemini_genai::blocking::Client::builder()
         .api_key("test-key")
         .http_options(HttpOptions {
             base_url: Some(base_url),

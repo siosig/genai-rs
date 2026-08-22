@@ -8,11 +8,11 @@
 //! GEMINI_API_KEY=... cargo run --example embed
 //! ```
 
-use google_genai::Client;
-use google_genai::types::EmbedContentConfig;
+use gemini_genai::Client;
+use gemini_genai::types::EmbedContentConfig;
 
 #[tokio::main]
-async fn main() -> google_genai::Result<()> {
+async fn main() -> gemini_genai::Result<()> {
     let client = Client::new()?;
 
     let response = client

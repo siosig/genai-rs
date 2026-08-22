@@ -13,8 +13,8 @@
 //! ([`Runtime`]) per [`Client`].
 //!
 //! ```no_run
-//! # fn run() -> google_genai::Result<()> {
-//! use google_genai::blocking::Client;
+//! # fn run() -> gemini_genai::Result<()> {
+//! use gemini_genai::blocking::Client;
 //!
 //! let client = Client::new()?;
 //! let response = client

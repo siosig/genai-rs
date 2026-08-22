@@ -5,7 +5,7 @@
 mod common;
 
 use common::test_client;
-use google_genai::types::{
+use gemini_genai::types::{
     Content, CreateCachedContentConfig, ListCachedContentsConfig, Part, UpdateCachedContentConfig,
 };
 use wiremock::matchers::{body_json, method, path, query_param, query_param_is_missing};
@@ -121,7 +121,7 @@ async fn get_maps_a_client_error_to_api_error() {
     let client = test_client(server.uri());
     let err = client.caches().get("missing", None).await.unwrap_err();
     match err {
-        google_genai::Error::Api(api_err) => assert_eq!(api_err.code, 404),
+        gemini_genai::Error::Api(api_err) => assert_eq!(api_err.code, 404),
         other => panic!("expected Error::Api, got {other:?}"),
     }
 }
@@ -151,7 +151,7 @@ async fn list_returns_a_pager_that_fetches_subsequent_pages() {
 
     let client = test_client(server.uri());
     let mut pager = client.caches().list(None).await.unwrap();
-    assert_eq!(pager.name(), google_genai::pager::PagedItem::CachedContents);
+    assert_eq!(pager.name(), gemini_genai::pager::PagedItem::CachedContents);
     assert_eq!(pager.page().len(), 1);
     assert_eq!(pager.page()[0].name.as_deref(), Some("cachedContents/a"));
 
@@ -160,7 +160,7 @@ async fn list_returns_a_pager_that_fetches_subsequent_pages() {
     assert_eq!(second[0].name.as_deref(), Some("cachedContents/b"));
 
     let err = pager.next_page().await.unwrap_err();
-    assert!(matches!(err, google_genai::Error::NoMorePages));
+    assert!(matches!(err, gemini_genai::Error::NoMorePages));
     server.verify().await;
 }
 

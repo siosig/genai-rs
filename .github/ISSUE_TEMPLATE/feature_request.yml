@@ -1,0 +1,40 @@
+name: Feature request
+description: Something missing from the port, or an API that could be nicer to use
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Scope note: this port targets the **Gemini Developer API** only. Vertex
+        AI is deliberately out of scope and fails fast rather than half-working,
+        so requests to add it will be closed — see the README.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do
+      description: The task, not the solution. What is awkward or impossible today?
+    validations:
+      required: true
+
+  - type: input
+    id: upstream-api
+    attributes:
+      label: Corresponding Python SDK API
+      description: >
+        If upstream already has this, naming it makes the port mechanical.
+        `docs/parity.md` lists what is and is not covered.
+      placeholder: "e.g. client.models.generate_content(..., config=...)"
+
+  - type: textarea
+    id: sketch
+    attributes:
+      label: What the Rust API might look like
+      description: A rough signature is plenty; no need for a working design.
+      render: rust
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you are doing instead today
+      description: Workarounds are useful — they show where the real friction is.

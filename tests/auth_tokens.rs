@@ -6,7 +6,7 @@
 mod common;
 
 use common::test_client;
-use google_genai::types::{CreateAuthTokenConfig, LiveConnectConstraints};
+use gemini_genai::types::{CreateAuthTokenConfig, LiveConnectConstraints};
 use wiremock::matchers::{body_json, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 

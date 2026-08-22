@@ -4,14 +4,14 @@
 //! `tools/codegen/gen_fixtures.py` from `tools/codegen/fixtures_cases.py`,
 //! by running the real installed `google-genai` Python SDK) is replayed
 //! through the matching Rust converter via
-//! [`google_genai::converters::dispatch_converter`], and the result is
+//! [`gemini_genai::converters::dispatch_converter`], and the result is
 //! asserted against the fixture's `expected`/`expected_error`.
 //!
 //! See specs/001-port-genai-rust/contracts/codegen.md "`gen_fixtures.py`".
 
 use std::path::PathBuf;
 
-use google_genai::converters::dispatch_converter;
+use gemini_genai::converters::dispatch_converter;
 use rstest::rstest;
 use serde::Deserialize;
 use serde_json::Value;

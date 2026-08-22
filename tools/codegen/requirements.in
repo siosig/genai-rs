@@ -1,0 +1,16 @@
+# Direct dependencies of the code generators. Human-edited.
+#
+# `requirements.txt` next to this file is the machine-generated lock with every
+# transitive dependency pinned and hashed; regenerate it with:
+#
+#     uv pip compile tools/codegen/requirements.in --generate-hashes \
+#       --python-version 3.12 -o tools/codegen/requirements.txt
+#
+# (`pip-compile` from pip-tools produces the same format if uv is unavailable.)
+#
+# The google-genai pin must match PINNED_VERSION in upstream.py: the generators
+# stamp that version into every generated header, and assert_supported_version()
+# refuses to run if the installed package disagrees.
+google-genai==2.19.0
+pydantic
+tomli; python_version < "3.11"

@@ -1,3 +1,14 @@
+# Pinned to an exact version rather than tracking `stable`.
+#
+# `channel = "stable"` is a moving reference: when a new stable ships, clippy
+# gains lints, and this repository's `-D warnings` gate turns red without a
+# single line having changed here. Pinning makes CI's red/green mean "is this
+# change correct", nothing else.
+#
+# This is the *development* toolchain, which is a different thing from the
+# crate's MSRV (`rust-version` in Cargo.toml). The `msrv` CI job checks the
+# latter; the advisory `clippy-latest` job watches newer stables so pinning
+# does not hide new lints. Bump this deliberately -- see CONTRIBUTING.md.
 [toolchain]
-channel = "stable"
+channel = "1.96.0"
 components = ["clippy", "rustfmt"]

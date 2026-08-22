@@ -1,0 +1,39 @@
+gemini-genai
+Copyright 2026 Daisuke ITO
+
+This product includes software derived from the Google Gen AI Python SDK
+("google-genai"), version 2.19.0.
+
+    https://github.com/googleapis/python-genai
+    Copyright 2025 Google LLC
+    Licensed under the Apache License, Version 2.0
+
+The following paths are mechanically generated from that upstream work and
+contain documentation text and control flow derived from it. They are
+modifications of the upstream work within the meaning of Section 4(b) of the
+Apache License, Version 2.0: the Python sources were mechanically translated
+into Rust, and the Python docstrings are reproduced verbatim as Rust doc
+comments.
+
+    src/types/generated/
+    src/converters/generated/
+    src/blocking/generated.rs
+    tests/fixtures/converters/
+    docs/parity.md
+
+Each of those files carries the same notice in its own header, except for the
+JSON fixtures under tests/fixtures/converters/, which cannot carry comments;
+see the README.md in that directory.
+
+Everything else in this repository -- including the HTTP and WebSocket
+transport layers, the error types, the streaming and pagination machinery,
+the code generators under tools/codegen/, and the tests -- is an independent
+implementation.
+
+This is an unofficial port. It is not affiliated with, endorsed by, or
+sponsored by Google. "Google", "Gemini", and related marks are trademarks of
+Google LLC; no trademark license is granted by the Apache License, Version 2.0
+(see Section 6 of the License).
+
+A copy of the Apache License, Version 2.0 is provided in the LICENSE file at
+the root of this repository.

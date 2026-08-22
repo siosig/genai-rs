@@ -256,6 +256,29 @@ pub(crate) fn ws_err(err: tokio_tungstenite::tungstenite::Error) -> Error {
 /// query param), and `BidiGenerateContent` becomes
 /// `BidiGenerateContentConstrained`. Returns the URL and, for the
 /// ephemeral-token case, the `Authorization` header value to send.
+///
+/// # The returned URL contains the API key
+///
+/// **Never log this URL, and never put it in an error message, a panic
+/// payload, or a `Debug` output.**
+///
+/// Unless the key is an ephemeral `auth_tokens/` token, it is embedded in the
+/// query string as `?key=<api key>`. That is the Live API's protocol, not a
+/// choice this crate makes -- the handshake is a plain WebSocket upgrade with
+/// nowhere else to put credentials -- so the only available mitigation is to
+/// keep the string from escaping.
+///
+/// Today nothing leaks it: this module does not log the URL, and
+/// `tokio_tungstenite::connect_async` does not include it in the errors it
+/// returns (the `UrlError::UnableToConnect(url)` variant that would is only
+/// produced by the synchronous client). **Do not rely on that.** It is a
+/// property of a dependency's current implementation, one `{err}` away from
+/// changing, and an API key in a log line is a credential leak the moment the
+/// log is shipped anywhere.
+///
+/// If you need to report a connection failure, report the host and the service
+/// method -- both are in [`HttpOptions::base_url`](crate::types::HttpOptions)
+/// and the `service_method` argument -- not this return value.
 pub(crate) fn websocket_endpoint(
     client: &Client,
     service_method: &str,

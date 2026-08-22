@@ -23,7 +23,9 @@ OUT_DIR = REPO_ROOT / "tests" / "fixtures" / "converters"
 if str(TOOLS_DIR) not in sys.path:
     sys.path.insert(0, str(TOOLS_DIR))
 
-import fixtures_cases  # noqa: E402  (needs TOOLS_DIR on sys.path first)
+import attribution  # noqa: E402  (needs TOOLS_DIR on sys.path first)
+import fixtures_cases  # noqa: E402
+import upstream  # noqa: E402
 import gen_converters as gc  # noqa: E402
 
 # Every installed-SDK module that can define a `_X_to_mldev`/`_X_from_mldev`
@@ -142,6 +144,14 @@ def main() -> None:
             json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8"
         )
         written += 1
+
+    # The fixtures themselves are JSON and cannot carry a comment, so the
+    # Apache-2.0 attribution for all of them is stated once, for the directory.
+    # See tools/codegen/attribution.py for why it is not embedded per file.
+    (OUT_DIR / "README.md").write_text(
+        attribution.fixtures_readme("gen_fixtures.py", upstream.assert_supported_version()),
+        encoding="utf-8",
+    )
 
     print(f"gen_fixtures.py: wrote {written}/{len(fixtures_cases.CASES)} fixtures", file=sys.stderr)
 

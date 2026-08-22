@@ -10,13 +10,13 @@
 //! GEMINI_API_KEY=... cargo run --example batches
 //! ```
 
-use google_genai::Client;
-use google_genai::types::{BatchJobSource, Content, CreateBatchJobConfig, InlinedRequest, Part};
+use gemini_genai::Client;
+use gemini_genai::types::{BatchJobSource, Content, CreateBatchJobConfig, InlinedRequest, Part};
 
 const MODEL: &str = "gemini-flash-latest";
 
 #[tokio::main]
-async fn main() -> google_genai::Result<()> {
+async fn main() -> gemini_genai::Result<()> {
     let client = Client::new()?;
 
     let requests: Vec<InlinedRequest> = ["Why is the sky blue?", "Why is the sea salty?"]

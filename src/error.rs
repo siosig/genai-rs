@@ -1,4 +1,4 @@
-//! Typed errors for `google_genai`, mirroring the Python SDK's `errors.py`.
+//! Typed errors for `gemini_genai`, mirroring the Python SDK's `errors.py`.
 
 use std::collections::HashMap;
 
@@ -7,7 +7,7 @@ use serde_json::Value;
 /// Convenience alias for `Result<T, Error>`.
 pub type Result<T> = core::result::Result<T, Error>;
 
-/// Top-level error type returned by every fallible `google_genai` call.
+/// Top-level error type returned by every fallible `gemini_genai` call.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     /// A non-2xx response from the Gemini API. Corresponds to Python's
@@ -82,7 +82,7 @@ pub enum Error {
     BlockingInsideRuntime,
 }
 
-/// The backend a `google_genai` [`Client`](crate::Client) talks to.
+/// The backend a `gemini_genai` [`Client`](crate::Client) talks to.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Backend {
     /// The Gemini Developer API (`generativelanguage.googleapis.com`).

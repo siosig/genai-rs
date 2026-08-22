@@ -6,7 +6,6 @@
 
 # Rust
 /target/
-Cargo.lock
 
 # codegen (Python)
 __pycache__/
@@ -15,3 +14,9 @@ __pycache__/
 
 # secretlint local-only denylist (company/personal terms — never committed)
 .secretlintrc.local.json
+
+# Per-developer commit gates. The *.sample templates are tracked; a copy without
+# the suffix is yours alone. Shipping an author-identity gate to everyone would
+# reject every external contribution -- see hooks/local.d/author.sample.
+/hooks/local.d/*
+!/hooks/local.d/*.sample

@@ -12,8 +12,8 @@
 //! calling one from inside an existing async runtime returns
 //! `Error::BlockingInsideRuntime` rather than panicking.
 
-fn main() -> google_genai::Result<()> {
-    let client = google_genai::blocking::Client::new()?;
+fn main() -> gemini_genai::Result<()> {
+    let client = gemini_genai::blocking::Client::new()?;
 
     let response =
         client

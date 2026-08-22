@@ -3,11 +3,12 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [Unreleased](#unreleased)
 - [0.1.0](#010)
 
 ## Overview
 
-Notable changes to `google-genai-rs`. The format follows
+Notable changes to `gemini-genai`. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the crate follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
@@ -17,6 +18,47 @@ a generated type is treated as a minor-version change**, matching the upstream
 Python SDK's own policy. Always finish a struct literal with
 `..Default::default()`.
 
+## Unreleased
+
+### Changed
+
+- **Renamed the package and library.** The package is now `gemini-genai` and
+  the library is `gemini_genai`; update dependency declarations and change
+  `use google_genai::...` to `use gemini_genai::...`. The vendor name was
+  dropped because Apache-2.0 grants no trademark rights (Section 6) and the
+  old library name matched the upstream Python import path `google.genai`
+  exactly, which read as an official Google product. `gemini-genai-rs` was not
+  available on crates.io, hence `gemini-genai`.
+- **Changed the client-identification header value.** Requests now send
+  `gemini-genai/<version> gl-rust/<version>` in `x-goog-api-client` and
+  `user-agent` instead of `google-genai-sdk/<version>`, which is the label the
+  official Python SDK uses. Header *names* are unchanged. This affects only
+  what the server records about the client; no request or response body
+  changes.
+- **Pinned the build.** `Cargo.lock` is now committed and CI runs with
+  `--locked`, `rust-toolchain.toml` names an exact version instead of tracking
+  `stable`, the code generator's Python dependencies are locked with hashes,
+  and every CI action is pinned to a commit SHA. Dependabot proposes the
+  updates that pinning would otherwise prevent.
+
+### Added
+
+- `NOTICE` at the repository root, plus SPDX attribution headers on every
+  generated file, recording that the generated types, converters, blocking
+  wrappers, parity table and converter fixtures are derived from
+  `google-genai` 2.19.0 (Copyright 2025 Google LLC, Apache-2.0) and what was
+  changed. Required by Sections 4(b) and 4(c) of the Apache License; the
+  repository previously carried no upstream copyright notice at all.
+- `SECURITY.md`, `CONTRIBUTING.md`, issue templates, and `hooks/` — the
+  commit-time secret and language gates, previously local-only, are now in the
+  repository and enabled with `git config core.hooksPath hooks`.
+- `tests/attribution.rs`, `tests/protected_identifiers.rs` and
+  `tests/supply_chain.rs`, which fail if the attribution is lost, if a future
+  rename touches an upstream-owned identifier (`GOOGLE_API_KEY`,
+  `x-goog-api-key`, `googleSearch`, the `google.ai.generativelanguage.*`
+  service path, or the upstream package name `google-genai` itself), or if an
+  action, download or lockfile stops being pinned.
+
 ## 0.1.0
 
 Initial release. A Rust port of the Google Gen AI Python SDK
@@ -25,7 +67,7 @@ the **Gemini Developer API**.
 
 ### Added
 
-Async-first client (`google_genai::Client`) with one accessor per Python SDK
+Async-first client (`gemini_genai::Client`) with one accessor per Python SDK
 module:
 
 | Module | Covered |
@@ -73,8 +115,8 @@ Cargo features:
 | `rustls-tls` | ✅ | TLS via `rustls` + `webpki-roots` |
 | `native-tls` | — | TLS via the platform's native stack |
 | `live` | ✅ | the bidirectional realtime (WebSocket) API |
-| `blocking` | — | `google_genai::blocking`: a synchronous mirror of the API (minus Live), streams as `Iterator`, its own current-thread runtime |
-| `mcp` | — | `google_genai::mcp::mcp_tools`: bridges an MCP server's tools into automatic function calling |
+| `blocking` | — | `gemini_genai::blocking`: a synchronous mirror of the API (minus Live), streams as `Iterator`, its own current-thread runtime |
+| `mcp` | — | `gemini_genai::mcp::mcp_tools`: bridges an MCP server's tools into automatic function calling |
 
 ### Known limitations
 

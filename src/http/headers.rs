@@ -15,7 +15,7 @@ pub(crate) const SERVER_TIMEOUT_HEADER: &str = "X-Server-Timeout";
 
 fn sdk_version_label() -> String {
     format!(
-        "google-genai-sdk/{} gl-rust/{}",
+        "gemini-genai/{} gl-rust/{}",
         env!("CARGO_PKG_VERSION"),
         rustc_version_label()
     )
@@ -66,8 +66,25 @@ mod tests {
     fn apply_sdk_headers_inserts_when_absent() {
         let mut headers = HashMap::new();
         apply_sdk_headers(&mut headers);
-        assert!(headers[USER_AGENT_HEADER].starts_with("google-genai-sdk/"));
-        assert!(headers[API_CLIENT_HEADER].starts_with("google-genai-sdk/"));
+        assert!(headers[USER_AGENT_HEADER].starts_with("gemini-genai/"));
+        assert!(headers[API_CLIENT_HEADER].starts_with("gemini-genai/"));
+    }
+
+    /// This crate is an unofficial port, so it must not report itself as the
+    /// upstream SDK: the label the Python SDK sends is `google-genai-sdk/...`,
+    /// and reusing it would fold this port's traffic into upstream's own
+    /// client statistics with no way to tell the two apart.
+    #[test]
+    fn apply_sdk_headers_does_not_impersonate_the_upstream_sdk() {
+        let mut headers = HashMap::new();
+        apply_sdk_headers(&mut headers);
+        for header in [USER_AGENT_HEADER, API_CLIENT_HEADER] {
+            assert!(
+                !headers[header].starts_with("google-genai-sdk/"),
+                "{header} must not claim to be the upstream Python SDK, got {}",
+                headers[header]
+            );
+        }
     }
 
     #[test]
@@ -76,7 +93,7 @@ mod tests {
         headers.insert(USER_AGENT_HEADER.to_owned(), "custom-agent/1.0".to_owned());
         apply_sdk_headers(&mut headers);
         assert!(headers[USER_AGENT_HEADER].ends_with("custom-agent/1.0"));
-        assert!(headers[USER_AGENT_HEADER].starts_with("google-genai-sdk/"));
+        assert!(headers[USER_AGENT_HEADER].starts_with("gemini-genai/"));
     }
 
     #[test]

@@ -1,0 +1,33 @@
+version: 2
+
+# Pinning dependencies (Cargo.lock, a fixed toolchain, hashed Python
+# requirements, SHA-pinned actions) buys reproducibility at the cost of never
+# updating. Dependabot is the other half of that trade: updates arrive as pull
+# requests that can be reviewed and tested, instead of as CI turning red on an
+# unrelated change.
+
+updates:
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  # Understands SHA-pinned `uses:` and rewrites the SHA together with the
+  # trailing `# vX.Y.Z` comment, so pinning does not cost the update flow.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "pip"
+    directory: "/tools/codegen"
+    schedule:
+      interval: "monthly"
+    ignore:
+      # Upgrading the upstream SDK is never a lockfile-only change: the version
+      # is stamped into every generated header, `upstream.py` refuses to run on
+      # a mismatch, and the whole generated tree plus the golden fixtures have
+      # to be regenerated. A Dependabot PR that bumped this alone would always
+      # fail `codegen-check`. The procedure lives in tools/codegen/upstream.py.
+      - dependency-name: "google-genai"

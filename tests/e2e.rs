@@ -16,8 +16,8 @@
 //! Live) live in `tests/e2e_expensive.rs` behind a second opt-in flag.
 
 use futures_util::StreamExt;
-use google_genai::Client;
-use google_genai::types::{
+use gemini_genai::Client;
+use gemini_genai::types::{
     Content, CountTokensConfig, CreateCachedContentConfig, EmbedContentConfig,
     GenerateContentConfig, Part, Tool, UpdateCachedContentConfig,
 };
@@ -218,7 +218,7 @@ async fn test_e2e_automatic_function_calling() {
     }
 
     let client = client_or_skip!();
-    let tool = Tool::from_function(google_genai::afc::function_tool(
+    let tool = Tool::from_function(gemini_genai::afc::function_tool(
         "get_weather",
         "Returns the current weather for a city.",
         |args: WeatherArgs| async move {
@@ -334,7 +334,7 @@ async fn test_e2e_models_list() {
 #[tokio::test]
 #[ignore = "calls the live Gemini API; run with --ignored"]
 async fn test_e2e_files_upload_get_delete() {
-    use google_genai::files::UploadSource;
+    use gemini_genai::files::UploadSource;
 
     let client = client_or_skip!();
     let uploaded = client
@@ -392,7 +392,7 @@ fn long_cacheable_text() -> String {
     clippy::expect_used,
     reason = "test helper: a failed cache create/name here is a live-API or test-setup problem the caller wants surfaced as a panic, exactly as if it were inline in the #[test] fn"
 )]
-async fn create_test_cache(client: &Client) -> (String, google_genai::types::CachedContent) {
+async fn create_test_cache(client: &Client) -> (String, gemini_genai::types::CachedContent) {
     let cached = client
         .caches()
         .create(
@@ -548,7 +548,7 @@ async fn test_e2e_cached_content_update_and_delete() {
         .await
         .expect_err("getting a deleted cache should fail");
     assert!(
-        matches!(error, google_genai::Error::Api(_)),
+        matches!(error, gemini_genai::Error::Api(_)),
         "expected an API error after deletion, got {error:?}"
     );
 }

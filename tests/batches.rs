@@ -5,11 +5,11 @@
 mod common;
 
 use common::test_client;
-use google_genai::types::{
+use gemini_genai::types::{
     BatchJobDestination, BatchJobSource, Content, CreateBatchJobConfig, EmbeddingsBatchJobSource,
     InlinedRequest, JobState, ListBatchJobsConfig, Part,
 };
-use google_genai::{Backend, Error};
+use gemini_genai::{Backend, Error};
 use wiremock::matchers::{body_json, method, path, query_param};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
@@ -317,6 +317,6 @@ async fn list_sends_page_size_as_a_query_parameter_and_pages_forward() {
     assert_eq!(second_page[0].name.as_deref(), Some("batches/two"));
 
     let err = pager.next_page().await.unwrap_err();
-    assert!(matches!(err, google_genai::Error::NoMorePages));
+    assert!(matches!(err, gemini_genai::Error::NoMorePages));
     server.verify().await;
 }

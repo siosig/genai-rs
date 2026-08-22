@@ -18,7 +18,7 @@
 
 ## Overview
 
-`google_genai` keeps the Python SDK's *shape* and changes only what Rust forces
+`gemini_genai` keeps the Python SDK's *shape* and changes only what Rust forces
 it to. The mental translation is mostly mechanical:
 
 | Python | Rust |
@@ -27,11 +27,11 @@ it to. The mental translation is mostly mechanical:
 | `model=`, `contents=`, `config=` keyword args | positional `(model, contents, config)`, in that order |
 | `config=types.XConfig(a=1)` or `config={"a": 1}` | `Some(XConfig { a: Some(1), ..Default::default() })` |
 | `config=None` (omitted) | `None` |
-| exceptions (`APIError`, `ValueError`) | `Result<T, google_genai::Error>` |
+| exceptions (`APIError`, `ValueError`) | `Result<T, gemini_genai::Error>` |
 | generators (`for chunk in ...`) | `Stream<Item = Result<T>>` |
 | `Pager` / `AsyncPager` | `Pager<T>` |
 | `client.aio.*` (async) | the default API — everything is `async fn` |
-| `client.*` (sync) | `google_genai::blocking::*` (feature `blocking`) |
+| `client.*` (sync) | `gemini_genai::blocking::*` (feature `blocking`) |
 
 ```mermaid
 flowchart LR
@@ -62,10 +62,10 @@ client = genai.Client(http_options=types.HttpOptions(timeout=30_000))
 ```
 
 ```rust,no_run
-use google_genai::Client;
-use google_genai::types::HttpOptions;
+use gemini_genai::Client;
+use gemini_genai::types::HttpOptions;
 
-# fn main() -> google_genai::Result<()> {
+# fn main() -> gemini_genai::Result<()> {
 let client = Client::new()?;                       // GOOGLE_API_KEY / GEMINI_API_KEY
 
 let client = Client::builder().api_key("...").build()?;
@@ -88,7 +88,7 @@ supplied one.
 Vertex AI knobs exist on the builder for signature parity but are not implemented:
 
 ```rust,no_run
-# use google_genai::{Client, Error};
+# use gemini_genai::{Client, Error};
 let result = Client::builder().vertexai(true).build();
 assert!(matches!(result, Err(Error::UnsupportedBackend("vertexai"))));
 ```
@@ -103,13 +103,13 @@ inverts that: **async is the default**, and the synchronous mirror lives behind
 the `blocking` feature.
 
 ```toml
-google-genai-rs = { version = "0.1", features = ["blocking"] }
+gemini-genai = { version = "0.1", features = ["blocking"] }
 ```
 
 ```rust,no_run
-use google_genai::blocking::Client;
+use gemini_genai::blocking::Client;
 
-# fn main() -> google_genai::Result<()> {
+# fn main() -> gemini_genai::Result<()> {
 let client = Client::new()?;
 let response = client
     .models()
@@ -137,10 +137,10 @@ Two things to know:
   not a deadlock:
 
   ```rust,no_run
-  # use google_genai::Error;
+  # use gemini_genai::Error;
   #[tokio::main]
   async fn main() {
-      let result = google_genai::blocking::Client::new();
+      let result = gemini_genai::blocking::Client::new();
       assert!(matches!(result, Err(Error::BlockingInsideRuntime)));
   }
   ```
@@ -198,7 +198,7 @@ config = types.GenerateContentConfig(
 ```
 
 ```rust
-use google_genai::types::{Content, GenerateContentConfig};
+use gemini_genai::types::{Content, GenerateContentConfig};
 
 let config = GenerateContentConfig {
     temperature: Some(0.2),
@@ -221,7 +221,7 @@ Structured output has a dedicated shortcut. Python passes a pydantic model as
 `response_schema=`; Rust derives the schema from any `schemars::JsonSchema` type:
 
 ```rust
-use google_genai::types::GenerateContentConfig;
+use gemini_genai::types::GenerateContentConfig;
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
 struct Capital {
@@ -257,7 +257,7 @@ except errors.ServerError:
 ```
 
 ```rust
-use google_genai::Error;
+use gemini_genai::Error;
 
 fn classify(error: &Error) -> &'static str {
     match error {
@@ -300,7 +300,7 @@ for chunk in client.models.generate_content_stream(model=..., contents=...):
 ```
 
 ```rust,no_run
-# async fn run(client: google_genai::Client) -> google_genai::Result<()> {
+# async fn run(client: gemini_genai::Client) -> gemini_genai::Result<()> {
 use futures_util::StreamExt;   // brings `.next()` into scope
 
 let stream = client
@@ -340,7 +340,7 @@ for model in client.models.list():   # iterate everything
 ```
 
 ```rust,no_run
-# async fn run(client: google_genai::Client) -> google_genai::Result<()> {
+# async fn run(client: gemini_genai::Client) -> gemini_genai::Result<()> {
 use futures_util::StreamExt;
 
 let mut pager = client.models().list(None).await?;
@@ -349,7 +349,7 @@ println!("{} items on this page", pager.page().len());
 // One page at a time; `Error::NoMorePages` once exhausted.
 match pager.next_page().await {
     Ok(items) => println!("{} more", items.len()),
-    Err(google_genai::Error::NoMorePages) => println!("done"),
+    Err(gemini_genai::Error::NoMorePages) => println!("done"),
     Err(other) => return Err(other),
 }
 
@@ -382,8 +382,8 @@ config = types.GenerateContentConfig(tools=[get_weather])
 ```
 
 ```rust,no_run
-use google_genai::afc::function_tool;
-use google_genai::types::{GenerateContentConfig, Tool};
+use gemini_genai::afc::function_tool;
+use gemini_genai::types::{GenerateContentConfig, Tool};
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
 struct WeatherArgs {
@@ -408,7 +408,7 @@ answer, with the intermediate turns in
 works exactly as in Python:
 
 ```rust
-use google_genai::types::{AutomaticFunctionCallingConfig, GenerateContentConfig};
+use gemini_genai::types::{AutomaticFunctionCallingConfig, GenerateContentConfig};
 
 let config = GenerateContentConfig {
     automatic_function_calling: Some(AutomaticFunctionCallingConfig {
@@ -448,7 +448,7 @@ With the `mcp` feature, `mcp_tools` wraps every tool exposed by an MCP server
 (reached through an `rmcp` client `Peer`) as an AFC tool:
 
 ```rust,ignore
-let tools = google_genai::mcp::mcp_tools(&peer).await?;
+let tools = gemini_genai::mcp::mcp_tools(&peer).await?;
 let config = GenerateContentConfig { tools: Some(tools), ..Default::default() };
 ```
 
@@ -467,9 +467,9 @@ async with client.aio.live.connect(model=..., config=...) as session:
 ```
 
 ```rust,no_run
-# async fn run(client: google_genai::Client) -> google_genai::Result<()> {
+# async fn run(client: gemini_genai::Client) -> gemini_genai::Result<()> {
 use futures_util::StreamExt;
-use google_genai::types::Content;
+use gemini_genai::types::Content;
 
 let mut session = client.live().connect("gemini-3.1-flash-live-preview", None).await?;
 

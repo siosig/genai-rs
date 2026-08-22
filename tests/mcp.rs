@@ -1,4 +1,4 @@
-//! Integration tests for `google_genai::mcp::mcp_tools`, the bridge from
+//! Integration tests for `gemini_genai::mcp::mcp_tools`, the bridge from
 //! an MCP server's tools to this crate's `FunctionTool`/`Tool`.
 //!
 //! Uses a real, in-process `rmcp` client/server pair connected over a
@@ -14,9 +14,9 @@
 mod common;
 
 use common::test_client;
-use google_genai::afc::function_tool;
-use google_genai::mcp::mcp_tools;
-use google_genai::types::{GenerateContentConfig, Tool};
+use gemini_genai::afc::function_tool;
+use gemini_genai::mcp::mcp_tools;
+use gemini_genai::types::{GenerateContentConfig, Tool};
 use rmcp::ErrorData as McpError;
 use rmcp::ServiceExt;
 use rmcp::handler::server::ServerHandler;
@@ -285,7 +285,7 @@ async fn an_mcp_tool_level_error_becomes_an_error_function_response_and_the_loop
 /// Confirms a plain Rust [`function_tool`] and an MCP tool can be
 /// registered side by side without interfering with each other's
 /// callable registration (both funnel through the same process-wide
-/// registry keyed by function name; see `google_genai::afc`'s docs).
+/// registry keyed by function name; see `gemini_genai::afc`'s docs).
 #[tokio::test]
 async fn a_native_function_tool_and_an_mcp_tool_coexist_in_one_request() {
     #[derive(Debug, Deserialize, JsonSchema)]

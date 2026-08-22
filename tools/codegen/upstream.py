@@ -10,15 +10,19 @@ Everything that stamps or checks a version reads it from here:
 
 - `gen_types.py` / `gen_converters.py` — the `// @generated ... from
   google-genai <version>` header on every generated file.
-- `tools/codegen/requirements.txt` — the pinned install (`==`), kept in
-  sync manually; `assert_supported_version()` catches any drift at
-  generation time rather than letting it reach the generated output.
+- `tools/codegen/requirements.in` — the human-edited pin, and
+  `tools/codegen/requirements.txt` — the lock generated from it with
+  `--generate-hashes`. Both are checked; `assert_supported_version()`
+  catches any drift at generation time rather than letting it reach the
+  generated output.
 
 ## Upgrading to a new upstream release
 
 1. Bump `PINNED_VERSION` here and the `google-genai==` pin in
-   `tools/codegen/requirements.txt` to the same value.
-2. `pip install -r tools/codegen/requirements.txt`
+   `tools/codegen/requirements.in` to the same value, then relock:
+   `uv pip compile tools/codegen/requirements.in --generate-hashes
+   --python-version 3.12 -o tools/codegen/requirements.txt`
+2. `pip install --require-hashes -r tools/codegen/requirements.txt`
 3. `python tools/codegen/generate.py`
 4. `cargo check --all-features` — new or renamed `t_*` transformers show up
    here as missing-function errors; add them to `src/transformers.rs`.
@@ -84,7 +88,14 @@ def assert_supported_version() -> str:
 # silently, so `assert_all_in_sync()` checks them on every generation run
 # (and therefore in CI's `codegen-check` job).
 _VERSION_SITES: tuple[tuple[str, str], ...] = (
-    ("tools/codegen/requirements.txt", r"^google-genai==(?P<version>[\w.]+)\s*$"),
+    # The human-edited declaration. `requirements.txt` beside it is the
+    # generated lock; its own pin is checked below with a pattern that tolerates
+    # the trailing ` \` continuation `--generate-hashes` emits.
+    ("tools/codegen/requirements.in", r"^google-genai==(?P<version>[\w.]+)\s*$"),
+    (
+        "tools/codegen/requirements.txt",
+        r"^google-genai==(?P<version>[\w.]+)\s*(?:\\\s*)?$",
+    ),
     (
         "Cargo.toml",
         r"\[package\.metadata\.upstream\][^\[]*?version\s*=\s*\"(?P<version>[\w.]+)\"",

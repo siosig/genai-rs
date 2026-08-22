@@ -1,13 +1,17 @@
 [package]
-name = "google-genai-rs"
+name = "gemini-genai"
 version = "0.1.0"
 edition = "2024"
+# Minimum supported Rust version, for the default feature set plus `blocking`.
+# The optional `mcp` feature is NOT covered: rmcp's dependency tree requires
+# 1.88, and that is a cost of opting into MCP rather than a property of this
+# crate. The `msrv` CI job checks exactly the combinations this line claims.
 rust-version = "1.85"
-description = "Rust port of the Google Gen AI Python SDK (google-genai) for the Gemini Developer API"
+description = "Unofficial Rust port of the Google Gen AI Python SDK (google-genai) for the Gemini Developer API. Not affiliated with Google."
 license = "Apache-2.0"
 repository = "https://github.com/siosig/genai-rs"
 readme = "README.md"
-keywords = ["gemini", "genai", "google", "llm", "ai"]
+keywords = ["gemini", "genai", "llm", "ai", "sdk"]
 categories = ["api-bindings", "asynchronous"]
 # Development tooling; regenerating requires a Python interpreter and the
 # google-genai package, neither of which a consumer of the crate has.
@@ -24,7 +28,7 @@ version = "2.19.0"
 backend = "gemini-developer-api"
 
 [lib]
-name = "google_genai"
+name = "gemini_genai"
 path = "src/lib.rs"
 
 [features]

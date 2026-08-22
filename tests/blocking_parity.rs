@@ -1,4 +1,4 @@
-//! Integration tests for `google_genai::blocking` (`feature = "blocking"`):
+//! Integration tests for `gemini_genai::blocking` (`feature = "blocking"`):
 //! `Client` construction, one `wiremock`-backed call of each generated
 //! wrapper shape (unary/stream/pager -- see `tools/codegen/methods.toml`'s
 //! `kind` field), and the `Error::BlockingInsideRuntime` guard.
@@ -31,8 +31,8 @@ use std::collections::HashSet;
 use std::future::Future;
 
 use common::blocking_test_client;
-use google_genai::Error;
-use google_genai::blocking::Client;
+use gemini_genai::Error;
+use gemini_genai::blocking::Client;
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 

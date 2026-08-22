@@ -1,9 +1,14 @@
-//! Rust port of the [Google Gen AI Python SDK](https://github.com/googleapis/python-genai)
-//! (`google-genai` 2.19.0) for the **Gemini Developer API**.
+//! **Unofficial.** An independent Rust port of the
+//! [Google Gen AI Python SDK](https://github.com/googleapis/python-genai)
+//! (`google-genai` 2.19.0) for the **Gemini Developer API**. Not affiliated
+//! with, endorsed by, or sponsored by Google. Portions of this crate are
+//! derived from `google-genai`, Copyright 2025 Google LLC, licensed under the
+//! Apache License, Version 2.0; see the `NOTICE` file at the repository root
+//! for what is derived and what was changed.
 //!
-//! The package is named `google-genai-rs` but its library name is
-//! `google_genai`. It is not on crates.io yet, so depend on the Git repository
-//! (see the README) and `use google_genai::...`.
+//! The package is named `gemini-genai` but its library name is
+//! `gemini_genai`. It is not on crates.io yet, so depend on the Git repository
+//! (see the README) and `use gemini_genai::...`.
 //!
 //! Vertex AI is out of scope: asking for it (via
 //! [`ClientBuilder::vertexai`], `project`/`location`, or the
@@ -13,8 +18,8 @@
 //! # Quickstart
 //!
 //! ```no_run
-//! # async fn run() -> google_genai::Result<()> {
-//! use google_genai::Client;
+//! # async fn run() -> gemini_genai::Result<()> {
+//! use gemini_genai::Client;
 //!
 //! let client = Client::new()?;
 //! let response = client
@@ -34,9 +39,9 @@
 //! # Streaming
 //!
 //! ```no_run
-//! # async fn run() -> google_genai::Result<()> {
+//! # async fn run() -> gemini_genai::Result<()> {
 //! use futures_util::StreamExt;
-//! use google_genai::Client;
+//! use gemini_genai::Client;
 //!
 //! let client = Client::new()?;
 //! let stream = client
@@ -60,8 +65,8 @@
 //!
 //! ```no_run
 //! # async fn run() -> Result<(), Box<dyn std::error::Error>> {
-//! use google_genai::Client;
-//! use google_genai::types::GenerateContentConfig;
+//! use gemini_genai::Client;
+//! use gemini_genai::types::GenerateContentConfig;
 //!
 //! #[derive(serde::Deserialize, schemars::JsonSchema)]
 //! struct Capital {
@@ -92,10 +97,10 @@
 //! (callables are keyed by function name).
 //!
 //! ```no_run
-//! # async fn run() -> google_genai::Result<()> {
-//! use google_genai::afc::function_tool;
-//! use google_genai::types::{GenerateContentConfig, Tool};
-//! use google_genai::Client;
+//! # async fn run() -> gemini_genai::Result<()> {
+//! use gemini_genai::afc::function_tool;
+//! use gemini_genai::types::{GenerateContentConfig, Tool};
+//! use gemini_genai::Client;
 //!
 //! #[derive(serde::Deserialize, schemars::JsonSchema)]
 //! struct WeatherArgs {
@@ -142,8 +147,8 @@
 //! | `rustls-tls` | yes | TLS via `rustls` + `webpki-roots` (no system OpenSSL) |
 //! | `native-tls` | no | TLS via the platform's native stack instead |
 //! | `live` | yes | [`live`]: the bidirectional realtime (WebSocket) API |
-//! | `blocking` | no | `google_genai::blocking`: a synchronous mirror of this API |
-//! | `mcp` | no | `google_genai::mcp`: exposes MCP server tools to the model |
+//! | `blocking` | no | `gemini_genai::blocking`: a synchronous mirror of this API |
+//! | `mcp` | no | `gemini_genai::mcp`: exposes MCP server tools to the model |
 //!
 //! # Errors
 //!
@@ -157,7 +162,7 @@
 //! [`Error::BlockingInsideRuntime`].
 //!
 //! ```
-//! use google_genai::{ApiError, Error};
+//! use gemini_genai::{ApiError, Error};
 //!
 //! fn describe(error: &Error) -> String {
 //!     match error {

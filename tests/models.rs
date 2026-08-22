@@ -7,7 +7,7 @@
 mod common;
 
 use common::test_client;
-use google_genai::types::{Content, GenerateContentConfig, Part, Schema, Type};
+use gemini_genai::types::{Content, GenerateContentConfig, Part, Schema, Type};
 use wiremock::matchers::method;
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
@@ -134,7 +134,7 @@ mod multimodal {
 
     #[tokio::test]
     async fn video_metadata_on_a_part_is_preserved() {
-        use google_genai::types::VideoMetadata;
+        use gemini_genai::types::VideoMetadata;
 
         let server = MockServer::start().await;
         Mock::given(method("POST"))

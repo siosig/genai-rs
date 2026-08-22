@@ -15,11 +15,11 @@
 //! when the model provides them, arrive as `output_transcription`.
 
 use futures_util::StreamExt;
-use google_genai::Client;
-use google_genai::types::{Content, LiveConnectConfig, Modality, Part};
+use gemini_genai::Client;
+use gemini_genai::types::{Content, LiveConnectConfig, Modality, Part};
 
 #[tokio::main]
-async fn main() -> google_genai::Result<()> {
+async fn main() -> gemini_genai::Result<()> {
     let client = Client::new()?;
 
     let mut session = Box::pin(client.live().connect(

@@ -8,11 +8,11 @@
 //! GEMINI_API_KEY=... cargo run --example generate_videos
 //! ```
 
-use google_genai::Client;
-use google_genai::types::GenerateVideosSource;
+use gemini_genai::Client;
+use gemini_genai::types::GenerateVideosSource;
 
 #[tokio::main]
-async fn main() -> google_genai::Result<()> {
+async fn main() -> gemini_genai::Result<()> {
     let client = Client::new()?;
 
     let mut operation = client

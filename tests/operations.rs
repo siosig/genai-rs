@@ -6,7 +6,7 @@
 mod common;
 
 use common::test_client;
-use google_genai::types::GenerateVideosSource;
+use gemini_genai::types::GenerateVideosSource;
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
@@ -80,7 +80,7 @@ async fn operations_get_polls_the_operations_resource_name_as_the_path() {
         .await;
 
     let client = test_client(server.uri());
-    let operation = google_genai::types::GenerateVideosOperation {
+    let operation = gemini_genai::types::GenerateVideosOperation {
         name: Some("operations/xyz789".to_owned()),
         done: Some(false),
         ..Default::default()
@@ -106,7 +106,7 @@ async fn operations_get_surfaces_an_error_bearing_operation() {
         .await;
 
     let client = test_client(server.uri());
-    let operation = google_genai::types::GenerateVideosOperation {
+    let operation = gemini_genai::types::GenerateVideosOperation {
         name: Some("operations/failed1".to_owned()),
         done: Some(false),
         ..Default::default()
@@ -141,7 +141,7 @@ async fn operations_get_polls_a_file_search_import_operation() {
     // Proves `operations().get()` is usable with operations other than
     // video generation -- `file_search_stores().import_file()` returns this
     // type, and Python's `operations.get` accepts any `types.Operation`.
-    let operation = google_genai::types::ImportFileOperation {
+    let operation = gemini_genai::types::ImportFileOperation {
         name: Some("fileSearchStores/s1/operations/imp1".to_owned()),
         done: Some(false),
         ..Default::default()
@@ -167,7 +167,7 @@ async fn operations_get_polls_an_upload_to_file_search_store_operation() {
         .await;
 
     let client = test_client(server.uri());
-    let operation = google_genai::types::UploadToFileSearchStoreOperation {
+    let operation = gemini_genai::types::UploadToFileSearchStoreOperation {
         name: Some("fileSearchStores/s1/operations/up1".to_owned()),
         done: Some(false),
         ..Default::default()

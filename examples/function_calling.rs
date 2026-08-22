@@ -8,9 +8,9 @@
 //! GOOGLE_API_KEY=... cargo run --example function_calling
 //! ```
 
-use google_genai::afc::function_tool;
-use google_genai::types::{GenerateContentConfig, Tool};
-use google_genai::{Client, Result};
+use gemini_genai::afc::function_tool;
+use gemini_genai::types::{GenerateContentConfig, Tool};
+use gemini_genai::{Client, Result};
 use schemars::JsonSchema;
 use serde::Deserialize;
 

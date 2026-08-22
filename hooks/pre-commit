@@ -1,0 +1,83 @@
+#!/bin/sh
+# Commit-time gates for this repository.
+#
+# Enable once per clone:
+#
+#     git config core.hooksPath hooks
+#
+# Everything here is a project-wide policy that applies to every contributor.
+# Anything personal -- an author identity check, a private denylist -- belongs
+# in hooks/local.d/ instead, which is git-ignored and sourced at the end.
+#
+# Emergency bypass: git commit --no-verify. The server-side `secret-scan`
+# workflow re-runs the secret checks, so bypassing locally does not get a
+# secret merged.
+
+# >>> secret-scan (secretlint) >>>
+# Block commits that introduce credentials/secrets (preset) or private denylist terms.
+# Scans only staged files.
+#
+# The version is pinned to the patch and must match SECRETLINT_VERSION in
+# .github/workflows/secret-scan.yml -- a hook that flags what CI accepts (or the
+# reverse) just teaches people to ignore one of them. tests/supply_chain.rs
+# fails if the two drift apart.
+SECRETLINT_VERSION="13.0.4"
+(
+  _ss_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+  [ -z "$_ss_root" ] && exit 0
+  cd "$_ss_root" || exit 0
+  [ -z "$(git diff --cached --name-only --diff-filter=ACM)" ] && exit 0
+  _ss_rc=".secretlintrc.json"
+  [ -e ".secretlintrc.local.json" ] && _ss_rc=".secretlintrc.local.json"
+  if [ -x node_modules/.bin/secretlint ] && [ -d "node_modules/@secretlint/secretlint-rule-pattern" ]; then
+    set -- node_modules/.bin/secretlint
+  else
+    set -- npx -y \
+      -p "secretlint@${SECRETLINT_VERSION}" \
+      -p "@secretlint/secretlint-rule-preset-recommend@${SECRETLINT_VERSION}" \
+      -p "@secretlint/secretlint-rule-pattern@${SECRETLINT_VERSION}" \
+      secretlint
+  fi
+  echo "pre-commit: secretlint scanning staged files (config: $_ss_rc)…"
+  git diff --cached --name-only --diff-filter=ACM -z | xargs -0 "$@" --no-glob --secretlintrc "$_ss_rc"
+) || exit 1
+# <<< secret-scan (secretlint) <<<
+
+# >>> english-only-content >>>
+# Published files are English; Japanese lives in *.ja* files (README.ja.md,
+# docs/parity.ja.md, tools/codegen/parity_strings.ja.toml). This keeps the
+# repository readable to contributors who do not read Japanese, without
+# preventing a Japanese translation from existing alongside.
+# POSIX sh only below (hook runs under /bin/sh): no process substitution, no 'read -d'.
+(
+  _ec_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+  [ -z "$_ec_root" ] && exit 0
+  cd "$_ec_root" || exit 0
+  git diff --cached --name-only --diff-filter=ACM | while IFS= read -r _ec_file; do
+    case "$_ec_file" in *.ja*) continue ;; esac
+    _ec_bin="$(git diff --cached --numstat -- "$_ec_file" | cut -f1)"
+    [ "$_ec_bin" = "-" ] && continue
+    if git show ":$_ec_file" 2>/dev/null | grep -qP '[\x{3000}-\x{303f}\x{3040}-\x{30ff}\x{3400}-\x{4dbf}\x{4e00}-\x{9fff}\x{f900}-\x{faff}\x{ff00}-\x{ffef}]'; then
+      echo "pre-commit: Japanese/CJK found in $_ec_file — published files must be English, except *.ja* (bypass: git commit --no-verify)." >&2
+      exit 1
+    fi
+  done
+) || exit 1
+# <<< english-only-content <<<
+
+# >>> local gates >>>
+# Optional, per-developer checks. hooks/local.d/ is git-ignored except for the
+# *.sample templates, so nothing here can lock a contributor out of their own
+# clone: an author-identity gate hard-coding one maintainer's address would
+# reject every external contribution, which is why it is not shipped enabled.
+(
+  _lg_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+  [ -z "$_lg_root" ] && exit 0
+  for _lg_hook in "$_lg_root"/hooks/local.d/*; do
+    [ -f "$_lg_hook" ] || continue
+    case "$_lg_hook" in *.sample) continue ;; esac
+    # shellcheck source=/dev/null
+    . "$_lg_hook" || exit 1
+  done
+) || exit 1
+# <<< local gates <<<

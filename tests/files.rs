@@ -18,7 +18,7 @@ use wiremock::{Mock, MockServer, ResponseTemplate};
 async fn write_temp_file(name: &str, data: &[u8]) -> std::path::PathBuf {
     let mut file_path = std::env::temp_dir();
     file_path.push(format!(
-        "google-genai-rs-files-test-{name}-{}",
+        "gemini-genai-files-test-{name}-{}",
         uuid::Uuid::new_v4()
     ));
     tokio::fs::write(&file_path, data).await.unwrap();
@@ -113,7 +113,7 @@ async fn upload_a_nine_mebibyte_payload_sends_exactly_two_chunks() {
         .mount(&server)
         .await;
 
-    let source = google_genai::files::UploadSource::Bytes {
+    let source = gemini_genai::files::UploadSource::Bytes {
         data,
         mime_type: "application/octet-stream".to_owned(),
     };
@@ -149,11 +149,11 @@ async fn upload_bytes_source_never_touches_the_filesystem() {
         .mount(&server)
         .await;
 
-    let config = google_genai::types::UploadFileConfig {
+    let config = gemini_genai::types::UploadFileConfig {
         display_name: Some("my data".to_owned()),
         ..Default::default()
     };
-    let source = google_genai::files::UploadSource::Bytes {
+    let source = gemini_genai::files::UploadSource::Bytes {
         data: b"a,b,c\n1,2,3\n".to_vec(),
         mime_type: "text/csv".to_owned(),
     };
@@ -183,7 +183,7 @@ async fn upload_non_active_final_status_is_an_upload_error() {
         .mount(&server)
         .await;
 
-    let source = google_genai::files::UploadSource::Bytes {
+    let source = gemini_genai::files::UploadSource::Bytes {
         data: b"x".to_vec(),
         mime_type: "text/plain".to_owned(),
     };
@@ -192,7 +192,7 @@ async fn upload_non_active_final_status_is_an_upload_error() {
         .upload(source, None)
         .await
         .unwrap_err();
-    assert!(matches!(err, google_genai::Error::Upload(_)));
+    assert!(matches!(err, gemini_genai::Error::Upload(_)));
 }
 
 #[tokio::test]
@@ -244,7 +244,7 @@ async fn list_returns_a_pager_that_fetches_the_next_page() {
         .mount(&server)
         .await;
 
-    let config = google_genai::types::ListFilesConfig {
+    let config = gemini_genai::types::ListFilesConfig {
         page_size: Some(1),
         ..Default::default()
     };
@@ -260,7 +260,7 @@ async fn list_returns_a_pager_that_fetches_the_next_page() {
     assert_eq!(second[0].name.as_deref(), Some("files/two"));
 
     let err = pager.next_page().await.unwrap_err();
-    assert!(matches!(err, google_genai::Error::NoMorePages));
+    assert!(matches!(err, gemini_genai::Error::NoMorePages));
     server.verify().await;
 }
 

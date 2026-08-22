@@ -8,12 +8,12 @@
 //! GEMINI_API_KEY=... cargo run --example files_upload
 //! ```
 
-use google_genai::Client;
-use google_genai::files::UploadSource;
-use google_genai::types::{Content, Part};
+use gemini_genai::Client;
+use gemini_genai::files::UploadSource;
+use gemini_genai::types::{Content, Part};
 
 #[tokio::main]
-async fn main() -> google_genai::Result<()> {
+async fn main() -> gemini_genai::Result<()> {
     let client = Client::new()?;
 
     let uploaded = client

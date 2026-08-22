@@ -361,9 +361,22 @@ mod tests {
     use wiremock::matchers::{body_json, header, method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
-    use super::{HttpClient, recursive_body_update};
+    use super::{DEFAULT_BASE_URL, HttpClient, recursive_body_update};
     use crate::error::Error;
     use crate::types::{HttpOptions, HttpRetryOptions};
+
+    /// P8 of `specs/002-oss-release-compliance/contracts/protected-identifiers.md`.
+    ///
+    /// The host belongs to the upstream API, not to this crate; the rest of
+    /// that contract is guarded from `tests/protected_identifiers.rs`, but
+    /// `DEFAULT_BASE_URL` is `pub(crate)` so it has to be checked from inside.
+    #[test]
+    fn default_base_url_points_at_the_gemini_developer_api() {
+        assert!(
+            DEFAULT_BASE_URL.contains("generativelanguage.googleapis.com"),
+            "the default base URL must stay on the upstream API host, got {DEFAULT_BASE_URL}"
+        );
+    }
 
     fn client_for(server: &MockServer, options: HttpOptions) -> HttpClient {
         let mut options = options;

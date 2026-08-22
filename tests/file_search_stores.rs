@@ -6,7 +6,7 @@
 mod common;
 
 use common::test_client;
-use google_genai::types::{
+use gemini_genai::types::{
     CreateFileSearchStoreConfig, DeleteDocumentConfig, DeleteFileSearchStoreConfig,
     ImportFileConfig, ListDocumentsConfig, UploadToFileSearchStoreConfig,
 };
@@ -122,7 +122,7 @@ async fn import_file_returns_a_long_running_operation() {
             "fileSearchStores/abc123",
             "files/xyz",
             Some(ImportFileConfig {
-                custom_metadata: Some(vec![google_genai::types::CustomMetadata {
+                custom_metadata: Some(vec![gemini_genai::types::CustomMetadata {
                     key: Some("topic".to_owned()),
                     string_value: Some("cats".to_owned()),
                     ..Default::default()
@@ -269,7 +269,7 @@ async fn documents_get_list_and_delete() {
     assert_eq!(doc.display_name.as_deref(), Some("doc one"));
     assert_eq!(
         doc.state,
-        Some(google_genai::types::DocumentState::StateActive)
+        Some(gemini_genai::types::DocumentState::StateActive)
     );
 
     let pager = documents

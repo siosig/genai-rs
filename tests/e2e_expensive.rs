@@ -33,11 +33,11 @@
 //! models via `t_models_url`. The test below does exactly that cleanup.
 
 use futures_util::StreamExt;
-use google_genai::types::{
+use gemini_genai::types::{
     BatchJobSource, Content, CreateBatchJobConfig, CreateTuningJobConfig, GenerateVideosSource,
     InlinedRequest, JobState, LiveConnectConfig, Modality, Part, TuningDataset, TuningExample,
 };
-use google_genai::{Client, Error};
+use gemini_genai::{Client, Error};
 
 /// A currently-served video-generation model.
 const VIDEO_MODEL: &str = "veo-3.1-fast-generate-preview";

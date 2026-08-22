@@ -13,11 +13,11 @@
 //! `gemini-3.1-flash-image`), which returns the image as an `inline_data`
 //! part. It is kept here because the Python SDK still exposes it.
 
-use google_genai::Client;
-use google_genai::types::GenerateImagesConfig;
+use gemini_genai::Client;
+use gemini_genai::types::GenerateImagesConfig;
 
 #[tokio::main]
-async fn main() -> google_genai::Result<()> {
+async fn main() -> gemini_genai::Result<()> {
     let client = Client::new()?;
 
     #[expect(

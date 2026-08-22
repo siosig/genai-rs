@@ -16,11 +16,11 @@
 //! `Error::UnsupportedByBackend` here; use `client.models().list(..)` with
 //! `query_base: Some(false)` to enumerate tuned models instead.
 
-use google_genai::Client;
-use google_genai::types::{CreateTuningJobConfig, TuningDataset, TuningExample};
+use gemini_genai::Client;
+use gemini_genai::types::{CreateTuningJobConfig, TuningDataset, TuningExample};
 
 #[tokio::main]
-async fn main() -> google_genai::Result<()> {
+async fn main() -> gemini_genai::Result<()> {
     let client = Client::new()?;
 
     let dataset = TuningDataset {

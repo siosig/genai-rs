@@ -1,0 +1,22 @@
+# Personal gate: refuse commits authored under anything but one identity.
+#
+# NOT enabled by default, and deliberately not shipped as an active hook: it
+# hard-codes a single email address, so enabling it for everyone would reject
+# every external contribution. It exists for maintainers who use more than one
+# git identity on the same machine and want to be sure a work address never
+# reaches this repository.
+#
+# Enable for yourself:
+#
+#     cp hooks/local.d/author.sample hooks/local.d/author
+#     # then edit the address below
+#
+# hooks/local.d/* is git-ignored (except *.sample), so your copy stays local.
+# Sourced by hooks/pre-commit, so `exit 1` here aborts the commit.
+
+_pa_expected="siosig@gmail.com"
+_pa_email="$(git var GIT_AUTHOR_IDENT 2>/dev/null | grep -oP '<\K[^>]+')"
+if [ "$_pa_email" != "$_pa_expected" ]; then
+  echo "pre-commit: commit author must be <$_pa_expected> (got: ${_pa_email:-unknown}) (bypass: git commit --no-verify)." >&2
+  exit 1
+fi

@@ -1,0 +1,87 @@
+name: Bug report
+description: Something behaves differently from what the API or the upstream SDK does
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Not for security problems — those go through
+        [private vulnerability reporting](../security/policy) instead, so the
+        details stay private until a fix exists.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you expected, what you got, and how the two differ.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: >
+        A minimal snippet is ideal. Redact your API key — and if one has already
+        been pasted somewhere public, rotate it.
+      render: rust
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Crate version or commit
+      placeholder: "0.1.0, or a commit SHA"
+    validations:
+      required: true
+
+  - type: input
+    id: features
+    attributes:
+      label: Cargo features enabled
+      description: The defaults are rustls-tls and live.
+      placeholder: "default, or e.g. blocking + mcp"
+    validations:
+      required: true
+
+  - type: input
+    id: rust-version
+    attributes:
+      label: Rust version
+      description: Output of `rustc --version`.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area
+      options:
+        - Not sure
+        - models / generate_content
+        - Streaming
+        - chats
+        - files / upload
+        - caches
+        - batches
+        - tunings
+        - operations
+        - file_search_stores
+        - auth_tokens
+        - Live API (WebSocket)
+        - Automatic function calling
+        - MCP bridge
+        - Blocking API
+        - Generated types or converters
+    validations:
+      required: true
+
+  - type: textarea
+    id: upstream
+    attributes:
+      label: Does the Python SDK do the same?
+      description: >
+        This crate is a port of google-genai 2.19.0, so "the Python SDK does X
+        but this does Y" is the most actionable kind of report. Skip if you have
+        not checked — it is genuinely useful either way.
