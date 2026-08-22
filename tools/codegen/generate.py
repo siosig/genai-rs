@@ -69,9 +69,12 @@ def main() -> None:
         parser.error(f"unknown --only target(s): {unknown}; choose from {TARGETS}")
 
     # Fails fast if requirements.txt / Cargo.toml / src/lib.rs disagree with
-    # the pinned upstream version, before any generated file is stamped.
+    # the pinned upstream version, or if this interpreter is not the pinned
+    # one -- before any generated file is stamped. Both are inputs the output
+    # depends on, and both fail silently if left unchecked.
     import upstream  # noqa: PLC0415
 
+    upstream.assert_supported_python()
     upstream.assert_all_in_sync()
 
     if "types" in requested:

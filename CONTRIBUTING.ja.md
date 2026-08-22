@@ -106,12 +106,23 @@ cargo +1.85.0 check --workspace --locked --features blocking
 - `tests/fixtures/converters/`
 - `docs/parity.md`
 
+入力側の `tools/codegen/methods.toml`、`tools/codegen/parity-matrix.ja.md`、
+`tools/codegen/fixtures_cases.py` は追跡されていて手で編集する。
+
 生成器（または `converter_overrides/<fn>.rs`）のほうを直して再生成する。
 
 ```sh
-pip install --require-hashes -r tools/codegen/requirements.txt
-python tools/codegen/generate.py            # あるいは --only types,converters,…
+uv venv --python 3.12 --seed .venv-codegen
+.venv-codegen/bin/pip install --require-hashes -r tools/codegen/requirements.txt
+.venv-codegen/bin/python tools/codegen/generate.py   # あるいは --only types,converters,…
 ```
+
+**インタプリタのバージョンも入力の一部。** `google.genai.types` が公開する
+pydantic モデルの集合がバージョンで変わる（3.12 は `BlobImageUnion` を含む 464、
+3.14 は含まない 463）ため、違う版で生成するとクレートの公開 API が黙って変わり、
+次に push する人のところで `codegen-check` が落ちる。`tools/codegen/upstream.py`
+がピンした 3.12 以外での実行を拒否する（新しい版を意図的に評価するときは
+`GENAI_ALLOW_PYTHON_DRIFT=1` で上書き）。
 
 生成ファイルの帰属ヘッダは `tools/codegen/attribution.py` が出している。文言は
 そこが唯一の出所なので、出力側ではなくそちらを直すこと。
@@ -136,6 +147,7 @@ Dependabot が PR で提案する。手動が要るのは次のもの。
 | Rust ツールチェーン | `rust-toolchain.toml` と `.github/workflows/ci.yml` の `RUST_TOOLCHAIN` | 両方を編集。新しい stable で何が指摘されるかは助言ジョブ `clippy-latest` が教えてくれる |
 | MSRV | `Cargo.toml` の `rust-version` と `ci.yml` の `RUST_MSRV` | 両方を編集 |
 | CI の Action | `uses:` の SHA | Dependabot が SHA と `# vX.Y.Z` コメントを同時に書き換える |
+| Python インタプリタ | `tools/codegen/upstream.py` の `PINNED_PYTHON` と `ci.yml` の `python-version` | 両方を編集して再生成し、出てくる API 差分をレビューする |
 | Python 生成依存 | `tools/codegen/requirements.in` → `.txt` | `.in` を編集してから `uv pip compile tools/codegen/requirements.in --generate-hashes --python-version 3.12 -o tools/codegen/requirements.txt`（`pip-compile` でも同じ） |
 | gitleaks | `secret-scan.yml` の `GITLEAKS_VERSION` | 編集するだけ。checksum はリリース同梱の `checksums.txt` から取る |
 | secretlint | `secret-scan.yml` の `SECRETLINT_VERSION` **と** `hooks/pre-commit` | **両方**を編集。食い違うと `tests/supply_chain.rs` が落ちる |

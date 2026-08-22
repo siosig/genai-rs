@@ -106,12 +106,24 @@ These are produced by `tools/codegen/*.py` and **must not be hand-edited**:
 - `tests/fixtures/converters/`
 - `docs/parity.md`
 
+Their inputs -- `tools/codegen/methods.toml`, `tools/codegen/parity-matrix.ja.md`,
+`tools/codegen/fixtures_cases.py` -- are tracked and hand-edited.
+
 Change the generator (or a `converter_overrides/<fn>.rs` file) and re-run:
 
 ```sh
-pip install --require-hashes -r tools/codegen/requirements.txt
-python tools/codegen/generate.py            # or --only types,converters,…
+uv venv --python 3.12 --seed .venv-codegen
+.venv-codegen/bin/pip install --require-hashes -r tools/codegen/requirements.txt
+.venv-codegen/bin/python tools/codegen/generate.py   # or --only types,converters,…
 ```
+
+**The interpreter version is part of the input.** `google.genai.types` exposes a
+different set of pydantic models depending on it -- 3.12 defines 464 including
+`BlobImageUnion`, 3.14 defines 463 without it -- so generating on the wrong one
+silently changes the crate's public API and breaks `codegen-check` for whoever
+pushes next. `tools/codegen/upstream.py` refuses to run on anything but the
+pinned 3.12 (override with `GENAI_ALLOW_PYTHON_DRIFT=1` if you are deliberately
+evaluating a newer one).
 
 Every generated file carries an attribution header emitted by
 `tools/codegen/attribution.py`, which is the single source for that wording.
@@ -138,6 +150,7 @@ Dependabot proposes most of them; these are the manual ones.
 | Rust toolchain | `rust-toolchain.toml` and `RUST_TOOLCHAIN` in `.github/workflows/ci.yml` | Edit both; the advisory `clippy-latest` job shows what a newer stable would flag |
 | MSRV | `rust-version` in `Cargo.toml` and `RUST_MSRV` in `ci.yml` | Edit both |
 | CI actions | `uses:` SHAs | Dependabot updates the SHA and the `# vX.Y.Z` comment together |
+| Python interpreter | `PINNED_PYTHON` in `tools/codegen/upstream.py` and `python-version` in `ci.yml` | Edit both, regenerate, and review the resulting API diff |
 | Python codegen deps | `tools/codegen/requirements.in` → `.txt` | Edit the `.in`, then `uv pip compile tools/codegen/requirements.in --generate-hashes --python-version 3.12 -o tools/codegen/requirements.txt` (`pip-compile` works too) |
 | gitleaks | `GITLEAKS_VERSION` in `secret-scan.yml` | Edit; the checksum comes from the release's own `checksums.txt` |
 | secretlint | `SECRETLINT_VERSION` in `secret-scan.yml` **and** `hooks/pre-commit` | Edit **both** — `tests/supply_chain.rs` fails if they disagree |

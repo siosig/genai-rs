@@ -1,0 +1,91 @@
+# Japanese strings for gen_parity.py (renders docs/parity.ja.md).
+#
+# Kept out of gen_parity.py itself because the repository's pre-commit hook
+# rejects CJK outside `*.ja*` files, and `\uXXXX`-escaping a whole document's
+# prose would be unreadable. Every key below is required: gen_parity.py exits
+# non-zero if one is missing, so adding a string to the English locale forces a
+# Japanese counterpart.
+
+title = "Python → Rust 対応表"
+cross_link = "English version: [parity.md](parity.md)"
+out_file = "docs/parity.ja.md"
+
+baseline = "**基準**: google-genai {version} | **クレート**: `gemini-genai`（`gemini_genai`） | **真実の源**: `specs/001-port-genai-rust/contracts/parity-matrix.md`"
+
+toc = "目次"
+
+h_overview = "概要"
+h_generated = "この文書の生成方法"
+h_legend = "凡例"
+h_summary = "モジュール別サマリ"
+h_mapping = "メソッド対応"
+h_client = "クライアント生成"
+h_types = "型"
+h_scope = "対象外（理由付き）"
+
+overview_p1 = "google-genai {version}（Python）が Gemini Developer API 向けに公開している **{total}** 個の公開メソッド（＋ Rust 固有のアクセサ）のカバレッジ。**{ok}** 個が実装済み、**{unsupported}** 個は Vertex AI 専用のため `UnsupportedByBackend` を返すスタブ、**{not_ported}** 個は Vertex AI 専用で移植していない。うち **{tested}** 個についてはテスト関数を自動検出できた。"
+
+overview_p2 = "この表は `tools/codegen/methods.toml`（メソッド台帳）と `specs/001-port-genai-rust/contracts/parity-matrix.md`（合意済みの真実の源）から生成している。対応表が ✅ と記した項目が台帳から欠けていれば `gen_parity.py` は非ゼロ終了し、CI の `codegen-check` が落ちる。"
+
+mermaid_missing = "✅ の項目が欠落"
+mermaid_exit = "非ゼロ終了"
+
+legend_col_status = "ステータス"
+legend_col_meaning = "意味"
+legend_st_unsupported = "⚠️ `UnsupportedByBackend`"
+legend_impl_desc = "対応する Rust メソッドが存在し、テストで担保されている"
+legend_unsup_desc = "Python 側で Vertex AI 専用。シグネチャのみ移植してあり、呼ぶと必ずエラーを返す"
+legend_not_ported_desc = "`vertexai=False` のとき Python 側が `ValueError` を送出するため対象外"
+
+legend_note = "「テスト」列は、`tests/**.rs` と `src/**` の `#[cfg(test)]` モジュールを走査し、`.<module>().<method>(` のチェーン呼び出しを含むテスト関数を拾ったもの（モジュール自身の `#[cfg(test)]` 内では素の `.<method>(` 呼び出し、どちらにも当たらなければアクセサ呼び出し＋メソッド名）。**カバレッジの証明ではなくヒューリスティックとして扱うこと。** 1 メソッドあたり最大 {max_tests} 件まで表示する。"
+
+sum_col_module = "モジュール"
+sum_col_methods = "メソッド数"
+sum_col_impl = "実装済み"
+sum_col_not_ported = "未移植"
+sum_col_tests = "テスト検出数"
+sum_total = "**合計**"
+
+col_python = "Python"
+col_rust = "Rust"
+col_status = "ステータス"
+col_tests = "テスト"
+
+st_impl = "✅ 実装済み"
+st_unsupported = "⚠️ `UnsupportedByBackend`（Vertex AI 専用）"
+st_not_ported = "⏭ 未移植（Vertex AI 専用）"
+
+status_notes = "{status}（{notes}）"
+note_join = "、"
+note_deprecated = "`#[deprecated]`"
+note_private = "非公開ヘルパー"
+note_async_only = "非同期のみ、同期版なし"
+note_sync_handwritten = "同期版は手書き"
+
+more_tests = "ほか {count} 件"
+no_test = "— （テスト未検出）"
+rust_specific = "— （Rust 固有のアクセサ）"
+
+client_p = "`Client` の構築とバックエンドの選択は個々のメソッドではないため `methods.toml` の対象外。ここには真実の源にある対応表をそのまま再掲する。"
+
+types_p1 = "`tools/codegen/gen_types.py` は `google.genai.types` を **{structs} 個の構造体 / {enums} 個の enum** に変換する（`src/types/generated/structs.rs`、`src/types/generated/enums.rs`）。型名・フィールド名は Python と 1 対 1（snake_case）で一致するので、ここには列挙しない。"
+
+types_p2 = "型側の整合性は `gen_types.py` 自身の仕事。マッピング表にないアノテーションに出会った瞬間、クラス名とフィールド名を表示して非ゼロ終了するため、漏れは CI の `codegen-check` で表面化する（`specs/001-port-genai-rust/contracts/codegen.md` の「gen_types.py」を参照）。"
+
+scope_col_item = "項目"
+scope_col_reason = "理由"
+scope_row_suffix = "（真実の源側の行）"
+scope_per_sot = "（真実の源に準拠）"
+
+scope_tail = "バックエンド単位で対象外としているもの（Vertex AI / NextGen / `local_tokenizer` / replay）は、`specs/001-port-genai-rust/contracts/parity-matrix.md` の対象外セクションで扱っている。"
+
+[not_ported]
+"models.edit_image" = "`models.py::_edit_image` は冒頭が `if not self._api_client.vertexai: raise ValueError('This method is only supported in Gemini Enterprise Agent Platform mode, ...')` なので、Gemini Developer API では呼べない。"
+"models.upscale_image" = "`models.py::_upscale_image` にも同じ `vertexai` ガードがある。Vertex AI 専用。"
+"models.recontext_image" = "`models.py::recontext_image` にも同じ `vertexai` ガードがある。Vertex AI 専用。"
+"models.segment_image" = "`models.py::segment_image` にも同じ `vertexai` ガードがある。Vertex AI 専用。"
+"tunings.validate_reward" = "`tunings.py::validate_reward` にも同じ `vertexai` ガードがある。Vertex AI 専用（報酬モデルの検証は Vertex AI のチューニング機能）。"
+
+[non_method_rows]
+"pagers" = "`Pager` / `AsyncPager` はメソッドではなく型。Rust では `crate::pager::Pager<T>`（`page()` / `name()` / `page_size()` / `config()` / `next_page()`）として実装しており、`src/pager.rs` の `#[cfg(test)]` テストと各 `list` メソッドのテストで担保している。"
+"errors" = "`APIError` 系はメソッドではなく型。Rust では `crate::error::Error` enum（`Api` / `Function*` / `UnknownApiResponse` など）として実装しており、`src/error.rs` の `#[cfg(test)]` テストで担保している。"

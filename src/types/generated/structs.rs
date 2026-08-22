@@ -17,7 +17,7 @@
 // mapping constants) and re-run
 // `python tools/codegen/generate.py --only types` instead.
 
-//! Generated from 411 `pydantic` models in `google.genai.types`.
+//! Generated from 412 `pydantic` models in `google.genai.types`.
 
 #![allow(
     clippy::pedantic,
@@ -624,6 +624,27 @@ pub struct BleuSpec {
 #[serde_with::serde_as]
 #[derive(Debug, Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 pub struct Blob {
+    /// Required. The raw bytes of the data.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::base64::Base64>")]
+    pub data: Option<Vec<u8>>,
+    /// Optional. The display name of the blob. Used to provide a label or filename to distinguish blobs. This field is only returned in `PromptMessage` for prompt management. It is used in the Gemini calls only when server-side tools (`code_execution`, `google_search`, and `url_context`) are enabled. This field is not supported in Gemini API.
+    #[serde(alias = "displayName")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
+    /// Required. The IANA standard MIME type of the source data.
+    #[serde(alias = "mimeType")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mime_type: Option<String>,
+}
+
+/// A content blob.
+///
+/// A Blob contains data of a specific media type. It is used to represent images,
+/// audio, and video.
+#[serde_with::serde_as]
+#[derive(Debug, Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
+pub struct BlobImageUnion {
     /// Required. The raw bytes of the data.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[serde_as(as = "Option<serde_with::base64::Base64>")]

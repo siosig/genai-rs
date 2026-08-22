@@ -43,6 +43,20 @@ Python SDK's own policy. Always finish a struct literal with
 
 ### Fixed
 
+- **`codegen-check` can actually run now.** `gen_parity.py` read its input from
+  `specs/`, which is git-ignored, so the job had never once succeeded on a clean
+  checkout -- it failed with `FileNotFoundError` before reaching `git diff`. The
+  parity matrix now lives at `tools/codegen/parity-matrix.md`, beside the
+  generator that consumes it.
+- **Pinned the interpreter the generated code is produced with.**
+  `google.genai.types` exposes a different set of pydantic models per Python
+  version (3.12: 464 including `BlobImageUnion`; 3.14: 463 without it), so the
+  committed output depended on whoever ran the generator last.
+  `tools/codegen/upstream.py` now refuses to generate on anything but the pinned
+  3.12, the same way it already refused a mismatched SDK version. Regenerating
+  under 3.12 adds the `BlobImageUnion` type; converters and fixtures are
+  unchanged, so no request or response body changes.
+
 - **`--no-default-features` now compiles.** `tokio`'s `io-util` feature, which
   `src/http/upload.rs` needs for `AsyncReadExt`, was missing from `Cargo.toml`.
   The crate only ever built because the default `live` feature pulls in

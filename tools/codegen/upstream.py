@@ -38,6 +38,62 @@ from __future__ import annotations
 # Keep in sync with the `google-genai==` pin in requirements.txt.
 PINNED_VERSION = "2.19.0"
 
+# The Python version the generated output is pinned to, as "major.minor".
+#
+# This is not paranoia about tooling hygiene: `google.genai.types` exposes a
+# *different set of models* depending on the interpreter. On 3.12 it defines 464
+# pydantic models including `BlobImageUnion`; on 3.14 it defines 463 without it.
+# Generating on the wrong interpreter therefore silently drops a public type
+# from the port, and `codegen-check` then fails for whoever pushes next rather
+# than for whoever generated it.
+#
+# 3.12 is the pin because it is what `.github/workflows/ci.yml` installs and
+# what `requirements.txt` was compiled for (`uv pip compile --python-version`).
+# Changing it means regenerating everything and reviewing the resulting API diff.
+PINNED_PYTHON = "3.12"
+
+
+def assert_supported_python() -> None:
+    """Aborts unless the running interpreter matches [`PINNED_PYTHON`].
+
+    Same contract as [`assert_supported_version`], for the same reason: the
+    output depends on it, so a mismatch has to fail at generation time instead
+    of producing a tree that only differs from CI's.
+
+    Set `GENAI_ALLOW_PYTHON_DRIFT=1` to proceed anyway, which is the intended
+    path while evaluating a new interpreter -- expect a non-empty diff.
+    """
+    import os  # noqa: PLC0415
+    import sys  # noqa: PLC0415
+
+    running = f"{sys.version_info.major}.{sys.version_info.minor}"
+    if running == PINNED_PYTHON:
+        return
+    if os.environ.get("GENAI_ALLOW_PYTHON_DRIFT") == "1":
+        print(
+            f"warning: generating with Python {running}, not the pinned"
+            f" {PINNED_PYTHON} (GENAI_ALLOW_PYTHON_DRIFT=1). The set of models"
+            " google.genai.types exposes varies by interpreter, so expect the"
+            " generated output to differ from CI's.",
+            file=sys.stderr,
+        )
+        return
+    raise SystemExit(
+        f"tools/codegen: this interpreter is Python {running}, but the generated"
+        f" output is pinned to {PINNED_PYTHON}.\n"
+        "\n"
+        "  google.genai.types exposes a different set of pydantic models per\n"
+        "  interpreter version, so generating here would silently change the\n"
+        "  public API surface and break codegen-check for the next person.\n"
+        "\n"
+        f"  Use Python {PINNED_PYTHON}, for example:\n"
+        f"    uv venv --python {PINNED_PYTHON} --seed .venv-codegen\n"
+        "    .venv-codegen/bin/pip install --require-hashes -r tools/codegen/requirements.txt\n"
+        "    .venv-codegen/bin/python tools/codegen/generate.py\n"
+        "\n"
+        "  To override deliberately: GENAI_ALLOW_PYTHON_DRIFT=1"
+    )
+
 
 def installed_version() -> str:
     """Returns the `google-genai` version actually importable right now."""
