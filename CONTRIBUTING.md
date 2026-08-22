@@ -16,6 +16,7 @@ For a security problem, do **not** open an issue: follow [SECURITY.md](SECURITY.
 - [Generated code](#generated-code)
 - [Language policy](#language-policy)
 - [Updating pinned things](#updating-pinned-things)
+- [Releasing](#releasing)
 - [Live tests](#live-tests)
 
 ## One-time setup
@@ -177,6 +178,23 @@ Dependabot proposes most of them; these are the manual ones.
 This one is not a dependency bump; it regenerates the whole generated tree.
 Dependabot is configured to leave `google-genai` alone for that reason. The
 procedure is in the module docstring of `tools/codegen/upstream.py`.
+
+## Releasing
+
+A release is a tag. Bump `version` in `Cargo.toml`, run
+`cargo update --workspace --offline` so `Cargo.lock` follows, add a
+`## X.Y.Z` section to `CHANGELOG.md`, commit, then tag `vX.Y.Z` on `main` and
+push the tag. `.github/workflows/release.yml` does the rest: it refuses to
+continue if the tag, the manifest version and the changelog disagree or if the
+tagged commit is not on `main`, and then runs `cargo publish --locked`.
+
+There is no crates.io token in this repository. The workflow authenticates with
+[Trusted Publishing](https://crates.io/docs/trusted-publishing): GitHub issues
+the job a short-lived OIDC credential, crates.io exchanges it for a publish
+token valid only for this repository, this workflow file and the `crates-io`
+environment, and the token is revoked when the job ends. Changing the workflow
+filename or the environment name therefore breaks publishing until the crate's
+settings on crates.io are updated to match.
 
 ## Live tests
 

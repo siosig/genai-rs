@@ -16,6 +16,7 @@ Gemini Developer API 向けに Rust へ移植した**非公式**のクレート�
 - [生成コード](#生成コード)
 - [言語の方針](#言語の方針)
 - [ピンしているものの更新](#ピンしているものの更新)
+- [リリース](#リリース)
 - [Live テスト](#live-テスト)
 
 ## 最初の一回だけの設定
@@ -173,6 +174,22 @@ Dependabot が PR で提案する。手動が要るのは次のもの。
 これは依存のバンプではなく、生成ツリー全体の再生成を伴う作業。Dependabot が
 `google-genai` を対象外にしているのはそのため。手順は
 `tools/codegen/upstream.py` のモジュール docstring にある。
+
+## リリース
+
+リリースはタグ 1 つ。`Cargo.toml` の `version` を上げ、`Cargo.lock` を追従させるために
+`cargo update --workspace --offline` を回し、`CHANGELOG.md` に `## X.Y.Z` 節を足して
+コミットし、`main` 上で `vX.Y.Z` タグを打って push する。あとは
+`.github/workflows/release.yml` がやる。タグ・マニフェストの版・changelog が食い違う、
+あるいはタグの先のコミットが `main` 上にないときは止まり、通れば
+`cargo publish --locked` を実行する。
+
+このリポジトリに crates.io のトークンは置いていない。ワークフローは
+[Trusted Publishing](https://crates.io/docs/trusted-publishing) で認証する。GitHub が
+ジョブに短命の OIDC クレデンシャルを発行し、crates.io がそれを「このリポジトリ・この
+ワークフローファイル・`crates-io` environment」に限って有効な publish トークンに
+交換し、ジョブ終了時に失効させる。だからワークフローのファイル名や environment 名を
+変えると、crates.io 側の crate 設定を合わせ直すまで publish は通らない。
 
 ## Live テスト
 

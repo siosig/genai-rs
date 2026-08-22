@@ -384,3 +384,37 @@ fn workflows_do_not_grant_write_permissions_by_default() {
         );
     }
 }
+
+// --- release workflow ------------------------------------------------------
+
+#[test]
+fn release_workflow_publishes_via_trusted_publishing_not_a_stored_token() {
+    // A `CARGO_REGISTRY_TOKEN` repository secret is a long-lived credential
+    // that anyone with write access, or any action with `secrets` exposure,
+    // can read and reuse from anywhere. Trusted Publishing replaces it with a
+    // per-run OIDC exchange scoped to this repository + workflow file +
+    // environment, which crates.io enforces server-side. Reintroducing a
+    // stored token quietly undoes that.
+    let workflow = read(".github/workflows/release.yml");
+    assert!(
+        !workflow.contains("secrets.CARGO_REGISTRY_TOKEN"),
+        "release.yml must not publish with a stored CARGO_REGISTRY_TOKEN secret"
+    );
+    assert!(
+        workflow.contains("rust-lang/crates-io-auth-action@"),
+        "release.yml must obtain its publish token from crates-io-auth-action"
+    );
+    assert!(
+        workflow.contains("id-token: write"),
+        "release.yml needs `id-token: write` for the OIDC exchange"
+    );
+    assert!(
+        workflow.contains("environment: crates-io"),
+        "release.yml must run in the `crates-io` environment, which is part of \
+         what crates.io checks in the token claim"
+    );
+    assert!(
+        workflow.contains("cargo publish --locked"),
+        "release.yml must publish with --locked"
+    );
+}
