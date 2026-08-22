@@ -68,7 +68,7 @@ Note the naming split: the **crate** is `gemini-genai`, the **library** is
 ## Installation
 
 The crate is **not on crates.io yet**, so depend on the repository rather than on
-a version number. Requires Rust 1.85 (edition 2024) or newer, and a Tokio runtime
+a version number. Requires Rust 1.88 or newer, and a Tokio runtime
 for the async API — the `blocking` feature brings its own runtime if you would
 rather not have one.
 

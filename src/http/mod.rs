@@ -162,11 +162,11 @@ impl HttpClient {
             format!("{}/", self.api_version)
         };
         let mut url = format!("{}{version_segment}{path}", self.base_url);
-        if let Some(query) = query {
-            if !query.is_empty() {
-                url.push('?');
-                url.push_str(query);
-            }
+        if let Some(query) = query
+            && !query.is_empty()
+        {
+            url.push('?');
+            url.push_str(query);
         }
         url
     }

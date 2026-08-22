@@ -66,13 +66,13 @@ fn get_field_masks(setup: Option<&serde_json::Map<String, Value>>) -> String {
     };
     let mut fields = Vec::new();
     for (key, value) in setup {
-        if let Value::Object(nested) = value {
-            if !nested.is_empty() {
-                for nested_key in nested.keys() {
-                    fields.push(format!("{key}.{nested_key}"));
-                }
-                continue;
+        if let Value::Object(nested) = value
+            && !nested.is_empty()
+        {
+            for nested_key in nested.keys() {
+                fields.push(format!("{key}.{nested_key}"));
             }
+            continue;
         }
         fields.push(key.clone());
     }

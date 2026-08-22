@@ -41,6 +41,21 @@ Python SDK's own policy. Always finish a struct literal with
   and every CI action is pinned to a commit SHA. Dependabot proposes the
   updates that pinning would otherwise prevent.
 
+### Security
+
+- Update `serde_with` 3.17 → 3.21 (GHSA-7gcf-g7xr-8hxj, `KeyValueMap` panic on
+  empty input) and `time` 0.3.45 → 0.3.47+ (CVE-2026-25727, stack exhaustion).
+  Neither is reachable through this crate -- `KeyValueMap` is not used, and
+  `time` is present in `Cargo.lock` only as an unactivated optional dependency
+  -- but both are flagged by Dependabot and there is no reason to sit on them.
+
+### Changed
+
+- **MSRV 1.85 → 1.88.** Both security fixes above, and `rmcp` behind the `mcp`
+  feature, require 1.88; an MSRV that blocks security patches is not worth
+  keeping, and 1.88 is over a year old. `rust-version` now covers every feature
+  combination, and the `msrv` CI job checks `--all-features`.
+
 ### Fixed
 
 - **`codegen-check` can actually run now.** `gen_parity.py` read its input from

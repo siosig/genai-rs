@@ -2,11 +2,15 @@
 name = "gemini-genai"
 version = "0.1.0"
 edition = "2024"
-# Minimum supported Rust version, for the default feature set plus `blocking`.
-# The optional `mcp` feature is NOT covered: rmcp's dependency tree requires
-# 1.88, and that is a cost of opting into MCP rather than a property of this
-# crate. The `msrv` CI job checks exactly the combinations this line claims.
-rust-version = "1.85"
+# Minimum supported Rust version, for every feature combination; the `msrv` CI
+# job checks `--all-features` on exactly this toolchain.
+#
+# 1.88 rather than the edition-2024 floor of 1.85 because the ecosystem has
+# moved: serde_with >= 3.21 and time >= 0.3.47 (both security fixes) and rmcp
+# (the `mcp` feature) all require 1.88. An MSRV that cannot take security
+# patches is not a floor worth defending, and 1.88 (June 2025) is over a year
+# old. Bumping this is a minor-version change; note it in CHANGELOG.
+rust-version = "1.88"
 description = "Unofficial Rust port of the Google Gen AI Python SDK (google-genai) for the Gemini Developer API. Not affiliated with Google."
 license = "Apache-2.0"
 repository = "https://github.com/siosig/genai-rs"

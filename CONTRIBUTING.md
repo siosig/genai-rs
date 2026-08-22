@@ -74,11 +74,9 @@ your change was written for.
 Two more, if your change could plausibly affect them:
 
 ```sh
-# MSRV. Covers the default features plus `blocking`; the optional `mcp` feature
-# needs 1.88 because of rmcp's dependency tree.
-rustup toolchain install 1.85.0 --profile minimal
-cargo +1.85.0 check --workspace --locked
-cargo +1.85.0 check --workspace --locked --features blocking
+# MSRV, for every feature combination.
+rustup toolchain install 1.88.0 --profile minimal
+cargo +1.88.0 check --workspace --all-features --locked
 ```
 
 Import grouping (`std` / external / `crate`, one `use` per crate) is enforced by

@@ -74,11 +74,9 @@ python tools/codegen/generate.py && git diff --exit-code
 変更の内容によっては、さらに次の 2 つ。
 
 ```sh
-# MSRV。既定 feature + `blocking` が対象。オプションの `mcp` は rmcp の
-# 依存ツリーの都合で 1.88 を要求する。
-rustup toolchain install 1.85.0 --profile minimal
-cargo +1.85.0 check --workspace --locked
-cargo +1.85.0 check --workspace --locked --features blocking
+# MSRV。全 feature の組み合わせが対象。
+rustup toolchain install 1.88.0 --profile minimal
+cargo +1.88.0 check --workspace --all-features --locked
 ```
 
 import のグルーピング（`std` / 外部 / `crate`、crate ごとに 1 つの `use`）は、背後の

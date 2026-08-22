@@ -242,10 +242,8 @@ pub(crate) fn t_recv_batch_job_destination(value: Value) -> Result<Value> {
                     .is_some_and(|resp| resp.contains_key("embedding"))
             })
         });
-    if looks_like_embedding {
-        if let Some(inlined) = dest.remove("inlinedResponses") {
-            dest.insert("inlinedEmbedContentResponses".to_owned(), inlined);
-        }
+    if looks_like_embedding && let Some(inlined) = dest.remove("inlinedResponses") {
+        dest.insert("inlinedEmbedContentResponses".to_owned(), inlined);
     }
     Ok(Value::Object(dest))
 }
