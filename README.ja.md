@@ -528,7 +528,7 @@ fn retryable(error: &Error) -> bool {
 - [`docs/migrating-from-python.ja.md`](docs/migrating-from-python.ja.md) — イディオムの違い（設定
   構造体、`Contents` の変換、ストリーム、ページャ、エラー）についてのガイド。
 
-0.1.0 で未実装なもの: Vertex AI バックエンド、および Vertex 専用・Python 固有の API 面。
+0.2.0 で未実装なもの: Vertex AI バックエンド、および Vertex 専用・Python 固有の API 面。
 `models.compute_tokens` と `tunings.list` は存在するけれど常にエラーを返す。
 `models.edit_image` / `upscale_image` / `recontext_image` / `segment_image` と
 `tunings.validate_reward` は存在しない（Python でも Vertex AI 以外では `ValueError` になる）。

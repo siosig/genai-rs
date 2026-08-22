@@ -3,7 +3,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
-- [Unreleased](#unreleased)
+- [0.2.0](#020)
 - [0.1.0](#010)
 
 ## Overview
@@ -18,7 +18,7 @@ a generated type is treated as a minor-version change**, matching the upstream
 Python SDK's own policy. Always finish a struct literal with
 `..Default::default()`.
 
-## Unreleased
+## 0.2.0
 
 ### Changed
 

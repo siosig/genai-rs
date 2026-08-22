@@ -494,7 +494,7 @@ Python で deprecated な `AsyncSession.send` と `start_stream` は移植して
 
 | 領域 | Python | Rust | 理由 |
 |---|---|---|---|
-| Vertex AI バックエンド | 対応 | `Error::UnsupportedBackend` | 0.1.0 ではスコープ外 |
+| Vertex AI バックエンド | 対応 | `Error::UnsupportedBackend` | 0.2.0 ではスコープ外 |
 | `models.compute_tokens` | Vertex 専用 | 存在はするが常に `Error::UnsupportedBackend("models.compute_tokens")` | Gemini Developer API に該当エンドポイントがない |
 | `tunings.list` | Vertex 専用 | 存在はするが常に `Error::UnsupportedByBackend` | 上流に `_to_mldev` コンバータがなく、忠実に送れるリクエストが存在しない |
 | `edit_image` / `upscale_image` / `recontext_image` / `segment_image` | Vertex 専用 | 未実装 | 同上 |
@@ -502,7 +502,7 @@ Python で deprecated な `AsyncSession.send` と `start_stream` は移植して
 | `files.upload(file=str \| Path \| IO)` | 3 種いずれも可 | `impl Into<UploadSource>`: `Path` / `&str` / `String`（全量をメモリに読み込む）または `Bytes { data, mime_type }` | `IOBase` 相当がない。ディスクからのストリーミングは今後の課題 |
 | `files.download(file=File \| str)` | どちらでも可 | `&str`（素の id、`files/...` 形式の name、完全なダウンロード URI） | — |
 | `Chat.record_history` | public | private（履歴は `send_message` が面倒を見る） | 履歴管理はここでは内部不変条件 |
-| `client.http_options` | 読み取り可能な属性 | 非公開 | 0.1.0 ではアクセサを最小限に保つ |
+| `client.http_options` | 読み取り可能な属性 | 非公開 | 0.2.0 ではアクセサを最小限に保つ |
 | 生成 enum | 厳密 | `Unknown(String)` バリアントを追加 | サーバー追加値への前方互換 |
 | `local_tokenizer` | あり | 未移植 | sentencepiece バインディングが必要 |
 | `interactions` / `agents` / `webhooks` / `triggers` / `environments` | プレビューの NextGen SDK | 未移植 | 上流で独立に生成されている別 SDK |

@@ -542,7 +542,7 @@ of the blocking API (`BlockingInsideRuntime`).
   the idiom differences (config structs, `Contents` conversions, streams, pagers,
   errors).
 
-Not implemented in 0.1.0: the Vertex AI backend, and the Python surfaces that are
+Not implemented in 0.2.0: the Vertex AI backend, and the Python surfaces that are
 Vertex-only or Python-specific — `models.compute_tokens` and `tunings.list` are
 present but always error; `models.edit_image` / `upscale_image` /
 `recontext_image` / `segment_image` and `tunings.validate_reward` are absent

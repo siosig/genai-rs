@@ -1,6 +1,6 @@
 [package]
 name = "gemini-genai"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 # Minimum supported Rust version, for every feature combination; the `msrv` CI
 # job checks `--all-features` on exactly this toolchain.

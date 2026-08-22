@@ -513,7 +513,7 @@ differences worth knowing when porting code:
 
 | Area | Python | Rust | Why |
 |---|---|---|---|
-| Vertex AI backend | supported | `Error::UnsupportedBackend` | out of scope for 0.1.0 |
+| Vertex AI backend | supported | `Error::UnsupportedBackend` | out of scope for 0.2.0 |
 | `models.compute_tokens` | Vertex-only | present, always `Error::UnsupportedBackend("models.compute_tokens")` | the Gemini Developer API has no such endpoint |
 | `tunings.list` | Vertex-only | present, always `Error::UnsupportedByBackend` | upstream has no `_to_mldev` converter for it, so there is no faithful request to send |
 | `edit_image` / `upscale_image` / `recontext_image` / `segment_image` | Vertex-only | not implemented | same reason |
@@ -521,7 +521,7 @@ differences worth knowing when porting code:
 | `files.upload(file=str \| Path \| IO)` | any of the three | `impl Into<UploadSource>`: `Path`/`&str`/`String` (read fully into memory) or `Bytes { data, mime_type }` | no `IOBase` equivalent; streaming-from-disk is a possible follow-up |
 | `files.download(file=File \| str)` | either | `&str` (bare id, `files/...` name, or full download URI) | — |
 | `Chat.record_history` | public | private (`send_message` maintains history for you) | history bookkeeping is an internal invariant here |
-| `client.http_options` | readable attribute | not exposed | keep the accessor set minimal for 0.1.0 |
+| `client.http_options` | readable attribute | not exposed | keep the accessor set minimal for 0.2.0 |
 | generated enums | strict | extra `Unknown(String)` variant | forward compatibility with server-added values |
 | `local_tokenizer` | available | not ported | needs a sentencepiece binding |
 | `interactions` / `agents` / `webhooks` / `triggers` / `environments` | preview NextGen SDK | not ported | separate, independently generated SDK upstream |
