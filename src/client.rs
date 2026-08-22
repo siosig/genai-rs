@@ -18,7 +18,8 @@ const GEMINI_API_KEY_VAR: &str = "GEMINI_API_KEY";
 const USE_VERTEXAI_VAR: &str = "GOOGLE_GENAI_USE_VERTEXAI";
 const BASE_URL_VAR: &str = "GOOGLE_GEMINI_BASE_URL";
 
-struct ClientInner {
+#[derive(Debug)]
+pub(crate) struct ClientInner {
     http: HttpClient,
 }
 
@@ -26,7 +27,7 @@ struct ClientInner {
 /// `Client::builder()`, then `client.models()`, `client.chats()`, etc.
 ///
 /// Cheap to clone: internally reference-counted.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Client {
     pub(crate) inner: Arc<ClientInner>,
 }
@@ -54,6 +55,92 @@ impl Client {
     #[must_use]
     pub(crate) fn http(&self) -> &HttpClient {
         &self.inner.http
+    }
+
+    /// Text/image generation, embeddings, token counting, and model
+    /// listing (`client.models()...`).
+    #[must_use]
+    pub fn models(&self) -> crate::models::Models {
+        crate::models::Models {
+            client: self.clone(),
+        }
+    }
+
+    /// Multi-turn chat sessions (`client.chats().create(...)`).
+    #[must_use]
+    pub fn chats(&self) -> crate::chats::Chats {
+        crate::chats::Chats {
+            client: self.clone(),
+        }
+    }
+
+    /// File upload/get/list/delete/download (`client.files()...`).
+    #[must_use]
+    pub fn files(&self) -> crate::files::Files {
+        crate::files::Files {
+            client: self.clone(),
+        }
+    }
+
+    /// Context cache create/get/list/update/delete
+    /// (`client.caches()...`).
+    #[must_use]
+    pub fn caches(&self) -> crate::caches::Caches {
+        crate::caches::Caches {
+            client: self.clone(),
+        }
+    }
+
+    /// Fine-tuning job create/get/list/cancel (`client.tunings()...`).
+    #[must_use]
+    pub fn tunings(&self) -> crate::tunings::Tunings {
+        crate::tunings::Tunings {
+            client: self.clone(),
+        }
+    }
+
+    /// Batch job create/get/list/cancel/delete (`client.batches()...`).
+    #[must_use]
+    pub fn batches(&self) -> crate::batches::Batches {
+        crate::batches::Batches {
+            client: self.clone(),
+        }
+    }
+
+    /// Long-running operation polling (`client.operations()...`).
+    #[must_use]
+    pub fn operations(&self) -> crate::operations::Operations {
+        crate::operations::Operations {
+            client: self.clone(),
+        }
+    }
+
+    /// File Search store create/get/list/delete/import
+    /// (`client.file_search_stores()...`).
+    #[must_use]
+    pub fn file_search_stores(&self) -> crate::file_search_stores::FileSearchStores {
+        crate::file_search_stores::FileSearchStores {
+            client: self.clone(),
+        }
+    }
+
+    /// Ephemeral auth token creation for the Live API
+    /// (`client.auth_tokens()...`).
+    #[must_use]
+    pub fn auth_tokens(&self) -> crate::auth_tokens::AuthTokens {
+        crate::auth_tokens::AuthTokens {
+            client: self.clone(),
+        }
+    }
+
+    /// Bidirectional realtime (Live API) sessions
+    /// (`client.live().connect(...)`).
+    #[cfg(feature = "live")]
+    #[must_use]
+    pub fn live(&self) -> crate::live::Live {
+        crate::live::Live {
+            client: self.clone(),
+        }
     }
 }
 
@@ -114,7 +201,7 @@ impl ClientBuilder {
     /// # Errors
     /// See [`Client::new`].
     pub fn build(self) -> Result<Client> {
-        if resolve_vertexai(self.vertexai)? || self.project.is_some() || self.location.is_some() {
+        if resolve_vertexai(self.vertexai) || self.project.is_some() || self.location.is_some() {
             return Err(Error::UnsupportedBackend("vertexai"));
         }
 
@@ -132,14 +219,12 @@ impl ClientBuilder {
     }
 }
 
-fn resolve_vertexai(explicit: Option<bool>) -> Result<bool> {
+fn resolve_vertexai(explicit: Option<bool>) -> bool {
     if let Some(value) = explicit {
-        return Ok(value);
+        return value;
     }
-    match env::var(USE_VERTEXAI_VAR) {
-        Ok(value) => Ok(matches!(value.to_lowercase().as_str(), "1" | "true" | "yes")),
-        Err(_) => Ok(false),
-    }
+    env::var(USE_VERTEXAI_VAR)
+        .is_ok_and(|value| matches!(value.to_lowercase().as_str(), "1" | "true" | "yes"))
 }
 
 fn resolve_api_key(explicit: Option<String>) -> Result<String> {
@@ -164,7 +249,10 @@ fn resolve_api_key(explicit: Option<String>) -> Result<String> {
 }
 
 #[cfg(test)]
-#[allow(unsafe_code, reason = "std::env::set_var/remove_var are unsafe in a multi-threaded process; tests serialize via ENV_LOCK")]
+#[allow(
+    unsafe_code,
+    reason = "std::env::set_var/remove_var are unsafe in a multi-threaded process; tests serialize via ENV_LOCK"
+)]
 mod tests {
     use std::sync::Mutex;
 
@@ -175,14 +263,21 @@ mod tests {
     static ENV_LOCK: Mutex<()> = Mutex::new(());
 
     fn clear_env() {
-        for var in [GOOGLE_API_KEY_VAR, GEMINI_API_KEY_VAR, USE_VERTEXAI_VAR, BASE_URL_VAR] {
+        for var in [
+            GOOGLE_API_KEY_VAR,
+            GEMINI_API_KEY_VAR,
+            USE_VERTEXAI_VAR,
+            BASE_URL_VAR,
+        ] {
             unsafe { std::env::remove_var(var) };
         }
     }
 
     #[test]
     fn explicit_api_key_wins_over_environment() {
-        let _guard = ENV_LOCK.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let _guard = ENV_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         clear_env();
         unsafe { std::env::set_var(GOOGLE_API_KEY_VAR, "env-key") };
         let client = Client::builder().api_key("explicit-key").build();
@@ -192,7 +287,9 @@ mod tests {
 
     #[test]
     fn google_api_key_wins_over_gemini_api_key() {
-        let _guard = ENV_LOCK.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let _guard = ENV_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         clear_env();
         unsafe {
             std::env::set_var(GOOGLE_API_KEY_VAR, "google-key");
@@ -204,7 +301,9 @@ mod tests {
 
     #[test]
     fn missing_api_key_is_a_validation_error() {
-        let _guard = ENV_LOCK.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let _guard = ENV_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         clear_env();
         let err = Client::new().unwrap_err();
         assert!(matches!(err, crate::Error::Validation(_)));
@@ -213,7 +312,9 @@ mod tests {
 
     #[test]
     fn vertexai_env_flag_is_unsupported() {
-        let _guard = ENV_LOCK.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let _guard = ENV_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         clear_env();
         unsafe {
             std::env::set_var(GOOGLE_API_KEY_VAR, "k");
@@ -226,7 +327,9 @@ mod tests {
 
     #[test]
     fn base_url_env_var_overrides_default() {
-        let _guard = ENV_LOCK.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let _guard = ENV_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         clear_env();
         unsafe {
             std::env::set_var(GOOGLE_API_KEY_VAR, "k");

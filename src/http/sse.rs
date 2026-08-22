@@ -32,9 +32,13 @@ mod tests {
 
     use super::parse_sse;
 
-    fn chunks(data: &[&str]) -> impl futures_core::Stream<Item = Result<bytes::Bytes, std::io::Error>> {
-        let owned: Vec<Result<bytes::Bytes, std::io::Error>> =
-            data.iter().map(|s| Ok(bytes::Bytes::from((*s).to_owned()))).collect();
+    fn chunks(
+        data: &[&str],
+    ) -> impl futures_core::Stream<Item = Result<bytes::Bytes, std::io::Error>> {
+        let owned: Vec<Result<bytes::Bytes, std::io::Error>> = data
+            .iter()
+            .map(|s| Ok(bytes::Bytes::from((*s).to_owned())))
+            .collect();
         stream::iter(owned)
     }
 

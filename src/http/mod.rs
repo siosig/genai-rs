@@ -19,7 +19,7 @@ use serde_json::Value;
 
 use crate::error::{ApiError, Error};
 use crate::types::HttpOptions;
-use headers::{API_CLIENT_HEADER, API_KEY_HEADER, SERVER_TIMEOUT_HEADER, USER_AGENT_HEADER};
+use headers::{API_KEY_HEADER, SERVER_TIMEOUT_HEADER};
 use retry::RetryPolicy;
 
 /// The default Gemini Developer API base URL.
@@ -28,6 +28,10 @@ pub(crate) const DEFAULT_BASE_URL: &str = "https://generativelanguage.googleapis
 pub(crate) const DEFAULT_API_VERSION: &str = "v1beta";
 
 /// A buffered HTTP response.
+#[expect(
+    dead_code,
+    reason = "status/headers are read by tests only today; kept for future response-header inspection (e.g. rate-limit headers) without changing this type's shape"
+)]
 #[derive(Debug, Clone)]
 pub(crate) struct HttpResponse {
     pub status: StatusCode,
@@ -39,10 +43,14 @@ impl HttpResponse {
     fn header_map(headers: &reqwest::header::HeaderMap) -> HashMap<String, String> {
         headers
             .iter()
-            .filter_map(|(name, value)| value.to_str().ok().map(|v| (name.as_str().to_owned(), v.to_owned())))
+            .filter_map(|(name, value)| {
+                value
+                    .to_str()
+                    .ok()
+                    .map(|v| (name.as_str().to_owned(), v.to_owned()))
+            })
             .collect()
     }
-
 }
 
 /// The resolved (client-level) HTTP configuration, plus the `reqwest`
@@ -80,7 +88,10 @@ impl HttpClient {
             inner: reqwest::Client::builder().build()?,
             api_key,
             base_url,
-            api_version: options.api_version.clone().unwrap_or_else(|| DEFAULT_API_VERSION.to_owned()),
+            api_version: options
+                .api_version
+                .clone()
+                .unwrap_or_else(|| DEFAULT_API_VERSION.to_owned()),
             default_headers,
             default_timeout: options.timeout,
             default_extra_body: options.extra_body.clone(),
@@ -112,7 +123,10 @@ impl HttpClient {
         if let Some(extra) = per_request.and_then(|o| o.headers.as_ref()) {
             headers.extend(extra.clone());
         }
-        headers.insert(API_KEY_HEADER.to_owned(), self.api_key.expose_secret().to_owned());
+        headers.insert(
+            API_KEY_HEADER.to_owned(),
+            self.api_key.expose_secret().to_owned(),
+        );
         let timeout = per_request.and_then(|o| o.timeout).or(self.default_timeout);
         if let Some(seconds) = headers::server_timeout_seconds(timeout) {
             headers.insert(SERVER_TIMEOUT_HEADER.to_owned(), seconds);
@@ -139,7 +153,10 @@ impl HttpClient {
     fn retry_policy(&self, per_request: Option<&HttpOptions>) -> RetryPolicy {
         per_request
             .and_then(|o| o.retry_options.as_ref())
-            .map_or_else(|| self.default_retry.clone(), |r| RetryPolicy::from_options(Some(r)))
+            .map_or_else(
+                || self.default_retry.clone(),
+                |r| RetryPolicy::from_options(Some(r)),
+            )
     }
 
     fn timeout(&self, per_request: Option<&HttpOptions>) -> Option<Duration> {
@@ -176,8 +193,13 @@ impl HttpClient {
         let resp_headers = HttpResponse::header_map(response.headers());
         let body = response.bytes().await?;
         if !status.is_success() {
-            let api_err = ApiError::from_response(status.as_u16(), status.canonical_reason().unwrap_or("Unknown"), resp_headers, &body);
-            return Err(Error::Api(api_err));
+            let api_err = ApiError::from_response(
+                status.as_u16(),
+                status.canonical_reason().unwrap_or("Unknown"),
+                resp_headers,
+                &body,
+            );
+            return Err(Error::Api(Box::new(api_err)));
         }
         Ok(HttpResponse {
             status,
@@ -203,10 +225,15 @@ impl HttpClient {
         let policy = self.retry_policy(per_request);
         let timeout = self.timeout(per_request);
 
+        #[expect(
+            clippy::cast_possible_truncation,
+            reason = "exp_base is a small config value (typically 1.5-3.0); f32 precision is more than sufficient for exponential-backoff multiplier math"
+        )]
+        let exp_base = policy.exp_base as f32;
         let backoff = ExponentialBuilder::default()
             .with_min_delay(policy.initial_delay)
             .with_max_delay(policy.max_delay)
-            .with_factor(policy.exp_base as f32)
+            .with_factor(exp_base)
             .with_jitter()
             .with_max_times(policy.attempts.saturating_sub(1) as usize);
 
@@ -252,7 +279,7 @@ impl HttpClient {
                 resp_headers,
                 &body,
             );
-            return Err(Error::Api(api_err));
+            return Err(Error::Api(Box::new(api_err)));
         }
         Ok(Box::pin(sse::parse_sse(response.bytes_stream())))
     }
@@ -264,7 +291,9 @@ impl HttpClient {
         query: Option<&str>,
         per_request: Option<&HttpOptions>,
     ) -> Result<Bytes, Error> {
-        let response = self.request(Method::GET, path, query, None, per_request).await?;
+        let response = self
+            .request(Method::GET, path, query, None, per_request)
+            .await?;
         Ok(response.body)
     }
 
@@ -285,3 +314,190 @@ impl HttpClient {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use secrecy::SecretString;
+    use serde_json::json;
+    use wiremock::matchers::{header, method, path};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
+
+    use super::HttpClient;
+    use crate::error::Error;
+    use crate::types::{HttpOptions, HttpRetryOptions};
+
+    fn client_for(server: &MockServer, options: HttpOptions) -> HttpClient {
+        let mut options = options;
+        options.base_url = Some(server.uri());
+        options.api_version = Some(String::new());
+        HttpClient::new(SecretString::from("test-key".to_owned()), &options).unwrap()
+    }
+
+    #[tokio::test]
+    async fn retries_retryable_status_until_success() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/x"))
+            .respond_with(ResponseTemplate::new(503))
+            .up_to_n_times(2)
+            .expect(2)
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/x"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"ok": true})))
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        let options = HttpOptions {
+            retry_options: Some(HttpRetryOptions {
+                attempts: Some(3),
+                initial_delay: Some(0.001),
+                max_delay: Some(0.001),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+        let client = client_for(&server, options);
+        let response = client
+            .request(reqwest::Method::GET, "x", None, None, None)
+            .await
+            .unwrap();
+        assert_eq!(response.status, reqwest::StatusCode::OK);
+        server.verify().await;
+    }
+
+    #[tokio::test]
+    async fn does_not_retry_without_retry_options() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/x"))
+            .respond_with(ResponseTemplate::new(503))
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        let client = client_for(&server, HttpOptions::default());
+        let err = client
+            .request(reqwest::Method::GET, "x", None, None, None)
+            .await
+            .unwrap_err();
+        assert!(matches!(err, Error::Api(api_err) if api_err.code == 503));
+        server.verify().await;
+    }
+
+    #[tokio::test]
+    async fn does_not_retry_non_retryable_status() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/x"))
+            .respond_with(ResponseTemplate::new(400))
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        let options = HttpOptions {
+            retry_options: Some(HttpRetryOptions {
+                attempts: Some(3),
+                initial_delay: Some(0.001),
+                max_delay: Some(0.001),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+        let client = client_for(&server, options);
+        let err = client
+            .request(reqwest::Method::GET, "x", None, None, None)
+            .await
+            .unwrap_err();
+        assert!(matches!(err, Error::Api(api_err) if api_err.code == 400));
+        server.verify().await;
+    }
+
+    #[tokio::test]
+    async fn sends_api_key_and_sdk_identification_headers() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/x"))
+            .and(header("x-goog-api-key", "test-key"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({})))
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        let client = client_for(&server, HttpOptions::default());
+        client
+            .request(reqwest::Method::GET, "x", None, None, None)
+            .await
+            .unwrap();
+        server.verify().await;
+    }
+
+    #[tokio::test]
+    async fn per_request_timeout_header_reflects_configured_timeout() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/x"))
+            .and(header("X-Server-Timeout", "2"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({})))
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        let client = client_for(&server, HttpOptions::default());
+        let per_request = HttpOptions {
+            timeout: Some(1500),
+            ..Default::default()
+        };
+        client
+            .request(reqwest::Method::GET, "x", None, None, Some(&per_request))
+            .await
+            .unwrap();
+        server.verify().await;
+    }
+
+    #[tokio::test]
+    async fn extra_body_is_deep_merged_into_request_body() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/x"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({})))
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        let mut extra = serde_json::Map::new();
+        extra.insert("extraField".to_owned(), json!("value"));
+        let options = HttpOptions {
+            extra_body: Some(extra),
+            ..Default::default()
+        };
+        let client = client_for(&server, options);
+        client
+            .request(
+                reqwest::Method::POST,
+                "x",
+                None,
+                Some(json!({"a": 1})),
+                None,
+            )
+            .await
+            .unwrap();
+        server.verify().await;
+    }
+
+    #[tokio::test]
+    async fn build_url_inserts_api_version_between_base_and_path() {
+        let server = MockServer::start().await;
+        let mut options = HttpOptions {
+            base_url: Some(server.uri()),
+            ..Default::default()
+        };
+        options.api_version = None; // default v1beta
+        let client = HttpClient::new(SecretString::from("k".to_owned()), &options).unwrap();
+        assert_eq!(
+            client.build_url("models/x:generateContent", None),
+            format!("{}/v1beta/models/x:generateContent", server.uri())
+        );
+    }
+}

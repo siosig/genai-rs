@@ -50,17 +50,26 @@ impl RetryPolicy {
         };
 
         Self {
-            attempts: options.attempts.map_or(defaults.attempts, |a| a.max(1).try_into().unwrap_or(u32::MAX)),
+            attempts: options.attempts.map_or(defaults.attempts, |a| {
+                a.max(1).try_into().unwrap_or(u32::MAX)
+            }),
             initial_delay: options
                 .initial_delay
                 .map_or(defaults.initial_delay, Duration::from_secs_f64),
-            max_delay: options.max_delay.map_or(defaults.max_delay, Duration::from_secs_f64),
+            max_delay: options
+                .max_delay
+                .map_or(defaults.max_delay, Duration::from_secs_f64),
             exp_base: options.exp_base.unwrap_or(defaults.exp_base),
             jitter: options.jitter.unwrap_or(defaults.jitter),
             status_codes: options
                 .http_status_codes
                 .clone()
-                .map(|codes| codes.into_iter().filter_map(|c| u16::try_from(c).ok()).collect())
+                .map(|codes| {
+                    codes
+                        .into_iter()
+                        .filter_map(|c| u16::try_from(c).ok())
+                        .collect()
+                })
                 .unwrap_or(defaults.status_codes),
         }
     }

@@ -9,11 +9,12 @@
 
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
 use serde_json::Map;
 
 /// Per-client or per-request HTTP configuration. Mirrors Python's
 /// `types.HttpOptions`.
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct HttpOptions {
     /// Overrides the API base URL (default:
     /// `https://generativelanguage.googleapis.com/`).
@@ -39,7 +40,7 @@ pub struct HttpOptions {
 /// (i.e. all fields `None`) opts into retries using the SDK's documented
 /// defaults: 5 attempts, 1.0s initial delay, 60s max delay, exponential
 /// base 2, jitter 1.0, retrying on 408/429/500/502/503/504.
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct HttpRetryOptions {
     /// Total number of attempts, including the first.
     pub attempts: Option<i64>,
@@ -57,7 +58,7 @@ pub struct HttpRetryOptions {
 
 /// A raw HTTP response, attached to typed responses for diagnostics.
 /// Mirrors Python's `types.HttpResponse`.
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct HttpResponse {
     /// Response headers.
     pub headers: Option<HashMap<String, String>>,

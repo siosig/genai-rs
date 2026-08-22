@@ -11,9 +11,12 @@ pub type Result<T> = core::result::Result<T, Error>;
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     /// A non-2xx response from the Gemini API. Corresponds to Python's
-    /// `APIError` / `ClientError` / `ServerError`.
+    /// `APIError` / `ClientError` / `ServerError`. Boxed: `ApiError` is
+    /// large (a `String` message plus `Vec`/`HashMap` detail fields), and
+    /// `clippy::result_large_err` flags an unboxed variant that size on
+    /// every one of this crate's (numerous) `Result<T, Error>` returns.
     #[error("{0}")]
-    Api(#[from] ApiError),
+    Api(#[from] Box<ApiError>),
 
     /// A transport-level failure (connection, TLS, timeout).
     #[error("HTTP transport error: {0}")]
@@ -38,7 +41,7 @@ pub enum Error {
     /// Corresponds to Python's `ValueError('... only supported in ...')`.
     #[error("field `{field}` is only supported by the {backend} backend")]
     UnsupportedByBackend {
-        /// The unsupported field's Python name (snake_case).
+        /// The unsupported field's Python name (`snake_case`).
         field: &'static str,
         /// The backend the field requires.
         backend: Backend,
@@ -130,8 +133,7 @@ impl ApiError {
         let message = error_obj
             .and_then(|e| e.get("message"))
             .and_then(Value::as_str)
-            .map(str::to_owned)
-            .unwrap_or_else(|| String::from_utf8_lossy(body).into_owned());
+            .map_or_else(|| String::from_utf8_lossy(body).into_owned(), str::to_owned);
 
         let status = error_obj
             .and_then(|e| e.get("status"))
@@ -223,7 +225,12 @@ mod tests {
     #[test]
     fn api_error_from_json_body_extracts_status_and_message() {
         let body = br#"{"error":{"code":429,"message":"rate limited","status":"RESOURCE_EXHAUSTED","details":[{"reason":"x"}]}}"#;
-        let err = ApiError::from_response(429, "Too Many Requests", std::collections::HashMap::new(), body);
+        let err = ApiError::from_response(
+            429,
+            "Too Many Requests",
+            std::collections::HashMap::new(),
+            body,
+        );
         assert_eq!(err.status.as_deref(), Some("RESOURCE_EXHAUSTED"));
         assert_eq!(err.message, "rate limited");
         assert_eq!(err.details.len(), 1);
@@ -233,7 +240,12 @@ mod tests {
 
     #[test]
     fn api_error_from_non_json_body_uses_raw_text_and_reason_phrase() {
-        let err = ApiError::from_response(503, "Service Unavailable", std::collections::HashMap::new(), b"upstream down");
+        let err = ApiError::from_response(
+            503,
+            "Service Unavailable",
+            std::collections::HashMap::new(),
+            b"upstream down",
+        );
         assert_eq!(err.status.as_deref(), Some("Service Unavailable"));
         assert_eq!(err.message, "upstream down");
         assert!(err.is_server_error());

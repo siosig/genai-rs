@@ -52,7 +52,7 @@ pub(crate) fn apply_sdk_headers(headers: &mut HashMap<String, String>) {
 #[must_use]
 pub(crate) fn server_timeout_seconds(timeout_ms: Option<i64>) -> Option<String> {
     timeout_ms.map(|ms| {
-        let secs = ms.div_ceil(1000).max(1);
+        let secs = ms.max(0).unsigned_abs().div_ceil(1000).max(1);
         secs.to_string()
     })
 }
