@@ -344,6 +344,28 @@ fn dependabot_covers_every_pinned_ecosystem() {
     );
 }
 
+// --- feature combinations -------------------------------------------------
+
+#[test]
+fn ci_checks_the_crate_without_default_features() {
+    // Cargo features are additive across the entire dependency graph, so a
+    // crate can compile only because a *sibling* dependency turned on a feature
+    // it needs. That is exactly what happened here: `tokio`'s `io-util` was
+    // missing from Cargo.toml, `--no-default-features` did not compile, and
+    // nothing noticed because the default `live` feature pulls in
+    // tokio-tungstenite, which enabled it for us.
+    //
+    // Testing only the default and `--all-features` sets cannot catch that --
+    // both have the masking dependency. The minimal set has to be built.
+    let ci = read(".github/workflows/ci.yml");
+    assert!(
+        ci.contains("--no-default-features"),
+        "ci.yml must build the crate with --no-default-features; a feature the \
+         crate needs can otherwise be supplied by a dependency instead of by \
+         Cargo.toml, and nothing fails until that dependency changes"
+    );
+}
+
 // --- workflow permissions -------------------------------------------------
 
 #[test]

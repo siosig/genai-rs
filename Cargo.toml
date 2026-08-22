@@ -41,7 +41,13 @@ mcp = ["dep:rmcp"]
 
 [dependencies]
 reqwest = { version = "0.13", default-features = false, features = ["json", "stream", "multipart"] }
-tokio = { version = "1.53", features = ["rt", "rt-multi-thread", "macros", "fs", "sync", "time"] }
+# `io-util` supplies AsyncReadExt, which `src/http/upload.rs` uses to read a file
+# in chunks for resumable upload. It is not listed by accident being harmless:
+# without it `--no-default-features` fails to compile, and it only ever built
+# because another dependency happened to enable the feature for us. Cargo
+# features are additive across the graph, so relying on that is relying on a
+# dependency's own feature choices not changing.
+tokio = { version = "1.53", features = ["rt", "rt-multi-thread", "macros", "fs", "io-util", "sync", "time"] }
 tokio-stream = "0.1"
 tokio-util = { version = "0.7", features = ["io"] }
 futures-core = "0.3"

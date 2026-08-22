@@ -41,6 +41,16 @@ Python SDK's own policy. Always finish a struct literal with
   and every CI action is pinned to a commit SHA. Dependabot proposes the
   updates that pinning would otherwise prevent.
 
+### Fixed
+
+- **`--no-default-features` now compiles.** `tokio`'s `io-util` feature, which
+  `src/http/upload.rs` needs for `AsyncReadExt`, was missing from `Cargo.toml`.
+  The crate only ever built because the default `live` feature pulls in
+  tokio-tungstenite, which enabled it as a side effect — Cargo features are
+  additive across the whole graph, so a crate that compiles only because a
+  sibling dependency turned on a feature is one dependency change away from
+  breaking. A CI matrix now builds all eight selectable feature combinations.
+
 ### Added
 
 - `NOTICE` at the repository root, plus SPDX attribution headers on every
