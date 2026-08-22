@@ -1,9 +1,9 @@
 //! Rust port of the [Google Gen AI Python SDK](https://github.com/googleapis/python-genai)
 //! (`google-genai` 2.19.0) for the **Gemini Developer API**.
 //!
-//! The crate is published as `google-genai-rs` but its library name is
-//! `google_genai`, so `cargo add google-genai-rs` is followed by
-//! `use google_genai::...`.
+//! The package is named `google-genai-rs` but its library name is
+//! `google_genai`. It is not on crates.io yet, so depend on the Git repository
+//! (see the README) and `use google_genai::...`.
 //!
 //! Vertex AI is out of scope: asking for it (via
 //! [`ClientBuilder::vertexai`], `project`/`location`, or the

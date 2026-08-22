@@ -7,6 +7,9 @@ Rust port of the [Google Gen AI Python SDK](https://github.com/googleapis/python
 
 - [Overview](#overview)
 - [Installation](#installation)
+  - [From Git](#from-git)
+  - [From a local checkout](#from-a-local-checkout)
+  - [Companion dependencies](#companion-dependencies)
 - [Authentication](#authentication)
 - [Cargo features](#cargo-features)
 - [Quickstart](#quickstart)
@@ -56,16 +59,72 @@ Note the naming split: the **crate** is `google-genai-rs`, the **library** is
 
 ## Installation
 
-```sh
-cargo add google-genai-rs
+The crate is **not on crates.io yet**, so depend on the repository rather than on
+a version number. Requires Rust 1.85 (edition 2024) or newer, and a Tokio runtime
+for the async API — the `blocking` feature brings its own runtime if you would
+rather not have one.
+
+### From Git
+
+```toml
+[dependencies]
+google-genai-rs = { git = "https://github.com/siosig/genai-rs", branch = "main" }
 ```
+
+or, equivalently, `cargo add --git https://github.com/siosig/genai-rs google-genai-rs`.
+
+Cargo records the resolved commit in your `Cargo.lock`, but `branch = "main"`
+still moves whenever you run `cargo update`. Pin it explicitly if you would
+rather upgrade deliberately:
+
+```toml
+google-genai-rs = { git = "https://github.com/siosig/genai-rs", rev = "5d38819" }
+```
+
+### From a local checkout
+
+```toml
+[dependencies]
+google-genai-rs = { path = "../genai-rs" }
+```
+
+A `path` dependency is the better choice over adding the checkout to your own
+workspace's `members`: only the workspace root's `rust-toolchain.toml` takes
+effect, and `cargo test --workspace` / `cargo clippy --workspace` would start
+building this crate's own test suite and strict lint set (`missing_docs`,
+`unsafe_code`, `clippy::unwrap_used`, `clippy::expect_used` are all `deny`)
+as part of your build.
+
+### Companion dependencies
+
+`Client`, `Error`, `Result`, `Pager` and every wire type come from the crate
+itself, but the crates its public API is *built on* are not re-exported, so add
+whichever of these you actually touch:
+
+```toml
+[dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }  # async API
+futures-util = "0.3"    # StreamExt, for streaming and Pager::into_stream
+serde = { version = "1", features = ["derive"] }  # structured output / AFC arguments
+schemars = "1"          # with_json_schema_of::<T>(), Tool::from_function
+serde_json = "1"        # function-tool return values
+```
+
+Only `tokio` is always needed (and not even that with the `blocking` feature) —
+a plain `generate_content` call needs nothing else on this list.
+
+Then, noting the crate/library naming split:
 
 ```rust
 use google_genai::Client;
 ```
 
-Requires Rust 1.85 (edition 2024) or newer, and a Tokio runtime for the async API.
-The `blocking` feature brings its own runtime if you would rather not.
+A dependency-only smoke test, if you want to confirm the wiring before writing
+anything real:
+
+```sh
+cargo build && cargo tree -p google-genai-rs --depth 0
+```
 
 ## Authentication
 
@@ -114,8 +173,11 @@ To use `native-tls` instead of the default `rustls`:
 
 ```toml
 [dependencies]
-google-genai-rs = { version = "0.1", default-features = false, features = ["native-tls", "live"] }
+google-genai-rs = { git = "https://github.com/siosig/genai-rs", branch = "main", default-features = false, features = ["native-tls", "live"] }
 ```
+
+Always pair a feature override with `default-features = false`; otherwise
+`rustls-tls` stays on and both TLS stacks get compiled in.
 
 ## Quickstart
 
