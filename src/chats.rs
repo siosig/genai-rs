@@ -1,13 +1,17 @@
 //! `client.chats()`: multi-turn chat sessions. Mirrors Python's `chats.py`.
 
-use std::pin::Pin;
-use std::task::{Context, Poll};
+use std::{
+    pin::Pin,
+    task::{Context, Poll},
+};
 
 use futures_core::Stream;
 
-use crate::client::Client;
-use crate::error::Result;
-use crate::types::{Content, Contents, GenerateContentConfig, GenerateContentResponse, Part};
+use crate::{
+    client::Client,
+    error::Result,
+    types::{Content, Contents, GenerateContentConfig, GenerateContentResponse, Part},
+};
 
 /// Handle for `client.chats()`. Cheap to construct; borrows nothing.
 /// Mirrors Python's `Chats`.
@@ -352,12 +356,13 @@ fn extract_curated_history(comprehensive_history: &[Content]) -> Vec<Content> {
 #[cfg(test)]
 mod tests {
     use secrecy::SecretString;
-    use wiremock::matchers::method;
-    use wiremock::{Mock, MockServer, ResponseTemplate};
+    use wiremock::{Mock, MockServer, ResponseTemplate, matchers::method};
 
     use super::{Chats, extract_curated_history, validate_content, validate_response};
-    use crate::client::Client;
-    use crate::types::{Content, HttpOptions, Part};
+    use crate::{
+        client::Client,
+        types::{Content, HttpOptions, Part},
+    };
 
     fn test_client(base_url: String) -> Client {
         Client::builder()

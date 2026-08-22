@@ -6,12 +6,14 @@
 mod common;
 
 use common::test_client;
-use gemini_genai::Error;
-use gemini_genai::types::{
-    CancelTuningJobConfig, CreateTuningJobConfig, JobState, TuningDataset, TuningExample,
+use gemini_genai::{
+    Error,
+    types::{CancelTuningJobConfig, CreateTuningJobConfig, JobState, TuningDataset, TuningExample},
 };
-use wiremock::matchers::{body_json, method, path};
-use wiremock::{Mock, MockServer, ResponseTemplate};
+use wiremock::{
+    Mock, MockServer, ResponseTemplate,
+    matchers::{body_json, method, path},
+};
 
 fn dataset() -> TuningDataset {
     TuningDataset {

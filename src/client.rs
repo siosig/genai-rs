@@ -2,16 +2,16 @@
 //! per-module handles (`models()`, `chats()`, ...). Mirrors Python's
 //! `client.py`.
 
-use std::env;
-use std::sync::Arc;
+use std::{env, sync::Arc};
 
 use secrecy::SecretString;
 
-use crate::error::{Error, Result};
-use crate::http::HttpClient;
-use crate::types::HttpOptions;
-
 pub use crate::error::Backend;
+use crate::{
+    error::{Error, Result},
+    http::HttpClient,
+    types::HttpOptions,
+};
 
 const GOOGLE_API_KEY_VAR: &str = "GOOGLE_API_KEY";
 const GEMINI_API_KEY_VAR: &str = "GEMINI_API_KEY";

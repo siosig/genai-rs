@@ -4,8 +4,7 @@
 
 mod common;
 
-use common::test_client;
-use common::ws_server::start_mock_ws_server;
+use common::{test_client, ws_server::start_mock_ws_server};
 use futures_util::{SinkExt, StreamExt};
 use gemini_genai::types::{LiveMusicGenerationConfig, WeightedPrompt};
 use serde_json::{Value, json};

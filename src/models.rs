@@ -8,10 +8,12 @@ use futures_util::StreamExt;
 use reqwest::Method;
 use serde_json::{Map, Value};
 
-use crate::client::Client;
-use crate::converters::generated::models as conv;
-use crate::error::Result;
-use crate::types::{Contents, GenerateContentConfig, GenerateContentResponse};
+use crate::{
+    client::Client,
+    converters::generated::models as conv,
+    error::Result,
+    types::{Contents, GenerateContentConfig, GenerateContentResponse},
+};
 
 /// A stream of incremental [`GenerateContentResponse`] chunks, returned by
 /// [`Models::generate_content_stream`].
@@ -499,13 +501,17 @@ fn urlencoding_light(value: &str) -> String {
 #[cfg(test)]
 mod tests {
     use secrecy::SecretString;
-    use wiremock::matchers::{body_json, method, path};
-    use wiremock::{Mock, MockServer, ResponseTemplate};
+    use wiremock::{
+        Mock, MockServer, ResponseTemplate,
+        matchers::{body_json, method, path},
+    };
 
     use super::Models;
-    use crate::client::Client;
-    use crate::error::{Backend, Error};
-    use crate::types::{GenerateImagesConfig, HttpOptions};
+    use crate::{
+        client::Client,
+        error::{Backend, Error},
+        types::{GenerateImagesConfig, HttpOptions},
+    };
 
     fn test_client(base_url: String) -> Client {
         Client::builder()

@@ -6,21 +6,24 @@
 //! `_extra_utils.py` helpers and the AFC `while` loop inlined in
 //! `AsyncModels.generate_content` (`google/genai/models.py`).
 
-use std::collections::HashMap;
-use std::future::Future;
-use std::marker::PhantomData;
-use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
+use std::{
+    collections::HashMap,
+    future::Future,
+    marker::PhantomData,
+    sync::{Arc, Mutex, MutexGuard, OnceLock},
+};
 
 use futures_util::future::BoxFuture;
-use serde::Serialize;
-use serde::de::DeserializeOwned;
+use serde::{Serialize, de::DeserializeOwned};
 use serde_json::Value;
 
-use crate::error::{Error, FunctionCallError, Result};
-use crate::models::Models;
-use crate::types::{
-    AutomaticFunctionCallingConfig, Content, Contents, FunctionCall, FunctionDeclaration,
-    GenerateContentConfig, GenerateContentResponse, Part, Tool,
+use crate::{
+    error::{Error, FunctionCallError, Result},
+    models::Models,
+    types::{
+        AutomaticFunctionCallingConfig, Content, Contents, FunctionCall, FunctionDeclaration,
+        GenerateContentConfig, GenerateContentResponse, Part, Tool,
+    },
 };
 
 /// The default `maximum_remote_calls`, matching Python's

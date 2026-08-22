@@ -17,8 +17,10 @@
 //! network or the API. `CARGO_MANIFEST_DIR` is the repository root because
 //! this is a single-package crate.
 
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 /// Marks the upstream copyright holder in SPDX form.
 const UPSTREAM_SPDX_COPYRIGHT: &str = "SPDX-FileCopyrightText: 2025 Google LLC";

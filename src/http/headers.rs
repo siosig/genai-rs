@@ -59,8 +59,9 @@ pub(crate) fn server_timeout_seconds(timeout_ms: Option<i64>) -> Option<String> 
 
 #[cfg(test)]
 mod tests {
-    use super::{API_CLIENT_HEADER, USER_AGENT_HEADER, apply_sdk_headers, server_timeout_seconds};
     use std::collections::HashMap;
+
+    use super::{API_CLIENT_HEADER, USER_AGENT_HEADER, apply_sdk_headers, server_timeout_seconds};
 
     #[test]
     fn apply_sdk_headers_inserts_when_absent() {

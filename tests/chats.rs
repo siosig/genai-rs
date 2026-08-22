@@ -7,8 +7,7 @@ mod common;
 use common::test_client;
 use futures_util::StreamExt;
 use gemini_genai::types::{Content, Part};
-use wiremock::matchers::method;
-use wiremock::{Mock, MockServer, ResponseTemplate};
+use wiremock::{Mock, MockServer, ResponseTemplate, matchers::method};
 
 fn model_reply(text: &str) -> serde_json::Value {
     serde_json::json!({

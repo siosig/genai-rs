@@ -14,21 +14,23 @@
 mod common;
 
 use common::test_client;
-use gemini_genai::afc::function_tool;
-use gemini_genai::mcp::mcp_tools;
-use gemini_genai::types::{GenerateContentConfig, Tool};
-use rmcp::ErrorData as McpError;
-use rmcp::ServiceExt;
-use rmcp::handler::server::ServerHandler;
-use rmcp::model::{
-    CallToolRequestParams, CallToolResponse, CallToolResult, ContentBlock, ListToolsResult,
-    PaginatedRequestParams, ServerInfo, Tool as McpTool,
+use gemini_genai::{
+    afc::function_tool,
+    mcp::mcp_tools,
+    types::{GenerateContentConfig, Tool},
 };
-use rmcp::service::{RequestContext, RoleServer};
+use rmcp::{
+    ErrorData as McpError, ServiceExt,
+    handler::server::ServerHandler,
+    model::{
+        CallToolRequestParams, CallToolResponse, CallToolResult, ContentBlock, ListToolsResult,
+        PaginatedRequestParams, ServerInfo, Tool as McpTool,
+    },
+    service::{RequestContext, RoleServer},
+};
 use schemars::JsonSchema;
 use serde::Deserialize;
-use wiremock::matchers::method;
-use wiremock::{Mock, MockServer, ResponseTemplate};
+use wiremock::{Mock, MockServer, ResponseTemplate, matchers::method};
 
 fn model_reply(text: &str) -> serde_json::Value {
     serde_json::json!({

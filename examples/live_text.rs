@@ -15,8 +15,10 @@
 //! when the model provides them, arrive as `output_transcription`.
 
 use futures_util::StreamExt;
-use gemini_genai::Client;
-use gemini_genai::types::{Content, LiveConnectConfig, Modality, Part};
+use gemini_genai::{
+    Client,
+    types::{Content, LiveConnectConfig, Modality, Part},
+};
 
 #[tokio::main]
 async fn main() -> gemini_genai::Result<()> {

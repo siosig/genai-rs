@@ -7,8 +7,10 @@ mod common;
 
 use common::test_client;
 use gemini_genai::types::GenerateVideosSource;
-use wiremock::matchers::{method, path};
-use wiremock::{Mock, MockServer, ResponseTemplate};
+use wiremock::{
+    Mock, MockServer, ResponseTemplate,
+    matchers::{method, path},
+};
 
 #[tokio::test]
 async fn generate_videos_then_operations_get_returns_the_completed_operation() {

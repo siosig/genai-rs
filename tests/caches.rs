@@ -8,8 +8,10 @@ use common::test_client;
 use gemini_genai::types::{
     Content, CreateCachedContentConfig, ListCachedContentsConfig, Part, UpdateCachedContentConfig,
 };
-use wiremock::matchers::{body_json, method, path, query_param, query_param_is_missing};
-use wiremock::{Mock, MockServer, ResponseTemplate};
+use wiremock::{
+    Mock, MockServer, ResponseTemplate,
+    matchers::{body_json, method, path, query_param, query_param_is_missing},
+};
 
 #[tokio::test]
 async fn create_posts_the_flattened_config_body_to_cached_contents() {

@@ -13,8 +13,7 @@
 
 pub mod ws_server;
 
-use gemini_genai::Client;
-use gemini_genai::types::HttpOptions;
+use gemini_genai::{Client, types::HttpOptions};
 
 /// Builds a [`Client`] talking to `base_url` (typically a `wiremock`
 /// `MockServer`'s `uri()`) with a dummy API key.

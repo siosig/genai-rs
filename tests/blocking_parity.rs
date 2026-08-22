@@ -27,14 +27,14 @@
 
 mod common;
 
-use std::collections::HashSet;
-use std::future::Future;
+use std::{collections::HashSet, future::Future};
 
 use common::blocking_test_client;
-use gemini_genai::Error;
-use gemini_genai::blocking::Client;
-use wiremock::matchers::{method, path};
-use wiremock::{Mock, MockServer, ResponseTemplate};
+use gemini_genai::{Error, blocking::Client};
+use wiremock::{
+    Mock, MockServer, ResponseTemplate,
+    matchers::{method, path},
+};
 
 /// Runs `f` on a plain OS thread with no Tokio runtime context at all, so
 /// `blocking::Runtime::block_on` doesn't see itself as nested (which is

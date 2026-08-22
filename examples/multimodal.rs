@@ -7,8 +7,7 @@
 //! GOOGLE_API_KEY=... cargo run --example multimodal
 //! ```
 
-use gemini_genai::Client;
-use gemini_genai::types::Part;
+use gemini_genai::{Client, types::Part};
 
 /// A 1x1 red PNG pixel, so this example needs no external image file.
 const RED_PIXEL_PNG: &[u8] = &[

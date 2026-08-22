@@ -7,8 +7,10 @@ mod common;
 
 use common::test_client;
 use gemini_genai::types::{CreateAuthTokenConfig, LiveConnectConstraints};
-use wiremock::matchers::{body_json, method, path};
-use wiremock::{Mock, MockServer, ResponseTemplate};
+use wiremock::{
+    Mock, MockServer, ResponseTemplate,
+    matchers::{body_json, method, path},
+};
 
 #[tokio::test]
 async fn create_posts_uses_expire_time_and_returns_the_token_name() {

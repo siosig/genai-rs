@@ -8,8 +8,7 @@
 //! GEMINI_API_KEY=... cargo run --example embed
 //! ```
 
-use gemini_genai::Client;
-use gemini_genai::types::EmbedContentConfig;
+use gemini_genai::{Client, types::EmbedContentConfig};
 
 #[tokio::main]
 async fn main() -> gemini_genai::Result<()> {

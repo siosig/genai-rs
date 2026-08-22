@@ -1,18 +1,19 @@
 //! `client.file_search_stores().documents()`: Document get/list/delete. Mirrors Python's `documents.py`.
 
-use std::future::Future;
-use std::pin::Pin;
-use std::sync::Arc;
+use std::{future::Future, pin::Pin, sync::Arc};
 
 use reqwest::Method;
 use serde_json::{Map, Value};
 
-use crate::client::Client;
-use crate::converters::generated::documents as conv;
-use crate::error::Result;
-use crate::pager::{PagedItem, Pager};
-use crate::types::{
-    DeleteDocumentConfig, Document, GetDocumentConfig, ListDocumentsConfig, ListDocumentsResponse,
+use crate::{
+    client::Client,
+    converters::generated::documents as conv,
+    error::Result,
+    pager::{PagedItem, Pager},
+    types::{
+        DeleteDocumentConfig, Document, GetDocumentConfig, ListDocumentsConfig,
+        ListDocumentsResponse,
+    },
 };
 
 /// Parses a (possibly empty) response body as JSON, mirroring Python's
@@ -191,12 +192,16 @@ impl Documents {
 
 #[cfg(test)]
 mod tests {
-    use wiremock::matchers::{method, path, query_param};
-    use wiremock::{Mock, MockServer, ResponseTemplate};
+    use wiremock::{
+        Mock, MockServer, ResponseTemplate,
+        matchers::{method, path, query_param},
+    };
 
     use super::Documents;
-    use crate::client::Client;
-    use crate::types::{DeleteDocumentConfig, HttpOptions, ListDocumentsConfig};
+    use crate::{
+        client::Client,
+        types::{DeleteDocumentConfig, HttpOptions, ListDocumentsConfig},
+    };
 
     fn test_client(base_url: String) -> Client {
         Client::builder()

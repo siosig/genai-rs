@@ -11,10 +11,14 @@
 
 use std::future::Future;
 
-use tokio::net::{TcpListener, TcpStream};
-use tokio::task::JoinHandle;
-use tokio_tungstenite::WebSocketStream;
-use tokio_tungstenite::tungstenite::handshake::server::{Request, Response};
+use tokio::{
+    net::{TcpListener, TcpStream},
+    task::JoinHandle,
+};
+use tokio_tungstenite::{
+    WebSocketStream,
+    tungstenite::handshake::server::{Request, Response},
+};
 
 /// The HTTP request a client sent to establish the WebSocket handshake.
 #[derive(Debug, Clone)]

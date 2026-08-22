@@ -4,10 +4,11 @@
 use reqwest::Method;
 use serde_json::Value;
 
-use crate::client::Client;
-use crate::converters::generated::operations as conv;
-use crate::converters::generated::operations_converters as op_conv;
-use crate::error::{Error, Result};
+use crate::{
+    client::Client,
+    converters::generated::{operations as conv, operations_converters as op_conv},
+    error::{Error, Result},
+};
 
 /// A long-running operation that can be polled via
 /// [`Operations::get`].
@@ -123,12 +124,16 @@ impl Operations {
 
 #[cfg(test)]
 mod tests {
-    use wiremock::matchers::{method, path};
-    use wiremock::{Mock, MockServer, ResponseTemplate};
+    use wiremock::{
+        Mock, MockServer, ResponseTemplate,
+        matchers::{method, path},
+    };
 
     use super::Operations;
-    use crate::client::Client;
-    use crate::types::{GenerateVideosOperation, HttpOptions};
+    use crate::{
+        client::Client,
+        types::{GenerateVideosOperation, HttpOptions},
+    };
 
     fn test_client(base_url: String) -> Client {
         Client::builder()

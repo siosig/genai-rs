@@ -125,8 +125,10 @@ impl GenerateContentConfig {
 
 #[cfg(test)]
 mod tests {
-    use super::super::generated::{Candidate, Content};
-    use super::*;
+    use super::{
+        super::generated::{Candidate, Content},
+        *,
+    };
 
     fn response_with_parts(parts: Vec<Part>) -> GenerateContentResponse {
         GenerateContentResponse {

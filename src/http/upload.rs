@@ -230,12 +230,13 @@ async fn finalize_empty_upload(client: &HttpClient, upload_url: &str) -> Result<
 #[cfg(test)]
 mod tests {
     use secrecy::SecretString;
-    use wiremock::matchers::{header, headers, method, path};
-    use wiremock::{Mock, MockServer, ResponseTemplate};
+    use wiremock::{
+        Mock, MockServer, ResponseTemplate,
+        matchers::{header, headers, method, path},
+    };
 
     use super::{UploadSourceData, resumable_upload};
-    use crate::http::HttpClient;
-    use crate::types::HttpOptions;
+    use crate::{http::HttpClient, types::HttpOptions};
 
     fn client_for(server: &MockServer) -> HttpClient {
         let options = HttpOptions {
@@ -329,12 +330,13 @@ mod tests {
 #[cfg(test)]
 mod streaming_tests {
     use secrecy::SecretString;
-    use wiremock::matchers::{header, headers, method, path};
-    use wiremock::{Mock, MockServer, ResponseTemplate};
+    use wiremock::{
+        Mock, MockServer, ResponseTemplate,
+        matchers::{header, headers, method, path},
+    };
 
     use super::{CHUNK_SIZE, UploadSourceData, resumable_upload};
-    use crate::http::HttpClient;
-    use crate::types::HttpOptions;
+    use crate::{http::HttpClient, types::HttpOptions};
 
     fn client_for(server: &MockServer) -> HttpClient {
         let options = HttpOptions {

@@ -81,6 +81,18 @@ cargo +1.85.0 check --workspace --locked
 cargo +1.85.0 check --workspace --locked --features blocking
 ```
 
+Import grouping (`std` / external / `crate`, one `use` per crate) is enforced by
+the advisory `fmt-check-nightly` job only, because the rustfmt options behind it
+are nightly-only. To match it locally:
+
+```sh
+rustup toolchain install nightly --profile minimal --component rustfmt
+cargo +nightly fmt --all
+```
+
+Generated code is excluded from that pass (`ignore` in `rustfmt.toml`): its
+layout is owned by the generator and the stable `cargo fmt` it runs.
+
 `AGENTS.md` has the coding conventions this repository follows.
 
 ### The three guard test suites

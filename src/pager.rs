@@ -1,9 +1,7 @@
 //! Paginated list results, mirroring Python's `pagers.py`
 //! (`Pager`/`AsyncPager`).
 
-use std::future::Future;
-use std::pin::Pin;
-use std::sync::Arc;
+use std::{future::Future, pin::Pin, sync::Arc};
 
 use futures_core::Stream;
 use serde_json::{Map, Value};

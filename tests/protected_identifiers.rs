@@ -37,10 +37,11 @@ mod common;
 use std::sync::{Mutex, PoisonError};
 
 use common::ws_server::start_mock_ws_server;
-use gemini_genai::types::{GenerateContentConfig, GoogleSearch, HttpOptions, Tool};
-use gemini_genai::{Client, Error};
-use wiremock::matchers::method;
-use wiremock::{Mock, MockServer, ResponseTemplate};
+use gemini_genai::{
+    Client, Error,
+    types::{GenerateContentConfig, GoogleSearch, HttpOptions, Tool},
+};
+use wiremock::{Mock, MockServer, ResponseTemplate, matchers::method};
 
 // --- the identifiers under guard ------------------------------------------
 //

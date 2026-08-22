@@ -8,8 +8,7 @@
 //! GEMINI_API_KEY=... cargo run --example generate_videos
 //! ```
 
-use gemini_genai::Client;
-use gemini_genai::types::GenerateVideosSource;
+use gemini_genai::{Client, types::GenerateVideosSource};
 
 #[tokio::main]
 async fn main() -> gemini_genai::Result<()> {

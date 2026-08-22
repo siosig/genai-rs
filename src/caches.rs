@@ -1,21 +1,21 @@
 //! `client.caches()`: context cache create/get/list/update/delete. Mirrors
 //! Python's `caches.py` `Caches`.
 
-use std::future::Future;
-use std::pin::Pin;
-use std::sync::Arc;
+use std::{future::Future, pin::Pin, sync::Arc};
 
 use reqwest::Method;
 use serde_json::{Map, Value};
 
-use crate::client::Client;
-use crate::converters::generated::caches as conv;
-use crate::error::Result;
-use crate::pager::{PagedItem, Pager};
-use crate::types::{
-    CachedContent, CreateCachedContentConfig, DeleteCachedContentConfig,
-    DeleteCachedContentResponse, GetCachedContentConfig, ListCachedContentsConfig,
-    UpdateCachedContentConfig,
+use crate::{
+    client::Client,
+    converters::generated::caches as conv,
+    error::Result,
+    pager::{PagedItem, Pager},
+    types::{
+        CachedContent, CreateCachedContentConfig, DeleteCachedContentConfig,
+        DeleteCachedContentResponse, GetCachedContentConfig, ListCachedContentsConfig,
+        UpdateCachedContentConfig,
+    },
 };
 
 /// The page-fetch closure type backing a `caches().list(...)` [`Pager`].
@@ -239,12 +239,13 @@ fn build_query_string(query: &Value) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use secrecy::SecretString;
-    use wiremock::matchers::{method, path};
-    use wiremock::{Mock, MockServer, ResponseTemplate};
+    use wiremock::{
+        Mock, MockServer, ResponseTemplate,
+        matchers::{method, path},
+    };
 
     use super::Caches;
-    use crate::client::Client;
-    use crate::types::HttpOptions;
+    use crate::{client::Client, types::HttpOptions};
 
     fn test_client(base_url: String) -> Client {
         Client::builder()

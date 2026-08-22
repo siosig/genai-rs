@@ -10,13 +10,17 @@
 use std::sync::Arc;
 
 use futures_util::future::BoxFuture;
-use rmcp::model::{CallToolRequestParams, CallToolResponse, ContentBlock};
-use rmcp::service::{Peer, RoleClient};
+use rmcp::{
+    model::{CallToolRequestParams, CallToolResponse, ContentBlock},
+    service::{Peer, RoleClient},
+};
 use serde_json::Value;
 
-use crate::afc::FunctionTool;
-use crate::error::{Error, FunctionCallError, Result};
-use crate::types::{FunctionDeclaration, Tool};
+use crate::{
+    afc::FunctionTool,
+    error::{Error, FunctionCallError, Result},
+    types::{FunctionDeclaration, Tool},
+};
 
 /// Bridges one tool exposed by an MCP server to a [`FunctionTool`],
 /// delegating [`FunctionTool::call`] to a `tools/call` request over

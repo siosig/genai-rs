@@ -5,13 +5,17 @@
 mod common;
 
 use common::test_client;
-use gemini_genai::types::{
-    BatchJobDestination, BatchJobSource, Content, CreateBatchJobConfig, EmbeddingsBatchJobSource,
-    InlinedRequest, JobState, ListBatchJobsConfig, Part,
+use gemini_genai::{
+    Backend, Error,
+    types::{
+        BatchJobDestination, BatchJobSource, Content, CreateBatchJobConfig,
+        EmbeddingsBatchJobSource, InlinedRequest, JobState, ListBatchJobsConfig, Part,
+    },
 };
-use gemini_genai::{Backend, Error};
-use wiremock::matchers::{body_json, method, path, query_param};
-use wiremock::{Mock, MockServer, ResponseTemplate};
+use wiremock::{
+    Mock, MockServer, ResponseTemplate,
+    matchers::{body_json, method, path, query_param},
+};
 
 fn batch_job_response(name: &str, state: &str) -> serde_json::Value {
     serde_json::json!({

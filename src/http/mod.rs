@@ -7,20 +7,21 @@ pub(crate) mod retry;
 pub(crate) mod sse;
 pub(crate) mod upload;
 
-use std::collections::HashMap;
-use std::time::Duration;
+use std::{collections::HashMap, time::Duration};
 
 use backon::Retryable;
 use bytes::Bytes;
 use futures_core::Stream;
+use headers::{API_KEY_HEADER, SERVER_TIMEOUT_HEADER};
 use reqwest::{Method, StatusCode};
+use retry::RetryPolicy;
 use secrecy::{ExposeSecret, SecretString};
 use serde_json::{Map, Value};
 
-use crate::error::{ApiError, Error};
-use crate::types::HttpOptions;
-use headers::{API_KEY_HEADER, SERVER_TIMEOUT_HEADER};
-use retry::RetryPolicy;
+use crate::{
+    error::{ApiError, Error},
+    types::HttpOptions,
+};
 
 /// The default Gemini Developer API base URL.
 pub(crate) const DEFAULT_BASE_URL: &str = "https://generativelanguage.googleapis.com/";
@@ -358,12 +359,16 @@ impl HttpClient {
 mod tests {
     use secrecy::SecretString;
     use serde_json::{Value, json};
-    use wiremock::matchers::{body_json, header, method, path};
-    use wiremock::{Mock, MockServer, ResponseTemplate};
+    use wiremock::{
+        Mock, MockServer, ResponseTemplate,
+        matchers::{body_json, header, method, path},
+    };
 
     use super::{DEFAULT_BASE_URL, HttpClient, recursive_body_update};
-    use crate::error::Error;
-    use crate::types::{HttpOptions, HttpRetryOptions};
+    use crate::{
+        error::Error,
+        types::{HttpOptions, HttpRetryOptions},
+    };
 
     /// P8 of `specs/002-oss-release-compliance/contracts/protected-identifiers.md`.
     ///

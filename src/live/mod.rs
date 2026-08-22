@@ -3,22 +3,29 @@
 pub mod music;
 
 use futures_core::Stream;
-use futures_util::stream::{SplitSink, SplitStream};
-use futures_util::{SinkExt, StreamExt};
+use futures_util::{
+    SinkExt, StreamExt,
+    stream::{SplitSink, SplitStream},
+};
 use secrecy::ExposeSecret;
 use serde_json::{Map, Value};
 use tokio::net::TcpStream;
-use tokio_tungstenite::tungstenite::Message;
-use tokio_tungstenite::tungstenite::client::IntoClientRequest;
-use tokio_tungstenite::tungstenite::http::HeaderValue;
-use tokio_tungstenite::tungstenite::http::header::AUTHORIZATION;
-use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async};
+use tokio_tungstenite::{
+    MaybeTlsStream, WebSocketStream, connect_async,
+    tungstenite::{
+        Message,
+        client::IntoClientRequest,
+        http::{HeaderValue, header::AUTHORIZATION},
+    },
+};
 
-use crate::client::Client;
-use crate::converters::generated::live_converters as conv;
-use crate::error::{Error, Result};
-use crate::types::{
-    Content, FunctionResponse, LiveConnectConfig, LiveServerMessage, LiveServerSetupComplete,
+use crate::{
+    client::Client,
+    converters::generated::live_converters as conv,
+    error::{Error, Result},
+    types::{
+        Content, FunctionResponse, LiveConnectConfig, LiveServerMessage, LiveServerSetupComplete,
+    },
 };
 
 pub(crate) type WsStream = WebSocketStream<MaybeTlsStream<TcpStream>>;
@@ -411,9 +418,7 @@ mod tests {
     use serde_json::json;
 
     use super::{camelize_function_response, snake_to_camel, websocket_endpoint};
-    use crate::client::Client;
-    use crate::http::HttpClient;
-    use crate::types::HttpOptions;
+    use crate::{client::Client, http::HttpClient, types::HttpOptions};
 
     fn client_with(api_key: &str, base_url: &str) -> Client {
         Client::builder()

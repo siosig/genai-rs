@@ -10,15 +10,15 @@
 
 mod common;
 
-use common::test_client_with_api_key;
-use common::ws_server::start_mock_ws_server;
+use common::{test_client_with_api_key, ws_server::start_mock_ws_server};
 use futures_util::{SinkExt, StreamExt};
-use gemini_genai::Error;
-use gemini_genai::live::RealtimeInput;
-use gemini_genai::types::{Content, FunctionResponse, LiveConnectConfig, Modality, Part};
+use gemini_genai::{
+    Error,
+    live::RealtimeInput,
+    types::{Content, FunctionResponse, LiveConnectConfig, Modality, Part},
+};
 use serde_json::{Value, json};
-use tokio_tungstenite::WebSocketStream;
-use tokio_tungstenite::tungstenite::Message;
+use tokio_tungstenite::{WebSocketStream, tungstenite::Message};
 
 #[expect(
     clippy::unwrap_used,

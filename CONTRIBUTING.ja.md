@@ -81,6 +81,18 @@ cargo +1.85.0 check --workspace --locked
 cargo +1.85.0 check --workspace --locked --features blocking
 ```
 
+import のグルーピング（`std` / 外部 / `crate`、crate ごとに 1 つの `use`）は、背後の
+rustfmt オプションが nightly 限定なので、助言ジョブ `fmt-check-nightly` だけが
+強制している。手元で揃えるには:
+
+```sh
+rustup toolchain install nightly --profile minimal --component rustfmt
+cargo +nightly fmt --all
+```
+
+生成コードはこのパスの対象外（`rustfmt.toml` の `ignore`）。あちらのレイアウトは
+生成器と、生成器が回す stable の `cargo fmt` が所有する。
+
 コーディング規約は `AGENTS.md` にある。
 
 ### 3 つのガードテスト

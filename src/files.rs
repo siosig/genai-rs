@@ -1,22 +1,26 @@
 //! `client.files()`: file upload/get/list/delete/download. Mirrors Python's `files.py`.
 
-use std::future::Future;
-use std::path::{Path, PathBuf};
-use std::pin::Pin;
-use std::sync::Arc;
+use std::{
+    future::Future,
+    path::{Path, PathBuf},
+    pin::Pin,
+    sync::Arc,
+};
 
 use bytes::Bytes;
 use reqwest::Method;
 use serde_json::{Map, Value};
 
-use crate::client::Client;
-use crate::converters::generated::files as conv;
-use crate::error::Result;
-use crate::pager::{PagedItem, Pager};
-use crate::types::{
-    DeleteFileConfig, DeleteFileResponse, DownloadFileConfig, File, GetFileConfig, HttpOptions,
-    ListFilesConfig, ListFilesResponse, RegisterFilesConfig, RegisterFilesResponse,
-    UploadFileConfig,
+use crate::{
+    client::Client,
+    converters::generated::files as conv,
+    error::Result,
+    pager::{PagedItem, Pager},
+    types::{
+        DeleteFileConfig, DeleteFileResponse, DownloadFileConfig, File, GetFileConfig, HttpOptions,
+        ListFilesConfig, ListFilesResponse, RegisterFilesConfig, RegisterFilesResponse,
+        UploadFileConfig,
+    },
 };
 
 /// The source of bytes for [`Files::upload`]: a local filesystem path (read
@@ -358,12 +362,13 @@ fn query_string_from_value(query: &Value) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
-    use wiremock::matchers::{method, path};
-    use wiremock::{Mock, MockServer, ResponseTemplate};
+    use wiremock::{
+        Mock, MockServer, ResponseTemplate,
+        matchers::{method, path},
+    };
 
     use super::{Files, UploadSource};
-    use crate::client::Client;
-    use crate::types::HttpOptions;
+    use crate::{client::Client, types::HttpOptions};
 
     fn test_client(base_url: String) -> Client {
         Client::builder()

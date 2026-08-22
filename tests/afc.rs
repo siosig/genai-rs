@@ -12,17 +12,21 @@ mod common;
 use std::collections::HashMap;
 
 use common::test_client;
-use gemini_genai::Error;
-use gemini_genai::afc::function_tool;
-use gemini_genai::error::FunctionCallError;
-use gemini_genai::types::{
-    AutomaticFunctionCallingConfig, Content, FunctionDeclaration, GenerateContentConfig, Part,
-    Schema, Tool, Type,
+use gemini_genai::{
+    Error,
+    afc::function_tool,
+    error::FunctionCallError,
+    types::{
+        AutomaticFunctionCallingConfig, Content, FunctionDeclaration, GenerateContentConfig, Part,
+        Schema, Tool, Type,
+    },
 };
 use schemars::JsonSchema;
 use serde::Deserialize;
-use wiremock::ResponseTemplate;
-use wiremock::matchers::{body_partial_json, method};
+use wiremock::{
+    ResponseTemplate,
+    matchers::{body_partial_json, method},
+};
 
 fn model_reply(text: &str) -> serde_json::Value {
     serde_json::json!({
@@ -49,12 +53,13 @@ struct WeatherArgs {
 }
 
 mod manual_building_blocks {
+    use wiremock::{Mock, MockServer};
+
     use super::{
         Content, FunctionDeclaration, GenerateContentConfig, HashMap, Part, ResponseTemplate,
         Schema, Tool, Type, body_partial_json, function_call_reply, method, model_reply,
         test_client,
     };
-    use wiremock::{Mock, MockServer};
 
     /// Exercises the manual (non-AFC) path end to end: a hand-built `Tool`
     /// declares one function, the request body carries it correctly on the
@@ -166,11 +171,12 @@ mod manual_building_blocks {
 }
 
 mod afc_loop {
+    use wiremock::{Mock, MockServer, ResponseTemplate};
+
     use super::{
         AutomaticFunctionCallingConfig, Error, FunctionCallError, GenerateContentConfig, Tool,
         WeatherArgs, function_call_reply, function_tool, method, model_reply, test_client,
     };
-    use wiremock::{Mock, MockServer, ResponseTemplate};
 
     #[tokio::test]
     async fn invokes_the_tool_and_returns_the_final_text_after_two_requests() {

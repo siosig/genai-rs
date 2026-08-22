@@ -10,10 +10,10 @@ use gemini_genai::types::{
     CreateFileSearchStoreConfig, DeleteDocumentConfig, DeleteFileSearchStoreConfig,
     ImportFileConfig, ListDocumentsConfig, UploadToFileSearchStoreConfig,
 };
-use wiremock::matchers::{
-    body_json, header, headers, method, path, query_param, query_param_is_missing,
+use wiremock::{
+    Mock, MockServer, ResponseTemplate,
+    matchers::{body_json, header, headers, method, path, query_param, query_param_is_missing},
 };
-use wiremock::{Mock, MockServer, ResponseTemplate};
 
 #[tokio::test]
 async fn create_get_list_delete_a_file_search_store() {

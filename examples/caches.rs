@@ -13,8 +13,10 @@
 //! context below is deliberately long. A `400` here usually means the
 //! content was still under that minimum.
 
-use gemini_genai::Client;
-use gemini_genai::types::{Content, CreateCachedContentConfig, GenerateContentConfig, Part};
+use gemini_genai::{
+    Client,
+    types::{Content, CreateCachedContentConfig, GenerateContentConfig, Part},
+};
 
 const MODEL: &str = "gemini-flash-latest";
 

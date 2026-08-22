@@ -1,4 +1,19 @@
 edition = "2024"
 reorder_imports = true
+
+# The two options below are nightly-only. Stable `cargo fmt` warns and ignores
+# them, so the import layout they describe is enforced only by the advisory
+# `fmt-check-nightly` CI job -- see AGENTS.md for the intended ordering.
 imports_granularity = "Crate"
 group_imports = "StdExternalCrate"
+
+# Generated code is excluded from the nightly-only options above. Its layout is
+# owned by the generator plus the *stable* `cargo fmt --all` that generate.py
+# runs; stable cannot produce the merged-import form, so applying it here would
+# make `codegen-check` fail on every regeneration. (Also nightly-only; stable
+# ignores it, which is fine -- stable never changes these files' imports.)
+ignore = [
+    "src/types/generated",
+    "src/converters/generated",
+    "src/blocking/generated.rs",
+]

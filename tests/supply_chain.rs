@@ -12,8 +12,7 @@
 //! it is the property being asserted: no *mutable* reference anywhere, which is
 //! a lexical question, not a semantic one.
 
-use std::fs;
-use std::path::PathBuf;
+use std::{fs, path::PathBuf};
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))

@@ -70,8 +70,7 @@
 //!   nested-handle accessor (mirroring `Client::file_search_stores()`
 //!   itself), not an API call.
 
-use std::future::Future;
-use std::sync::Arc;
+use std::{future::Future, sync::Arc};
 
 use futures_util::StreamExt;
 

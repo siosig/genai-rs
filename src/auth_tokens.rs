@@ -3,10 +3,12 @@
 use reqwest::Method;
 use serde_json::Value;
 
-use crate::client::Client;
-use crate::converters::generated::tokens_converters as conv;
-use crate::error::Result;
-use crate::types::{AuthToken, CreateAuthTokenConfig};
+use crate::{
+    client::Client,
+    converters::generated::tokens_converters as conv,
+    error::Result,
+    types::{AuthToken, CreateAuthTokenConfig},
+};
 
 /// The (`snake_case`) field names of [`crate::types::GenerationConfig`],
 /// used by [`convert_bidi_setup_to_token_setup`] to decide which
@@ -193,12 +195,16 @@ impl AuthTokens {
 
 #[cfg(test)]
 mod tests {
-    use wiremock::matchers::{body_json, method, path};
-    use wiremock::{Mock, MockServer, ResponseTemplate};
+    use wiremock::{
+        Mock, MockServer, ResponseTemplate,
+        matchers::{body_json, method, path},
+    };
 
     use super::AuthTokens;
-    use crate::client::Client;
-    use crate::types::{CreateAuthTokenConfig, HttpOptions, LiveConnectConstraints};
+    use crate::{
+        client::Client,
+        types::{CreateAuthTokenConfig, HttpOptions, LiveConnectConstraints},
+    };
 
     fn test_client(base_url: String) -> Client {
         Client::builder()

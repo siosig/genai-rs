@@ -3,15 +3,17 @@
 use reqwest::Method;
 use serde_json::{Map, Value};
 
-use crate::client::Client;
-use crate::converters::generated::batches as conv;
-use crate::error::Result;
-use crate::pager::{PagedItem, Pager};
-use crate::types::{
-    BatchJob, BatchJobSource, CancelBatchJobConfig, CreateBatchJobConfig,
-    CreateEmbeddingsBatchJobConfig, DeleteBatchJobConfig, DeleteResourceJob,
-    EmbeddingsBatchJobSource, GetBatchJobConfig, HttpOptions, ListBatchJobsConfig,
-    ListBatchJobsResponse,
+use crate::{
+    client::Client,
+    converters::generated::batches as conv,
+    error::Result,
+    pager::{PagedItem, Pager},
+    types::{
+        BatchJob, BatchJobSource, CancelBatchJobConfig, CreateBatchJobConfig,
+        CreateEmbeddingsBatchJobConfig, DeleteBatchJobConfig, DeleteResourceJob,
+        EmbeddingsBatchJobSource, GetBatchJobConfig, HttpOptions, ListBatchJobsConfig,
+        ListBatchJobsResponse,
+    },
 };
 
 /// The boxed future returned while fetching one `batches().list(...)` page.

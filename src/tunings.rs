@@ -14,13 +14,15 @@
 use reqwest::Method;
 use serde_json::Value;
 
-use crate::client::Client;
-use crate::converters::generated::tunings as conv;
-use crate::error::{Backend, Error, Result};
-use crate::pager::Pager;
-use crate::types::{
-    CancelTuningJobConfig, CancelTuningJobResponse, CreateTuningJobConfig, GetTuningJobConfig,
-    JobState, ListTuningJobsConfig, TuningDataset, TuningJob, TuningOperation,
+use crate::{
+    client::Client,
+    converters::generated::tunings as conv,
+    error::{Backend, Error, Result},
+    pager::Pager,
+    types::{
+        CancelTuningJobConfig, CancelTuningJobResponse, CreateTuningJobConfig, GetTuningJobConfig,
+        JobState, ListTuningJobsConfig, TuningDataset, TuningJob, TuningOperation,
+    },
 };
 
 /// Handle for `client.tunings()`. Cheap to construct; borrows nothing.
@@ -217,14 +219,16 @@ impl Tunings {
 
 #[cfg(test)]
 mod tests {
-    use wiremock::matchers::{body_json, method, path};
-    use wiremock::{Mock, MockServer, ResponseTemplate};
+    use wiremock::{
+        Mock, MockServer, ResponseTemplate,
+        matchers::{body_json, method, path},
+    };
 
     use super::Tunings;
-    use crate::client::Client;
-    use crate::error::{Backend, Error};
-    use crate::types::{
-        CreateTuningJobConfig, HttpOptions, JobState, TuningDataset, TuningExample,
+    use crate::{
+        client::Client,
+        error::{Backend, Error},
+        types::{CreateTuningJobConfig, HttpOptions, JobState, TuningDataset, TuningExample},
     };
 
     fn test_client(base_url: String) -> Client {

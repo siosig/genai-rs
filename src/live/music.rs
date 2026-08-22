@@ -2,17 +2,21 @@
 //! WebSocket. Mirrors Python's `live_music.py`.
 
 use futures_core::Stream;
-use futures_util::stream::{SplitSink, SplitStream};
-use futures_util::{SinkExt, StreamExt};
+use futures_util::{
+    SinkExt, StreamExt,
+    stream::{SplitSink, SplitStream},
+};
 use serde_json::Value;
 use tokio_tungstenite::tungstenite::Message;
 
 use super::{WsStream, connect_ws, recv_decoded, send_json, websocket_endpoint, ws_err};
-use crate::client::Client;
-use crate::converters::generated::live_converters as conv;
-use crate::error::{Error, Result};
-use crate::types::{
-    LiveMusicGenerationConfig, LiveMusicPlaybackControl, LiveMusicServerMessage, WeightedPrompt,
+use crate::{
+    client::Client,
+    converters::generated::live_converters as conv,
+    error::{Error, Result},
+    types::{
+        LiveMusicGenerationConfig, LiveMusicPlaybackControl, LiveMusicServerMessage, WeightedPrompt,
+    },
 };
 
 /// Handle for `client.live().music()`: opens realtime music generation

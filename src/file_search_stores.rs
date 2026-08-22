@@ -1,22 +1,22 @@
 //! `client.file_search_stores()`: File Search store create/get/list/delete/import. Mirrors Python's `file_search_stores.py`.
 
-use std::future::Future;
-use std::pin::Pin;
-use std::sync::Arc;
+use std::{future::Future, pin::Pin, sync::Arc};
 
 use bytes::Bytes;
 use reqwest::Method;
 use serde_json::{Map, Value};
 
-use crate::client::Client;
-use crate::converters::generated::file_search_stores as conv;
-use crate::converters::generated::operations_converters as ops_conv;
-use crate::error::Result;
-use crate::pager::{PagedItem, Pager};
-use crate::types::{
-    CreateFileSearchStoreConfig, DeleteFileSearchStoreConfig, DownloadMediaConfig, FileSearchStore,
-    GetFileSearchStoreConfig, ImportFileConfig, ImportFileOperation, ListFileSearchStoresConfig,
-    ListFileSearchStoresResponse, UploadToFileSearchStoreConfig, UploadToFileSearchStoreOperation,
+use crate::{
+    client::Client,
+    converters::generated::{file_search_stores as conv, operations_converters as ops_conv},
+    error::Result,
+    pager::{PagedItem, Pager},
+    types::{
+        CreateFileSearchStoreConfig, DeleteFileSearchStoreConfig, DownloadMediaConfig,
+        FileSearchStore, GetFileSearchStoreConfig, ImportFileConfig, ImportFileOperation,
+        ListFileSearchStoresConfig, ListFileSearchStoresResponse, UploadToFileSearchStoreConfig,
+        UploadToFileSearchStoreOperation,
+    },
 };
 
 /// Parses a (possibly empty) response body as JSON, mirroring Python's
@@ -336,16 +336,18 @@ impl FileSearchStores {
 
 #[cfg(test)]
 mod tests {
-    use wiremock::matchers::{
-        body_json, header, method, path, query_param, query_param_is_missing,
+    use wiremock::{
+        Mock, MockServer, ResponseTemplate,
+        matchers::{body_json, header, method, path, query_param, query_param_is_missing},
     };
-    use wiremock::{Mock, MockServer, ResponseTemplate};
 
     use super::FileSearchStores;
-    use crate::client::Client;
-    use crate::types::{
-        CreateFileSearchStoreConfig, DeleteFileSearchStoreConfig, ImportFileConfig,
-        ListFileSearchStoresConfig, UploadToFileSearchStoreConfig,
+    use crate::{
+        client::Client,
+        types::{
+            CreateFileSearchStoreConfig, DeleteFileSearchStoreConfig, ImportFileConfig,
+            ListFileSearchStoresConfig, UploadToFileSearchStoreConfig,
+        },
     };
 
     fn test_client(base_url: String) -> Client {

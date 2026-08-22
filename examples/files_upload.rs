@@ -8,9 +8,11 @@
 //! GEMINI_API_KEY=... cargo run --example files_upload
 //! ```
 
-use gemini_genai::Client;
-use gemini_genai::files::UploadSource;
-use gemini_genai::types::{Content, Part};
+use gemini_genai::{
+    Client,
+    files::UploadSource,
+    types::{Content, Part},
+};
 
 #[tokio::main]
 async fn main() -> gemini_genai::Result<()> {

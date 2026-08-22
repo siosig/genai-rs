@@ -8,8 +8,7 @@
 //! GOOGLE_API_KEY=... cargo run --example structured_output
 //! ```
 
-use gemini_genai::Client;
-use gemini_genai::types::GenerateContentConfig;
+use gemini_genai::{Client, types::GenerateContentConfig};
 
 /// The shape we want Gemini's response to conform to. `schemars::JsonSchema`
 /// lets [`GenerateContentConfig::with_json_schema_of`] derive a JSON Schema

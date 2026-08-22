@@ -16,10 +16,12 @@
 //! Live) live in `tests/e2e_expensive.rs` behind a second opt-in flag.
 
 use futures_util::StreamExt;
-use gemini_genai::Client;
-use gemini_genai::types::{
-    Content, CountTokensConfig, CreateCachedContentConfig, EmbedContentConfig,
-    GenerateContentConfig, Part, Tool, UpdateCachedContentConfig,
+use gemini_genai::{
+    Client,
+    types::{
+        Content, CountTokensConfig, CreateCachedContentConfig, EmbedContentConfig,
+        GenerateContentConfig, Part, Tool, UpdateCachedContentConfig,
+    },
 };
 
 /// A small, currently-served text model. `*-latest` aliases are used

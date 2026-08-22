@@ -10,8 +10,10 @@
 //! GEMINI_API_KEY=... cargo run --example batches
 //! ```
 
-use gemini_genai::Client;
-use gemini_genai::types::{BatchJobSource, Content, CreateBatchJobConfig, InlinedRequest, Part};
+use gemini_genai::{
+    Client,
+    types::{BatchJobSource, Content, CreateBatchJobConfig, InlinedRequest, Part},
+};
 
 const MODEL: &str = "gemini-flash-latest";
 

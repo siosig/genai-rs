@@ -4,10 +4,10 @@
 mod common;
 
 use common::test_client;
-use wiremock::matchers::{
-    body_json, header, headers, method, path, query_param, query_param_is_missing,
+use wiremock::{
+    Mock, MockServer, ResponseTemplate,
+    matchers::{body_json, header, headers, method, path, query_param, query_param_is_missing},
 };
-use wiremock::{Mock, MockServer, ResponseTemplate};
 
 /// Writes `data` to a fresh temp file and returns its path. No `tempfile`
 /// dependency is available, so tests remove the file themselves once done.
