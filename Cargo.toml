@@ -1,6 +1,6 @@
 [package]
 name = "gemini-genai"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 # Minimum supported Rust version, for every feature combination; the `msrv` CI
 # job checks `--all-features` on exactly this toolchain.
@@ -14,12 +14,21 @@ rust-version = "1.88"
 description = "Unofficial Rust port of the Google Gen AI Python SDK (google-genai) for the Gemini Developer API. Not affiliated with Google."
 license = "Apache-2.0"
 repository = "https://github.com/siosig/genai-rs"
+documentation = "https://docs.rs/gemini-genai"
 readme = "README.md"
 keywords = ["gemini", "genai", "llm", "ai", "sdk"]
 categories = ["api-bindings", "asynchronous"]
 # Development tooling; regenerating requires a Python interpreter and the
-# google-genai package, neither of which a consumer of the crate has.
-exclude = ["tools/", "specs/", ".github/"]
+# google-genai package, neither of which a consumer of the crate has. `tests/`
+# is left out too: several suites read `tools/codegen/*` and the git history,
+# so they cannot pass from the .crate alone and would only mislead anyone
+# (a distro packager, say) running `cargo test` on the unpacked package.
+exclude = ["tools/", "specs/", ".github/", "tests/", "hooks/"]
+
+# docs.rs builds with default features unless told otherwise, which would hide
+# the `blocking`, `mcp` and `native-tls` APIs from the hosted documentation.
+[package.metadata.docs.rs]
+all-features = true
 
 # The upstream Python SDK release this port is generated from and verified
 # against. `google-genai` ships frequently; every generated file stamps this

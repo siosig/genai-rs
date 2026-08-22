@@ -67,19 +67,27 @@ Note the naming split: the **crate** is `gemini-genai`, the **library** is
 
 ## Installation
 
-The crate is **not on crates.io yet**, so depend on the repository rather than on
-a version number. Requires Rust 1.88 or newer, and a Tokio runtime
-for the async API — the `blocking` feature brings its own runtime if you would
-rather not have one.
+Requires Rust 1.88 or newer, and a Tokio runtime for the async API — the
+`blocking` feature brings its own runtime if you would rather not have one.
+
+### From crates.io
+
+```toml
+[dependencies]
+gemini-genai = "0.2"
+```
+
+or, equivalently, `cargo add gemini-genai`. API documentation is on
+[docs.rs](https://docs.rs/gemini-genai).
 
 ### From Git
+
+To follow `main` ahead of a release:
 
 ```toml
 [dependencies]
 gemini-genai = { git = "https://github.com/siosig/genai-rs", branch = "main" }
 ```
-
-or, equivalently, `cargo add --git https://github.com/siosig/genai-rs gemini-genai`.
 
 Cargo records the resolved commit in your `Cargo.lock`, but `branch = "main"`
 still moves whenever you run `cargo update`. Pin it explicitly if you would

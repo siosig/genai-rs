@@ -66,18 +66,27 @@ flowchart LR
 
 ## インストール
 
-まだ **crates.io には公開していない**ので、バージョン番号ではなくリポジトリを直接指定する。
 必要な Rust は 1.88 以降。非同期 API を使うなら Tokio ランタイムが要るけれど、
 ランタイムを持ち込みたくない場合は `blocking` フィーチャーが自前のランタイムを用意してくれる。
 
+### crates.io から
+
+```toml
+[dependencies]
+gemini-genai = "0.2"
+```
+
+`cargo add gemini-genai` でも同じ。API ドキュメントは
+[docs.rs](https://docs.rs/gemini-genai) にある。
+
 ### Git から
+
+リリースを待たずに `main` を追いかけたい場合:
 
 ```toml
 [dependencies]
 gemini-genai = { git = "https://github.com/siosig/genai-rs", branch = "main" }
 ```
-
-`cargo add --git https://github.com/siosig/genai-rs gemini-genai` でも同じ。
 
 解決されたコミットは `Cargo.lock` に記録されるものの、`branch = "main"` のままだと
 `cargo update` のたびに動く。更新のタイミングを自分で握りたいならコミットを固定する。

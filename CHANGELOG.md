@@ -3,6 +3,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [0.2.1](#021)
 - [0.2.0](#020)
 - [0.1.0](#010)
 
@@ -17,6 +18,21 @@ with struct literals plus `..Default::default()`. In exchange, **adding a field 
 a generated type is treated as a minor-version change**, matching the upstream
 Python SDK's own policy. Always finish a struct literal with
 `..Default::default()`.
+
+## 0.2.1
+
+First release published to [crates.io](https://crates.io/crates/gemini-genai).
+No library changes; packaging and documentation only.
+
+### Changed
+
+- The installation instructions now lead with `gemini-genai = "0.2"`; the Git
+  dependency is kept as the way to follow `main` between releases.
+- docs.rs builds with `all-features = true`, so the `blocking`, `mcp` and
+  `native-tls` APIs appear in the hosted documentation.
+- `tests/` and `hooks/` are excluded from the published package. Several
+  suites read `tools/codegen/*` (already excluded) and the git history, so
+  they could not pass from the `.crate` alone.
 
 ## 0.2.0
 

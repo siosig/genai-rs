@@ -7,8 +7,8 @@
 //! for what is derived and what was changed.
 //!
 //! The package is named `gemini-genai` but its library name is
-//! `gemini_genai`. It is not on crates.io yet, so depend on the Git repository
-//! (see the README) and `use gemini_genai::...`.
+//! `gemini_genai`: depend on the former (`cargo add gemini-genai`) and
+//! `use gemini_genai::...`.
 //!
 //! Vertex AI is out of scope: asking for it (via
 //! [`ClientBuilder::vertexai`], `project`/`location`, or the
