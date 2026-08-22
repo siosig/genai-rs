@@ -1,0 +1,14 @@
+{
+  "converter": "_CreateFileParameters_to_mldev",
+  "input": {
+    "file": {
+      "display_name": "my file"
+    }
+  },
+  "expected": {
+    "file": {
+      "display_name": "my file"
+    }
+  },
+  "expected_error": null
+}

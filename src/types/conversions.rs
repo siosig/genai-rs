@@ -86,6 +86,23 @@ impl Part {
     fn is_model_turn(&self) -> bool {
         self.function_call.is_some()
     }
+
+    /// Reads `path`'s bytes and builds an inline-data [`Part`], inferring
+    /// the MIME type from the file extension via `mime_guess` (falling
+    /// back to `application/octet-stream` if the extension is unknown or
+    /// absent). No direct Python equivalent -- there, callers read the
+    /// file themselves and pass the resulting `bytes` to
+    /// `Part.from_bytes`; this is a convenience wrapper folding that file
+    /// read into [`Part::from_bytes`] for the common case.
+    ///
+    /// # Errors
+    /// Returns the underlying [`std::io::Error`] if `path` cannot be read.
+    pub fn from_file_bytes(path: impl AsRef<std::path::Path>) -> std::io::Result<Self> {
+        let path = path.as_ref();
+        let data = std::fs::read(path)?;
+        let mime_type = mime_guess::from_path(path).first_or_octet_stream();
+        Ok(Self::from_bytes(data, mime_type.essence_str()))
+    }
 }
 
 impl From<&str> for Part {
@@ -205,6 +222,26 @@ mod tests {
         let blob = part.inline_data.unwrap();
         assert_eq!(blob.data, Some(vec![1, 2, 3]));
         assert_eq!(blob.mime_type.as_deref(), Some("image/png"));
+    }
+
+    #[test]
+    fn part_from_file_bytes_reads_the_file_and_infers_mime_type_from_extension() {
+        let dir = std::env::temp_dir();
+        let path = dir.join(format!("genai-rs-test-{}.png", std::process::id()));
+        std::fs::write(&path, [1, 2, 3, 4]).unwrap();
+
+        let part = Part::from_file_bytes(&path).unwrap();
+        std::fs::remove_file(&path).unwrap();
+
+        let blob = part.inline_data.unwrap();
+        assert_eq!(blob.data, Some(vec![1, 2, 3, 4]));
+        assert_eq!(blob.mime_type.as_deref(), Some("image/png"));
+    }
+
+    #[test]
+    fn part_from_file_bytes_errors_for_a_missing_file() {
+        let result = Part::from_file_bytes("/no/such/file/genai-rs-does-not-exist");
+        assert!(result.is_err());
     }
 
     #[test]

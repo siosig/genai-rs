@@ -56,8 +56,13 @@ pub struct Chat {
 
 impl Chat {
     /// Sends `message` plus the accumulated curated history to the model
-    /// and returns its response. Mirrors Python's `Chat.send_message`
-    /// (automatic function calling is not ported; see `models::Models`).
+    /// and returns its response. Mirrors Python's `Chat.send_message`.
+    ///
+    /// Automatic function calling applies here exactly as it does for
+    /// [`crate::models::Models::generate_content`], which this delegates
+    /// to: if `config.tools` contains a tool built by
+    /// [`crate::types::Tool::from_function`], the AFC loop runs and only
+    /// the final, post-tool-call response is recorded into history.
     ///
     /// # Errors
     /// See [`crate::models::Models::generate_content`].
@@ -87,8 +92,13 @@ impl Chat {
     /// streaming incremental response chunks. The returned [`ChatStream`]
     /// borrows this [`Chat`] mutably and finalizes the model's turn into
     /// history once it is fully drained. Mirrors Python's
-    /// `Chat.send_message_stream` (automatic function calling is not
-    /// ported).
+    /// `Chat.send_message_stream`.
+    ///
+    /// Unlike [`Self::send_message`], automatic function calling does
+    /// **not** run here: [`crate::models::Models::generate_content_stream`]
+    /// issues a single streaming request, matching Python, which likewise
+    /// only drives the AFC loop from the unary path. A `functionCall` part
+    /// is surfaced to the caller as-is.
     ///
     /// # Errors
     /// See [`crate::models::Models::generate_content_stream`].

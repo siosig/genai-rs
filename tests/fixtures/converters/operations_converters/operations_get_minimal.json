@@ -1,0 +1,12 @@
+{
+  "converter": "_GetOperationParameters_to_mldev",
+  "input": {
+    "operation_name": "operations/abc123"
+  },
+  "expected": {
+    "_url": {
+      "operationName": "operations/abc123"
+    }
+  },
+  "expected_error": null
+}

@@ -1,0 +1,895 @@
+# Method inventory driving `gen_blocking.py` (`src/blocking/generated.rs`)
+# and `gen_parity.py` (`docs/parity.md`). See
+# specs/001-port-genai-rust/contracts/codegen.md, "methods.toml /
+# gen_blocking.py / gen_parity.py".
+#
+# Because `gen_parity.py` cross-checks this file against
+# `contracts/parity-matrix.md`, the inventory covers *every* ported public
+# method, including ones `gen_blocking.py` never emits a wrapper for (the
+# Live WebSocket surface, `Chat`'s stateful methods, nested-handle
+# accessors). Those carry `kind = "session"` / `kind = "manual"`.
+#
+# Two tables:
+#
+# - `[[client_module]]`: the `Client`-accessor handles (`client.models()`,
+#   `client.chats()`, ...). Each gets a generated `blocking::<struct>`
+#   wrapper (`src/blocking/generated.rs`) holding a shared
+#   `Arc<blocking::Runtime>` plus the wrapped async handle (`owner`).
+# - `[[method]]`: one entry per async method on some handle type. `owner`
+#   is that type's fully-qualified path -- for methods whose `owner`
+#   matches a `[[client_module]]`'s `owner`, `gen_blocking.py` emits a
+#   blocking wrapper method automatically, *if* `kind` is one of `unary`,
+#   `stream`, `pager`, or `upload` (see below). Entries whose `kind` is
+#   `session` or `manual` are intentionally skipped by the generator and
+#   hand-written in `src/blocking/mod.rs` instead:
+#
+#   - `session`: methods on a stateful handle that is returned *by value*
+#     rather than being a `Client` accessor (so it has no
+#     `[[client_module]]` entry / no generated struct), and whose
+#     streaming methods return values borrowing `&mut self`
+#     (`ChatStream<'_>`, `LiveSession::receive`) -- a shape the
+#     generator's uniform `fn(&self, ..) -> Result<..>` template can't
+#     express without per-method lifetime handling. `crate::chats::Chat`
+#     is hand-written as `blocking::Chats::create` / `blocking::Chat`;
+#     the Live handles have no blocking counterpart at all (see the
+#     `live` section below).
+#   - `manual`: `Operations::get<T>` is generic over `T: OperationLike +
+#     Serialize + DeserializeOwned`; the `args`/`ret` string format below
+#     has no way to express a type parameter or its bounds. Hand-written
+#     as an inherent `impl` on the generated `blocking::Operations`
+#     struct. `FileSearchStores::documents()` is likewise `manual`: it is
+#     a nested-handle accessor (mirroring `Client::file_search_stores()`
+#     itself), not an API call, so it doesn't fit the `unary`/`stream`/
+#     `pager`/`upload` shapes either.
+#
+# `args` entries are literal `"name: type"` strings (split once on `": "`);
+# `ret` is the `T` in the wrapped method's `Result<T>` for `unary`/`upload`,
+# or the item type for `stream` (`Stream<Item = Result<T>>`) / `pager`
+# (`Pager<T>`). All non-primitive types are written fully qualified
+# (`crate::types::X`, `bytes::Bytes`, ...) so `gen_blocking.py` never has to
+# guess an import.
+
+# ---------------------------------------------------------------------------
+# Client-accessor modules
+# ---------------------------------------------------------------------------
+
+[[client_module]]
+name = "models"
+owner = "crate::models::Models"
+struct = "Models"
+
+[[client_module]]
+name = "chats"
+owner = "crate::chats::Chats"
+struct = "Chats"
+
+[[client_module]]
+name = "files"
+owner = "crate::files::Files"
+struct = "Files"
+
+[[client_module]]
+name = "caches"
+owner = "crate::caches::Caches"
+struct = "Caches"
+
+[[client_module]]
+name = "tunings"
+owner = "crate::tunings::Tunings"
+struct = "Tunings"
+
+[[client_module]]
+name = "batches"
+owner = "crate::batches::Batches"
+struct = "Batches"
+
+[[client_module]]
+name = "operations"
+owner = "crate::operations::Operations"
+struct = "Operations"
+
+[[client_module]]
+name = "file_search_stores"
+owner = "crate::file_search_stores::FileSearchStores"
+struct = "FileSearchStores"
+
+[[client_module]]
+name = "documents"
+owner = "crate::documents::Documents"
+struct = "Documents"
+
+[[client_module]]
+name = "auth_tokens"
+owner = "crate::auth_tokens::AuthTokens"
+struct = "AuthTokens"
+
+# ---------------------------------------------------------------------------
+# models
+# ---------------------------------------------------------------------------
+
+[[method]]
+module = "models"
+owner = "crate::models::Models"
+name = "generate_content"
+python = "models.generate_content"
+args = ["model: &str", "contents: impl Into<crate::types::Contents>", "config: Option<crate::types::GenerateContentConfig>"]
+ret = "crate::types::GenerateContentResponse"
+kind = "unary"
+path = "{model}:generateContent"
+http = "POST"
+
+[[method]]
+module = "models"
+owner = "crate::models::Models"
+name = "generate_content_stream"
+python = "models.generate_content_stream"
+args = ["model: &str", "contents: impl Into<crate::types::Contents>", "config: Option<crate::types::GenerateContentConfig>"]
+ret = "crate::types::GenerateContentResponse"
+kind = "stream"
+path = "{model}:streamGenerateContent"
+http = "POST"
+
+[[method]]
+module = "models"
+owner = "crate::models::Models"
+name = "embed_content"
+python = "models.embed_content"
+args = ["model: &str", "contents: impl Into<crate::types::Contents>", "config: Option<crate::types::EmbedContentConfig>"]
+ret = "crate::types::EmbedContentResponse"
+kind = "unary"
+path = "{model}:batchEmbedContents"
+http = "POST"
+
+[[method]]
+module = "models"
+owner = "crate::models::Models"
+name = "count_tokens"
+python = "models.count_tokens"
+args = ["model: &str", "contents: impl Into<crate::types::Contents>", "config: Option<crate::types::CountTokensConfig>"]
+ret = "crate::types::CountTokensResponse"
+kind = "unary"
+path = "{model}:countTokens"
+http = "POST"
+
+[[method]]
+module = "models"
+owner = "crate::models::Models"
+name = "compute_tokens"
+python = "models.compute_tokens"
+args = ["model: &str", "contents: impl Into<crate::types::Contents>", "config: Option<serde_json::Value>"]
+ret = "crate::types::ComputeTokensResponse"
+kind = "unary"
+path = ""
+http = ""
+
+[[method]]
+module = "models"
+owner = "crate::models::Models"
+name = "get"
+python = "models.get"
+args = ["model: &str", "config: Option<crate::types::GetModelConfig>"]
+ret = "crate::types::Model"
+kind = "unary"
+path = "{name}"
+http = "GET"
+
+[[method]]
+module = "models"
+owner = "crate::models::Models"
+name = "list"
+python = "models.list"
+args = ["config: Option<crate::types::ListModelsConfig>"]
+ret = "crate::types::Model"
+kind = "pager"
+path = "models"
+http = "GET"
+
+[[method]]
+module = "models"
+owner = "crate::models::Models"
+name = "update"
+python = "models.update"
+args = ["model: &str", "config: crate::types::UpdateModelConfig"]
+ret = "crate::types::Model"
+kind = "unary"
+path = "{name}"
+http = "PATCH"
+
+[[method]]
+module = "models"
+owner = "crate::models::Models"
+name = "delete"
+python = "models.delete"
+args = ["model: &str", "config: Option<crate::types::DeleteModelConfig>"]
+ret = "crate::types::DeleteModelResponse"
+kind = "unary"
+path = "{name}"
+http = "DELETE"
+
+[[method]]
+module = "models"
+owner = "crate::models::Models"
+name = "generate_images"
+python = "models.generate_images"
+args = ["model: &str", "prompt: &str", "config: Option<crate::types::GenerateImagesConfig>"]
+ret = "crate::types::GenerateImagesResponse"
+kind = "unary"
+deprecated = true
+path = "{model}:predict"
+http = "POST"
+
+[[method]]
+module = "models"
+owner = "crate::models::Models"
+name = "generate_videos"
+python = "models.generate_videos"
+args = ["model: &str", "source: crate::types::GenerateVideosSource", "config: Option<crate::types::GenerateVideosConfig>"]
+ret = "crate::types::GenerateVideosOperation"
+kind = "unary"
+path = "{model}:predictLongRunning"
+http = "POST"
+
+# ---------------------------------------------------------------------------
+# chats (Chats::create / Chat -- all hand-written, see the header note)
+# ---------------------------------------------------------------------------
+
+[[method]]
+module = "chats"
+owner = "crate::chats::Chats"
+name = "create"
+python = "chats.create"
+args = ["model: &str", "config: Option<crate::types::GenerateContentConfig>", "history: Option<Vec<crate::types::Content>>"]
+ret = "crate::blocking::Chat"
+kind = "session"
+path = ""
+http = ""
+
+[[method]]
+module = "chats"
+owner = "crate::chats::Chat"
+name = "send_message"
+python = "chats.Chat.send_message"
+args = ["message: impl Into<crate::types::Contents>", "config: Option<crate::types::GenerateContentConfig>"]
+ret = "crate::types::GenerateContentResponse"
+kind = "session"
+path = ""
+http = ""
+
+[[method]]
+module = "chats"
+owner = "crate::chats::Chat"
+name = "send_message_stream"
+python = "chats.Chat.send_message_stream"
+args = ["message: impl Into<crate::types::Contents>", "config: Option<crate::types::GenerateContentConfig>"]
+ret = "crate::types::GenerateContentResponse"
+kind = "session"
+path = ""
+http = ""
+
+[[method]]
+module = "chats"
+owner = "crate::chats::Chat"
+name = "get_history"
+python = "chats.Chat.get_history"
+args = ["curated: bool"]
+ret = "&[crate::types::Content]"
+kind = "session"
+path = ""
+http = ""
+
+# Python exposes `_BaseChat.record_history` publicly; the Rust port keeps
+# the equivalent as a private helper on `Chat`, invoked automatically by
+# `send_message` and by `ChatStream` when the stream is consumed (see
+# `src/chats.rs`). Listed here so `gen_parity.py` can account for the
+# `contracts/parity-matrix.md` row that marks it ✅.
+[[method]]
+module = "chats"
+owner = "crate::chats::Chat"
+name = "record_history"
+python = "chats.Chat.record_history"
+args = ["user_input: crate::types::Content", "model_output: Vec<crate::types::Content>", "is_valid: bool"]
+ret = "()"
+kind = "session"
+visibility = "private"
+path = ""
+http = ""
+
+# ---------------------------------------------------------------------------
+# files
+# ---------------------------------------------------------------------------
+
+[[method]]
+module = "files"
+owner = "crate::files::Files"
+name = "upload"
+python = "files.upload"
+args = ["source: impl Into<crate::files::UploadSource>", "config: Option<crate::types::UploadFileConfig>"]
+ret = "crate::types::File"
+kind = "upload"
+path = "upload/v1beta/files"
+http = "POST"
+
+[[method]]
+module = "files"
+owner = "crate::files::Files"
+name = "get"
+python = "files.get"
+args = ["name: &str", "config: Option<crate::types::GetFileConfig>"]
+ret = "crate::types::File"
+kind = "unary"
+path = "{name}"
+http = "GET"
+
+[[method]]
+module = "files"
+owner = "crate::files::Files"
+name = "list"
+python = "files.list"
+args = ["config: Option<crate::types::ListFilesConfig>"]
+ret = "crate::types::File"
+kind = "pager"
+path = "files"
+http = "GET"
+
+[[method]]
+module = "files"
+owner = "crate::files::Files"
+name = "delete"
+python = "files.delete"
+args = ["name: &str", "config: Option<crate::types::DeleteFileConfig>"]
+ret = "crate::types::DeleteFileResponse"
+kind = "unary"
+path = "{name}"
+http = "DELETE"
+
+[[method]]
+module = "files"
+owner = "crate::files::Files"
+name = "download"
+python = "files.download"
+args = ["file: &str", "config: Option<crate::types::DownloadFileConfig>"]
+ret = "bytes::Bytes"
+kind = "unary"
+path = "{file}:download"
+http = "GET"
+
+[[method]]
+module = "files"
+owner = "crate::files::Files"
+name = "register_files"
+python = "files._register_files"
+args = ["uris: Vec<String>", "config: Option<crate::types::RegisterFilesConfig>"]
+ret = "crate::types::RegisterFilesResponse"
+kind = "unary"
+path = "files:register"
+http = "POST"
+
+# ---------------------------------------------------------------------------
+# caches
+# ---------------------------------------------------------------------------
+
+[[method]]
+module = "caches"
+owner = "crate::caches::Caches"
+name = "create"
+python = "caches.create"
+args = ["model: &str", "config: Option<crate::types::CreateCachedContentConfig>"]
+ret = "crate::types::CachedContent"
+kind = "unary"
+path = "cachedContents"
+http = "POST"
+
+[[method]]
+module = "caches"
+owner = "crate::caches::Caches"
+name = "get"
+python = "caches.get"
+args = ["name: &str", "config: Option<crate::types::GetCachedContentConfig>"]
+ret = "crate::types::CachedContent"
+kind = "unary"
+path = "{name}"
+http = "GET"
+
+[[method]]
+module = "caches"
+owner = "crate::caches::Caches"
+name = "list"
+python = "caches.list"
+args = ["config: Option<crate::types::ListCachedContentsConfig>"]
+ret = "crate::types::CachedContent"
+kind = "pager"
+path = "cachedContents"
+http = "GET"
+
+[[method]]
+module = "caches"
+owner = "crate::caches::Caches"
+name = "update"
+python = "caches.update"
+args = ["name: &str", "config: Option<crate::types::UpdateCachedContentConfig>"]
+ret = "crate::types::CachedContent"
+kind = "unary"
+path = "{name}"
+http = "PATCH"
+
+[[method]]
+module = "caches"
+owner = "crate::caches::Caches"
+name = "delete"
+python = "caches.delete"
+args = ["name: &str", "config: Option<crate::types::DeleteCachedContentConfig>"]
+ret = "crate::types::DeleteCachedContentResponse"
+kind = "unary"
+path = "{name}"
+http = "DELETE"
+
+# ---------------------------------------------------------------------------
+# tunings
+# ---------------------------------------------------------------------------
+
+[[method]]
+module = "tunings"
+owner = "crate::tunings::Tunings"
+name = "tune"
+python = "tunings.tune"
+args = ["base_model: &str", "training_dataset: crate::types::TuningDataset", "config: Option<crate::types::CreateTuningJobConfig>"]
+ret = "crate::types::TuningJob"
+kind = "unary"
+path = "tunedModels"
+http = "POST"
+
+[[method]]
+module = "tunings"
+owner = "crate::tunings::Tunings"
+name = "get"
+python = "tunings.get"
+args = ["name: &str", "config: Option<crate::types::GetTuningJobConfig>"]
+ret = "crate::types::TuningJob"
+kind = "unary"
+path = "{name}"
+http = "GET"
+
+[[method]]
+module = "tunings"
+owner = "crate::tunings::Tunings"
+name = "list"
+python = "tunings.list"
+args = ["config: Option<crate::types::ListTuningJobsConfig>"]
+ret = "crate::types::TuningJob"
+kind = "pager"
+path = ""
+http = ""
+
+[[method]]
+module = "tunings"
+owner = "crate::tunings::Tunings"
+name = "cancel"
+python = "tunings.cancel"
+args = ["name: &str", "config: Option<crate::types::CancelTuningJobConfig>"]
+ret = "crate::types::CancelTuningJobResponse"
+kind = "unary"
+path = "{name}:cancel"
+http = "POST"
+
+# ---------------------------------------------------------------------------
+# batches
+# ---------------------------------------------------------------------------
+
+[[method]]
+module = "batches"
+owner = "crate::batches::Batches"
+name = "create"
+python = "batches.create"
+args = ["model: &str", "src: impl Into<crate::types::BatchJobSource>", "config: Option<crate::types::CreateBatchJobConfig>"]
+ret = "crate::types::BatchJob"
+kind = "unary"
+path = "{model}:batchGenerateContent"
+http = "POST"
+
+[[method]]
+module = "batches"
+owner = "crate::batches::Batches"
+name = "create_embeddings"
+python = "batches.create_embeddings"
+args = ["model: &str", "src: crate::types::EmbeddingsBatchJobSource", "config: Option<crate::types::CreateEmbeddingsBatchJobConfig>"]
+ret = "crate::types::BatchJob"
+kind = "unary"
+path = "{model}:asyncBatchEmbedContent"
+http = "POST"
+
+[[method]]
+module = "batches"
+owner = "crate::batches::Batches"
+name = "get"
+python = "batches.get"
+args = ["name: &str", "config: Option<crate::types::GetBatchJobConfig>"]
+ret = "crate::types::BatchJob"
+kind = "unary"
+path = "batches/{id}"
+http = "GET"
+
+[[method]]
+module = "batches"
+owner = "crate::batches::Batches"
+name = "cancel"
+python = "batches.cancel"
+args = ["name: &str", "config: Option<crate::types::CancelBatchJobConfig>"]
+ret = "()"
+kind = "unary"
+path = "batches/{id}:cancel"
+http = "POST"
+
+[[method]]
+module = "batches"
+owner = "crate::batches::Batches"
+name = "delete"
+python = "batches.delete"
+args = ["name: &str", "config: Option<crate::types::DeleteBatchJobConfig>"]
+ret = "crate::types::DeleteResourceJob"
+kind = "unary"
+path = "batches/{id}"
+http = "DELETE"
+
+[[method]]
+module = "batches"
+owner = "crate::batches::Batches"
+name = "list"
+python = "batches.list"
+args = ["config: Option<crate::types::ListBatchJobsConfig>"]
+ret = "crate::types::BatchJob"
+kind = "pager"
+path = "batches"
+http = "GET"
+
+# ---------------------------------------------------------------------------
+# operations (Operations::get<T> -- hand-written, see the header note)
+# ---------------------------------------------------------------------------
+
+[[method]]
+module = "operations"
+owner = "crate::operations::Operations"
+name = "get"
+python = "operations.get"
+args = ["operation: &T"]
+ret = "T"
+kind = "manual"
+path = ""
+http = ""
+
+# ---------------------------------------------------------------------------
+# file_search_stores
+# ---------------------------------------------------------------------------
+
+[[method]]
+module = "file_search_stores"
+owner = "crate::file_search_stores::FileSearchStores"
+name = "create"
+python = "file_search_stores.create"
+args = ["config: Option<crate::types::CreateFileSearchStoreConfig>"]
+ret = "crate::types::FileSearchStore"
+kind = "unary"
+path = "fileSearchStores"
+http = "POST"
+
+[[method]]
+module = "file_search_stores"
+owner = "crate::file_search_stores::FileSearchStores"
+name = "get"
+python = "file_search_stores.get"
+args = ["name: &str", "config: Option<crate::types::GetFileSearchStoreConfig>"]
+ret = "crate::types::FileSearchStore"
+kind = "unary"
+path = "{name}"
+http = "GET"
+
+[[method]]
+module = "file_search_stores"
+owner = "crate::file_search_stores::FileSearchStores"
+name = "delete"
+python = "file_search_stores.delete"
+args = ["name: &str", "config: Option<crate::types::DeleteFileSearchStoreConfig>"]
+ret = "()"
+kind = "unary"
+path = "{name}"
+http = "DELETE"
+
+[[method]]
+module = "file_search_stores"
+owner = "crate::file_search_stores::FileSearchStores"
+name = "list"
+python = "file_search_stores.list"
+args = ["config: Option<crate::types::ListFileSearchStoresConfig>"]
+ret = "crate::types::FileSearchStore"
+kind = "pager"
+path = "fileSearchStores"
+http = "GET"
+
+[[method]]
+module = "file_search_stores"
+owner = "crate::file_search_stores::FileSearchStores"
+name = "import_file"
+python = "file_search_stores.import_file"
+args = ["file_search_store_name: &str", "file_name: &str", "config: Option<crate::types::ImportFileConfig>"]
+ret = "crate::types::ImportFileOperation"
+kind = "unary"
+path = "{file_search_store_name}:importFile"
+http = "POST"
+
+[[method]]
+module = "file_search_stores"
+owner = "crate::file_search_stores::FileSearchStores"
+name = "upload_to_file_search_store"
+python = "file_search_stores.upload_to_file_search_store"
+args = ["file_search_store_name: &str", "data: &[u8]", "mime_type: &str", "config: Option<crate::types::UploadToFileSearchStoreConfig>"]
+ret = "crate::types::UploadToFileSearchStoreOperation"
+kind = "upload"
+path = "upload/v1beta/{file_search_store_name}:uploadToFileSearchStore"
+http = "POST"
+
+[[method]]
+module = "file_search_stores"
+owner = "crate::file_search_stores::FileSearchStores"
+name = "download_media"
+python = "file_search_stores.download_media"
+args = ["media_id: &str", "config: Option<crate::types::DownloadMediaConfig>"]
+ret = "bytes::Bytes"
+kind = "unary"
+path = "{media_id}"
+http = "GET"
+
+[[method]]
+module = "file_search_stores"
+owner = "crate::file_search_stores::FileSearchStores"
+name = "documents"
+python = ""
+args = []
+ret = "crate::blocking::Documents"
+kind = "manual"
+path = ""
+http = ""
+
+# ---------------------------------------------------------------------------
+# documents (client.file_search_stores().documents())
+# ---------------------------------------------------------------------------
+
+[[method]]
+module = "documents"
+owner = "crate::documents::Documents"
+name = "get"
+python = "documents.get"
+args = ["name: &str", "config: Option<crate::types::GetDocumentConfig>"]
+ret = "crate::types::Document"
+kind = "unary"
+path = "{name}"
+http = "GET"
+
+[[method]]
+module = "documents"
+owner = "crate::documents::Documents"
+name = "delete"
+python = "documents.delete"
+args = ["name: &str", "config: Option<crate::types::DeleteDocumentConfig>"]
+ret = "()"
+kind = "unary"
+path = "{name}"
+http = "DELETE"
+
+[[method]]
+module = "documents"
+owner = "crate::documents::Documents"
+name = "list"
+python = "documents.list"
+args = ["parent: &str", "config: Option<crate::types::ListDocumentsConfig>"]
+ret = "crate::types::Document"
+kind = "pager"
+path = "{parent}/documents"
+http = "GET"
+
+# ---------------------------------------------------------------------------
+# auth_tokens
+# ---------------------------------------------------------------------------
+
+[[method]]
+module = "auth_tokens"
+owner = "crate::auth_tokens::AuthTokens"
+name = "create"
+python = "tokens.create"
+args = ["config: Option<crate::types::CreateAuthTokenConfig>"]
+ret = "crate::types::AuthToken"
+kind = "unary"
+path = "auth_tokens"
+http = "POST"
+
+# ---------------------------------------------------------------------------
+# live (feature = "live"; WebSocket, async-only)
+#
+# Every entry below is `kind = "session"` (a stateful, borrow-heavy handle
+# over an open WebSocket) or `kind = "manual"` (a nested-handle accessor),
+# so `gen_blocking.py` skips all of them: `src/blocking/` deliberately has
+# no Live wrappers -- a blocking `receive()` would have to hand out an
+# `Iterator` borrowing the session across a `block_on`, and Python's own
+# Live API is `client.aio.live` (async) only, with no sync counterpart.
+# They are listed here because `gen_parity.py` uses `methods.toml` as the
+# method inventory for `docs/parity.md`, and `contracts/parity-matrix.md`
+# marks the Live surface ✅.
+# ---------------------------------------------------------------------------
+
+[[method]]
+module = "live"
+owner = "crate::live::Live"
+name = "connect"
+python = "live.connect"
+args = ["model: &str", "config: Option<crate::types::LiveConnectConfig>"]
+ret = "crate::live::LiveSession"
+kind = "session"
+path = "BidiGenerateContent"
+http = "WS"
+
+[[method]]
+module = "live"
+owner = "crate::live::LiveSession"
+name = "send_client_content"
+python = "live.AsyncSession.send_client_content"
+args = ["turns: Option<Vec<crate::types::Content>>", "turn_complete: bool"]
+ret = "()"
+kind = "session"
+path = ""
+http = "WS"
+
+[[method]]
+module = "live"
+owner = "crate::live::LiveSession"
+name = "send_realtime_input"
+python = "live.AsyncSession.send_realtime_input"
+args = ["input: crate::live::RealtimeInput"]
+ret = "()"
+kind = "session"
+path = ""
+http = "WS"
+
+[[method]]
+module = "live"
+owner = "crate::live::LiveSession"
+name = "send_tool_response"
+python = "live.AsyncSession.send_tool_response"
+args = ["function_responses: Vec<crate::types::FunctionResponse>"]
+ret = "()"
+kind = "session"
+path = ""
+http = "WS"
+
+[[method]]
+module = "live"
+owner = "crate::live::LiveSession"
+name = "receive"
+python = "live.AsyncSession.receive"
+args = []
+ret = "crate::types::LiveServerMessage"
+kind = "session"
+path = ""
+http = "WS"
+
+[[method]]
+module = "live"
+owner = "crate::live::LiveSession"
+name = "close"
+python = "live.AsyncSession.close"
+args = []
+ret = "()"
+kind = "session"
+path = ""
+http = "WS"
+
+# ---------------------------------------------------------------------------
+# live.music (client.live().music())
+# ---------------------------------------------------------------------------
+
+[[method]]
+module = "live_music"
+owner = "crate::live::Live"
+name = "music"
+python = "live.music"
+args = []
+ret = "crate::live::music::LiveMusic"
+kind = "manual"
+path = ""
+http = ""
+
+[[method]]
+module = "live_music"
+owner = "crate::live::music::LiveMusic"
+name = "connect"
+python = "live.music.connect"
+args = ["model: &str"]
+ret = "crate::live::music::LiveMusicSession"
+kind = "session"
+path = "BidiGenerateMusic"
+http = "WS"
+
+[[method]]
+module = "live_music"
+owner = "crate::live::music::LiveMusicSession"
+name = "set_weighted_prompts"
+python = "live.music.set_weighted_prompts"
+args = ["prompts: Vec<crate::types::WeightedPrompt>"]
+ret = "()"
+kind = "session"
+path = ""
+http = "WS"
+
+[[method]]
+module = "live_music"
+owner = "crate::live::music::LiveMusicSession"
+name = "set_music_generation_config"
+python = "live.music.set_music_generation_config"
+args = ["config: crate::types::LiveMusicGenerationConfig"]
+ret = "()"
+kind = "session"
+path = ""
+http = "WS"
+
+[[method]]
+module = "live_music"
+owner = "crate::live::music::LiveMusicSession"
+name = "play"
+python = "live.music.play"
+args = []
+ret = "()"
+kind = "session"
+path = ""
+http = "WS"
+
+[[method]]
+module = "live_music"
+owner = "crate::live::music::LiveMusicSession"
+name = "pause"
+python = "live.music.pause"
+args = []
+ret = "()"
+kind = "session"
+path = ""
+http = "WS"
+
+[[method]]
+module = "live_music"
+owner = "crate::live::music::LiveMusicSession"
+name = "stop"
+python = "live.music.stop"
+args = []
+ret = "()"
+kind = "session"
+path = ""
+http = "WS"
+
+[[method]]
+module = "live_music"
+owner = "crate::live::music::LiveMusicSession"
+name = "reset_context"
+python = "live.music.reset_context"
+args = []
+ret = "()"
+kind = "session"
+path = ""
+http = "WS"
+
+[[method]]
+module = "live_music"
+owner = "crate::live::music::LiveMusicSession"
+name = "receive"
+python = "live.music.receive"
+args = []
+ret = "crate::types::LiveMusicServerMessage"
+kind = "session"
+path = ""
+http = "WS"
+
+[[method]]
+module = "live_music"
+owner = "crate::live::music::LiveMusicSession"
+name = "close"
+python = "live.music.close"
+args = []
+ret = "()"
+kind = "session"
+path = ""
+http = "WS"

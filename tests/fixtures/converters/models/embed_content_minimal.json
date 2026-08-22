@@ -1,0 +1,35 @@
+{
+  "converter": "_EmbedContentParametersPrivate_to_mldev",
+  "input": {
+    "model": "text-embedding-004",
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "hello"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "_url": {
+      "model": "models/text-embedding-004"
+    },
+    "requests": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "hello"
+            }
+          ],
+          "role": "user"
+        },
+        "model": "models/text-embedding-004"
+      }
+    ]
+  },
+  "expected_error": null
+}

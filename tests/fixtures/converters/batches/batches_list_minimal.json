@@ -1,0 +1,14 @@
+{
+  "converter": "_ListBatchJobsParameters_to_mldev",
+  "input": {
+    "config": {
+      "page_size": 5
+    }
+  },
+  "expected": {
+    "_query": {
+      "pageSize": 5
+    }
+  },
+  "expected_error": null
+}

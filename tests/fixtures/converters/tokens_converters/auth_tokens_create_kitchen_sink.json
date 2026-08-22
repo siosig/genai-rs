@@ -1,0 +1,23 @@
+{
+  "converter": "_CreateAuthTokenParameters_to_mldev",
+  "input": {
+    "config": {
+      "uses": 1,
+      "expire_time": "2026-01-01T00:00:00Z",
+      "live_connect_constraints": {
+        "model": "gemini-2.0-flash-live-001"
+      }
+    }
+  },
+  "expected": {
+    "expireTime": "2026-01-01T00:00:00Z",
+    "uses": 1,
+    "bidiGenerateContentSetup": {
+      "setup": {
+        "model": "models/gemini-2.0-flash-live-001"
+      }
+    },
+    "config": {}
+  },
+  "expected_error": null
+}

@@ -21,7 +21,9 @@ import typing
 import google.genai
 from google.genai import _common, types  # type: ignore[import-untyped]
 
-GENAI_VERSION = google.genai.__version__
+import upstream
+
+GENAI_VERSION = upstream.assert_supported_version()
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT_DIR = REPO_ROOT / "src" / "types" / "generated"
@@ -122,6 +124,14 @@ def unwrap_optional(annotation: object) -> object:
 
 class UnhandledAnnotation(Exception):
     pass
+
+
+# Rust types whose proto3 JSON encoding may arrive as a quoted string.
+# Maps the generated field type -> its `serde_as` adapter.
+INT64_LENIENT_TYPES = {
+    "i64": "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>",
+    "Vec<i64>": "Option<Vec<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>>",
+}
 
 
 def map_annotation(cls_name: str, field_name: str, annotation: object) -> tuple[str, bool]:
@@ -305,6 +315,17 @@ def render_struct(name: str, cls: type, boxed_edges: set[tuple[str, str]]) -> st
             lines.append('    #[serde_as(as = "Option<Vec<serde_with::base64::Base64>>")]')
         elif is_bytes:
             lines.append('    #[serde_as(as = "Option<serde_with::base64::Base64>")]')
+        elif rust_type in INT64_LENIENT_TYPES:
+            # proto3's canonical JSON mapping encodes int64/uint64 as
+            # *strings* (to survive JavaScript's 2^53 precision limit), so
+            # the live API returns e.g. `"sizeBytes": "15"`. Python's
+            # pydantic coerces that to `int` automatically; serde does not,
+            # and would fail with `invalid type: string "15", expected i64`.
+            # `PickFirst` accepts either form on the wire while still
+            # *serializing* as a JSON number, which is what pydantic emits
+            # for outgoing requests (and which the server also accepts, since
+            # proto3 parsers must take both).
+            lines.append(f'    #[serde_as(as = "{INT64_LENIENT_TYPES[rust_type]}")]')
         ident = rust_field_ident(field_name)
         lines.append(f"    pub {ident}: Option<{rust_type}>,")
     lines.append("}")

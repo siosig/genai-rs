@@ -10,6 +10,23 @@ use serde_json::{Map, Value};
 
 use crate::error::{Error, Result};
 
+/// Invokes a generated `_X_to_mldev`/`_X_from_mldev` converter by its
+/// Python name (e.g. `"_GenerateContentParameters_to_mldev"`), calling it
+/// as `(input, None, None)`. This is a thin `pub` re-export of
+/// [`generated::dispatch`] solely so the golden-fixture converter test
+/// suite (`tests/converters_golden.rs`, a separate integration-test crate
+/// that can only see `pub` items) can reach it; it is not part of this
+/// crate's public API.
+///
+/// # Errors
+/// Returns whatever the underlying converter returns, including
+/// [`Error::UnsupportedByBackend`] for Vertex-AI-only fields, or
+/// [`Error::Validation`] if `name` does not match a known converter.
+#[doc(hidden)]
+pub fn dispatch_converter(name: &str, input: &Value) -> Result<Value> {
+    generated::dispatch(name, input)
+}
+
 fn is_truthy(value: Option<&Value>) -> bool {
     match value {
         None | Some(Value::Null) => false,

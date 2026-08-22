@@ -25,6 +25,8 @@ import pathlib
 import re
 import sys
 
+import upstream
+
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT_DIR = REPO_ROOT / "src" / "converters" / "generated"
 OVERRIDES_DIR = pathlib.Path(__file__).resolve().parent / "converter_overrides"
@@ -45,7 +47,7 @@ TARGET_FILES = {
     "live_converters": "_live_converters.py",
 }
 
-GENAI_VERSION = "2.19.0"
+GENAI_VERSION = upstream.assert_supported_version()
 
 TRANSFORMER_MODULE_ALIASES = {"t", "base_t"}
 
@@ -449,20 +451,24 @@ def build_known_functions(sdk_dir: pathlib.Path) -> dict[str, str]:
 
 def transpile_module(
     module_name: str, source_path: pathlib.Path, known_functions: dict[str, str]
-) -> tuple[str, int, list[str]]:
+) -> tuple[str, int, list[str], list[tuple[str, str]]]:
     tree = ast.parse(source_path.read_text(encoding="utf-8"), filename=str(source_path))
     functions = find_target_functions(tree)
 
     rendered: list[str] = []
     failures: list[str] = []
+    entries: list[tuple[str, str]] = []  # (python_name, rust_name) successfully rendered
     for func in functions:
-        override_path = OVERRIDES_DIR / f"{to_snake(func.name)}.rs"
+        rust_name = to_snake(func.name)
+        override_path = OVERRIDES_DIR / f"{rust_name}.rs"
         if override_path.exists():
             rendered.append(f"// override: {override_path.name}\n" + override_path.read_text(encoding="utf-8"))
+            entries.append((func.name, rust_name))
             continue
         try:
             transpiler = FunctionTranspiler(func.name, function_has_root_param(func), known_functions)
             rendered.append(transpiler.transpile(func))
+            entries.append((func.name, rust_name))
         except Unsupported as exc:
             failures.append(str(exc))
 
@@ -470,12 +476,61 @@ def transpile_module(
     body = header(doc)
     body += "\n\n".join(rendered)
     body += "\n"
-    return body, len(functions), failures
+    return body, len(functions), failures, entries
 
 
-def main() -> None:
+def render_dispatch_fn(entries: list[tuple[str, str, str]]) -> str:
+    """Renders a `pub(crate) fn dispatch(name: &str, input: &Value) ->
+    Result<Value>` matching a Python converter name (e.g.
+    `"_GenerateContentParameters_to_mldev"`) to its generated Rust function,
+    called as `(input, None, None)`. Used by the golden-fixture converter
+    test suite (`tests/converters_golden.rs`, see
+    specs/001-port-genai-rust/contracts/codegen.md "gen_fixtures.py") to
+    invoke a converter by name from a fixture JSON file."""
+    seen: set[str] = set()
+    arms: list[str] = []
+    for python_name, rust_name, module_name in entries:
+        if python_name in seen:
+            continue  # same function name defined verbatim in >1 source file; the
+            # canonical module (known_functions' choice) is already what every
+            # in-crate cross-reference resolves to, so keep only that one arm.
+        seen.add(python_name)
+        arms.append(
+            f'        "{python_name}" => {module_name}::{rust_name}(input, None, None),'
+        )
+    arms_body = "\n".join(arms)
+    return (
+        "\n/// Dispatches to a generated `_X_to_mldev`/`_X_from_mldev` converter\n"
+        "/// by its Python name (e.g. `\"_GenerateContentParameters_to_mldev\"`),\n"
+        "/// calling it as `(input, None, None)`. Used by the golden-fixture\n"
+        "/// converter test suite (`tests/converters_golden.rs`) to invoke a\n"
+        "/// converter by name from `tests/fixtures/converters/**/*.json`.\n"
+        "#[allow(\n"
+        "    clippy::too_many_lines,\n"
+        "    reason = \"one match arm per known converter function; the line count is mechanical, same as the generated converter files themselves\"\n"
+        ")]\n"
+        "pub(crate) fn dispatch(name: &str, input: &Value) -> Result<Value> {\n"
+        "    match name {\n"
+        f"{arms_body}\n"
+        "        _ => Err(crate::error::Error::Validation(format!(\n"
+        '            "converters::generated::dispatch: unknown converter `{name}`"\n'
+        "        ))),\n"
+        "    }\n"
+        "}\n"
+    )
+
+
+def main(sdk_dir: pathlib.Path | None = None) -> None:
+    """Transpiles every converter module under `sdk_dir` (defaulting to the
+    installed `google.genai` package).
+
+    `sdk_dir` is a parameter rather than something read from `sys.argv`
+    here: `generate.py` imports this module and calls `main()` directly, so
+    reading `sys.argv` would pick up *generate.py's* flags (e.g. `--only`)
+    and silently treat them as an SDK path, transpiling nothing. The CLI
+    argument is parsed in the `__main__` block instead.
+    """
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    sdk_dir = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else None
     if sdk_dir is None:
         import google.genai  # noqa: PLC0415
 
@@ -486,17 +541,43 @@ def main() -> None:
     total_functions = 0
     all_failures: list[str] = []
     mod_lines = ["//! Generated converter modules. See each file for its source module.\n\n"]
+    # rust function names actually rendered (i.e. present in the generated
+    # output), keyed by the module they were rendered into -- used to guard
+    # the dispatch table against pointing at a function that failed to
+    # transpile in its canonical module (see qualified_callee/known_functions).
+    rendered_by_module: dict[str, set[str]] = {}
+    all_python_names: set[str] = set()
 
     for module_name, filename in TARGET_FILES.items():
         source_path = sdk_dir / filename
         if not source_path.exists():
             print(f"gen_converters.py: skipping {filename} (not found under {sdk_dir})", file=sys.stderr)
             continue
-        body, count, failures = transpile_module(module_name, source_path, known_functions)
+        body, count, failures, entries = transpile_module(module_name, source_path, known_functions)
         (OUT_DIR / f"{module_name}.rs").write_text(body, encoding="utf-8")
         mod_lines.append(f"pub(crate) mod {module_name};\n")
         total_functions += count
         all_failures.extend(failures)
+        rendered_by_module.setdefault(module_name, set()).update(rust_name for _, rust_name in entries)
+        all_python_names.update(python_name for python_name, _ in entries)
+
+    dispatch_entries: list[tuple[str, str, str]] = []
+    for python_name in sorted(all_python_names):
+        rust_name = to_snake(python_name)
+        canonical_module = known_functions.get(rust_name)
+        if canonical_module is None:
+            continue
+        if rust_name not in rendered_by_module.get(canonical_module, set()):
+            # The canonical module's copy of this function failed to
+            # transpile; every in-crate cross-reference to it would already
+            # be broken too (qualified_callee resolves the same way), so
+            # this is unreachable in practice -- skip defensively rather
+            # than emit a match arm calling a function that doesn't exist.
+            continue
+        dispatch_entries.append((python_name, rust_name, canonical_module))
+
+    mod_lines.append("\nuse serde_json::Value;\n\nuse crate::error::Result;\n")
+    mod_lines.append(render_dispatch_fn(dispatch_entries))
 
     (OUT_DIR / "mod.rs").write_text("".join(mod_lines), encoding="utf-8")
 
@@ -509,4 +590,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    main(pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else None)

@@ -1,0 +1,65 @@
+{
+  "converter": "_EmbedContentParametersPrivate_to_mldev",
+  "input": {
+    "model": "text-embedding-004",
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "What is your name?"
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "What is your favorite color?"
+          }
+        ]
+      }
+    ],
+    "config": {
+      "task_type": "RETRIEVAL_DOCUMENT",
+      "title": "my title",
+      "output_dimensionality": 64
+    }
+  },
+  "expected": {
+    "_url": {
+      "model": "models/text-embedding-004"
+    },
+    "requests": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "What is your name?"
+            }
+          ],
+          "role": "user"
+        },
+        "taskType": "RETRIEVAL_DOCUMENT",
+        "title": "my title",
+        "outputDimensionality": 64,
+        "model": "models/text-embedding-004"
+      },
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "What is your favorite color?"
+            }
+          ],
+          "role": "user"
+        },
+        "taskType": "RETRIEVAL_DOCUMENT",
+        "title": "my title",
+        "outputDimensionality": 64,
+        "model": "models/text-embedding-004"
+      }
+    ]
+  },
+  "expected_error": null
+}

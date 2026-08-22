@@ -1,0 +1,32 @@
+{
+  "converter": "_CreateCachedContentParameters_to_mldev",
+  "input": {
+    "model": "models/gemini-2.0-flash-001",
+    "config": {
+      "contents": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "hi"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "expected": {
+    "model": "models/gemini-2.0-flash-001",
+    "contents": [
+      {
+        "parts": [
+          {
+            "text": "hi"
+          }
+        ],
+        "role": "user"
+      }
+    ]
+  },
+  "expected_error": null
+}

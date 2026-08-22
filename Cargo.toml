@@ -5,10 +5,20 @@ edition = "2024"
 rust-version = "1.85"
 description = "Rust port of the Google Gen AI Python SDK (google-genai) for the Gemini Developer API"
 license = "Apache-2.0"
-repository = "https://github.com/googleapis/python-genai"
+repository = "https://github.com/siosig/genai-rs"
 readme = "README.md"
 keywords = ["gemini", "genai", "google", "llm", "ai"]
 categories = ["api-bindings", "asynchronous"]
+
+# The upstream Python SDK release this port is generated from and verified
+# against. `google-genai` ships frequently; every generated file stamps this
+# same version in its header, `tools/codegen/upstream.py` is the single source
+# of truth that enforces it, and `tools/codegen/requirements.txt` pins the
+# matching install. See `tools/codegen/upstream.py` for the upgrade procedure.
+[package.metadata.upstream]
+python-sdk = "google-genai"
+version = "2.19.0"
+backend = "gemini-developer-api"
 
 [lib]
 name = "google_genai"
@@ -45,10 +55,14 @@ secrecy = "0.10"
 tracing = "0.1"
 schemars = "1"
 async-trait = "0.1"
+# Jitter for the retry backoff. Already in the tree via
+# tokio-tungstenite, but declared directly since `retry` is not
+# gated behind the `live` feature.
+rand = "0.10"
 uuid = { version = "1", features = ["v4"] }
 once_cell = { version = "1", optional = true }
 tokio-tungstenite = { version = "0.30", optional = true, default-features = false, features = ["connect", "handshake"] }
-rmcp = { version = "3", optional = true }
+rmcp = { version = "3", optional = true, features = ["client"] }
 
 [dev-dependencies]
 wiremock = "0.6"

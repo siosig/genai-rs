@@ -478,26 +478,120 @@ pub(crate) fn t_tools(value: Value) -> Result<Value> {
     }
 }
 
-/// Passes a JSON Schema value through unchanged. Mirrors `t_json_schema`
-/// (`return origin`).
+/// Passes a JSON Schema value through unchanged. Mirrors `t_json_schema`,
+/// which (confirmed by reading the installed `google-genai` 2.19.0
+/// `_transformers.py`, `def t_json_schema(origin): return origin`) really
+/// is a pure passthrough with no validation or normalization -- the
+/// `response_json_schema` field accepts an arbitrary user-authored JSON
+/// Schema `serde_json::Value` verbatim, so there is nothing for this
+/// crate's version to add either.
 pub(crate) fn t_json_schema(value: Value) -> Result<Value> {
     Ok(value)
 }
 
+/// Returns whether `value` is "truthy" by Python's rules (`bool(value)`):
+/// `None`/`False`/`0`/`""`/an empty list or dict are falsy, everything
+/// else -- including a non-empty dict, e.g. an `additionalProperties`
+/// sub-schema -- is truthy. Needed to mirror
+/// `_raise_for_unsupported_mldev_properties`'s
+/// `schema.get('additionalProperties') or schema.get('additional_properties')`
+/// check exactly (a bare presence/`is_some()` check would wrongly reject
+/// an explicit `additional_properties: false`, which Python's `or` chain
+/// (falsy) does not).
+fn is_truthy(value: &Value) -> bool {
+    match value {
+        Value::Null => false,
+        Value::Bool(b) => *b,
+        Value::Number(n) => n.as_f64().is_some_and(|f| f != 0.0),
+        Value::String(s) => !s.is_empty(),
+        Value::Array(items) => !items.is_empty(),
+        Value::Object(map) => !map.is_empty(),
+    }
+}
+
+/// Recursively errors if any `Schema` (or nested sub-schema, in `any_of`,
+/// `properties` values, `defs` values, `items`, or a dict-shaped
+/// `additional_properties`) sets a truthy `additional_properties`.
+/// Mirrors `_raise_for_unsupported_mldev_properties`, called at the top of
+/// every `process_schema` invocation (i.e. once per schema level, since
+/// `process_schema` recurses into every nested schema). Python only
+/// raises when `not client.vertexai`; this crate targets the Gemini
+/// Developer API (`mldev`) exclusively (Vertex AI/"Gemini Enterprise
+/// Agent Platform mode" is out of scope, see `research.md` R-02/R-05), so
+/// the check unconditionally applies here.
+fn reject_unsupported_mldev_properties(value: &Value) -> Result<()> {
+    let Value::Object(map) = value else {
+        return Ok(());
+    };
+    if let Some(additional) = map.get("additional_properties") {
+        if is_truthy(additional) {
+            return Err(Error::Validation(
+                "additionalProperties is only supported in Gemini Enterprise Agent Platform \
+                 mode, not in Gemini Developer API mode."
+                    .to_owned(),
+            ));
+        }
+        reject_unsupported_mldev_properties(additional)?;
+    }
+    if let Some(items) = map.get("items") {
+        reject_unsupported_mldev_properties(items)?;
+    }
+    if let Some(any_of) = map.get("any_of").and_then(Value::as_array) {
+        for sub_schema in any_of {
+            reject_unsupported_mldev_properties(sub_schema)?;
+        }
+    }
+    for key in ["properties", "defs"] {
+        if let Some(sub_map) = map.get(key).and_then(Value::as_object) {
+            for sub_schema in sub_map.values() {
+                reject_unsupported_mldev_properties(sub_schema)?;
+            }
+        }
+    }
+    Ok(())
+}
+
 /// Renames an already-typed `Schema` value's own fields to their wire
-/// (camelCase) spelling (see [`camelize_schema`]), treating an absent
-/// schema as `Null`. Python's Python-type/pydantic-model/enum coercion
-/// (`t_schema`) is not applicable: the Rust API only accepts a
-/// [`crate::types::Schema`] directly, or a JSON Schema built from a Rust
-/// type via `schemars` (see `response_json_schema`). No generated
-/// `_to_mldev` converter exists for `Schema` (Python's `t_schema` does
-/// this renaming itself, via `process_schema` + a final `by_alias=True`
-/// serialization this crate has no equivalent step for), so this
-/// transformer must produce wire casing itself.
+/// (camelCase) spelling (see [`camelize_schema`]) and rejects an
+/// unsupported `additional_properties` (see
+/// [`reject_unsupported_mldev_properties`]), treating an absent schema as
+/// `Null`. Python's Python-type/pydantic-model/enum coercion (`t_schema`
+/// accepting a raw `dict`, a `pydantic.BaseModel` subclass, or an `Enum`
+/// and deriving a JSON Schema from it via `model_json_schema()`) is not
+/// applicable: the Rust API only accepts a [`crate::types::Schema`]
+/// directly, or a JSON Schema built from a Rust type via `schemars` (see
+/// `with_json_schema_of`/`response_json_schema`, handled by
+/// [`t_json_schema`] instead, which needs none of this). For the same
+/// reason, `process_schema`'s `$defs`/`$ref` inlining and its
+/// `PlaceholderLiteralEnum` title-stripping and `const`-to-`enum`
+/// rewriting -- all artifacts of normalizing a `pydantic`
+/// `model_json_schema()` dump, which a hand-built [`crate::types::Schema`]
+/// never produces -- are not applicable either, and `handle_null_fields`
+/// (rewriting a JSON-Schema-style `{"type": "null"}` member of `anyOf`
+/// into `nullable: true`) doesn't apply for the same reason: this crate's
+/// [`crate::types::Type`] already has its own `Null` variant that
+/// serializes directly to the wire `"NULL"` spelling the API expects, with
+/// no `anyOf`/`nullable` rewrite needed.
+///
+/// One divergence from Python is deliberate, not a gap: Python's
+/// `process_schema` auto-populates `property_ordering` from a `properties`
+/// dict's insertion order when the caller left it unset (`schema['property_ordering']
+/// = list(properties.keys())`), relying on Python 3.7+ dicts preserving
+/// insertion order. This crate's [`crate::types::Schema::properties`] is a
+/// `std::collections::HashMap`, which has no defined/stable iteration
+/// order (randomized per-process), so mechanically porting that
+/// auto-population would silently emit a `propertyOrdering` with no
+/// relationship to any order the caller intended, and a different one on
+/// every run -- worse than omitting it. Callers who need deterministic
+/// property ordering (it affects generation quality/determinism for
+/// structured output) must set [`crate::types::Schema::property_ordering`]
+/// explicitly; it passes through unchanged (renamed to `propertyOrdering`)
+/// when set.
 pub(crate) fn t_schema(value: Value) -> Result<Value> {
     if value.is_null() {
         Ok(Value::Null)
     } else {
+        reject_unsupported_mldev_properties(&value)?;
         Ok(camelize_schema(value))
     }
 }
@@ -552,6 +646,59 @@ mod tests {
     #[test]
     fn t_schema_passes_null_through() {
         assert_eq!(t_schema(Value::Null).unwrap(), Value::Null);
+    }
+
+    #[test]
+    fn t_schema_rejects_a_truthy_top_level_additional_properties() {
+        let schema = json!({"type": "OBJECT", "additional_properties": true});
+        let err = t_schema(schema).unwrap_err();
+        assert!(err.to_string().contains("additionalProperties"));
+    }
+
+    #[test]
+    fn t_schema_rejects_a_dict_shaped_additional_properties() {
+        let schema = json!({
+            "type": "OBJECT",
+            "additional_properties": {"type": "STRING"}
+        });
+        assert!(t_schema(schema).is_err());
+    }
+
+    #[test]
+    fn t_schema_allows_an_explicit_false_additional_properties() {
+        // Python's `schema.get(...) or schema.get(...)` truthiness check
+        // treats `False` as falsy, so it doesn't raise; this crate must
+        // match that, not just check field presence.
+        let schema = json!({"type": "OBJECT", "additional_properties": false});
+        assert!(t_schema(schema).is_ok());
+    }
+
+    #[test]
+    fn t_schema_rejects_additional_properties_nested_in_properties() {
+        let schema = json!({
+            "type": "OBJECT",
+            "properties": {
+                "nested": {"type": "OBJECT", "additional_properties": true}
+            }
+        });
+        assert!(t_schema(schema).is_err());
+    }
+
+    #[test]
+    fn t_schema_rejects_additional_properties_nested_in_any_of() {
+        let schema = json!({
+            "any_of": [{"type": "OBJECT", "additional_properties": true}]
+        });
+        assert!(t_schema(schema).is_err());
+    }
+
+    #[test]
+    fn t_schema_rejects_additional_properties_nested_in_items() {
+        let schema = json!({
+            "type": "ARRAY",
+            "items": {"type": "OBJECT", "additional_properties": true}
+        });
+        assert!(t_schema(schema).is_err());
     }
 
     #[test]

@@ -1,0 +1,14 @@
+{
+  "converter": "_ListFilesParameters_to_mldev",
+  "input": {
+    "config": {
+      "page_size": 10
+    }
+  },
+  "expected": {
+    "_query": {
+      "pageSize": 10
+    }
+  },
+  "expected_error": null
+}

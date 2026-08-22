@@ -1,0 +1,16 @@
+{
+  "converter": "_UpdateCachedContentParameters_to_mldev",
+  "input": {
+    "name": "cachedContents/abc123",
+    "config": {
+      "ttl": "7200s"
+    }
+  },
+  "expected": {
+    "_url": {
+      "name": "cachedContents/abc123"
+    },
+    "ttl": "7200s"
+  },
+  "expected_error": null
+}

@@ -1,0 +1,12 @@
+{
+  "converter": "_CreateFileSearchStoreParameters_to_mldev",
+  "input": {
+    "config": {
+      "display_name": "my-store"
+    }
+  },
+  "expected": {
+    "displayName": "my-store"
+  },
+  "expected_error": null
+}

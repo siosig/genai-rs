@@ -2,25 +2,75 @@
 //! Python's `operations.py` `Operations`.
 
 use reqwest::Method;
-use serde::Serialize;
-use serde::de::DeserializeOwned;
 use serde_json::Value;
 
 use crate::client::Client;
 use crate::converters::generated::operations as conv;
+use crate::converters::generated::operations_converters as op_conv;
 use crate::error::{Error, Result};
 
-/// A long-running operation type that carries a resource `name` (e.g.
-/// [`crate::types::GenerateVideosOperation`]). Implemented for every
-/// generated operation-shaped type this crate exposes.
-pub trait OperationLike {
+/// A long-running operation that can be polled via
+/// [`Operations::get`].
+///
+/// Implemented for every operation type this crate's methods return:
+/// [`crate::types::GenerateVideosOperation`] (from
+/// `models().generate_videos`), [`crate::types::ImportFileOperation`] (from
+/// `file_search_stores().import_file`), and
+/// [`crate::types::UploadToFileSearchStoreOperation`] (from
+/// `file_search_stores().upload_to_file_search_store`). Mirrors Python's
+/// `operations.get`, which is generic over `TypeVar('T', bound=types.Operation)`.
+pub trait OperationLike: Sized {
     /// The operation's resource name (e.g. `operations/abc123`).
     fn name(&self) -> Option<&str>;
+
+    /// Rebuilds this operation from a raw poll response body.
+    ///
+    /// Mirrors Python's `Operation.from_api_response` classmethod, which
+    /// dispatches to the *type-specific* `_X_Operation_from_mldev`
+    /// converter. That step is load-bearing, not cosmetic: the wire shape
+    /// nests the payload under keys the Rust type doesn't name directly
+    /// (e.g. a completed video operation arrives as
+    /// `response.generateVideoResponse.generatedSamples[]`, which the
+    /// converter remaps onto `response.generated_videos[]`), so
+    /// deserializing the raw body would silently yield an operation with
+    /// an empty result.
+    ///
+    /// # Errors
+    /// Returns [`crate::Error::Json`] if `wire` doesn't match this
+    /// operation's expected shape.
+    fn from_api_response(wire: &Value) -> Result<Self>;
 }
 
 impl OperationLike for crate::types::GenerateVideosOperation {
     fn name(&self) -> Option<&str> {
         self.name.as_deref()
+    }
+
+    fn from_api_response(wire: &Value) -> Result<Self> {
+        let mldev = op_conv::generate_videos_operation_from_mldev(wire, None, None)?;
+        Ok(serde_json::from_value(mldev)?)
+    }
+}
+
+impl OperationLike for crate::types::ImportFileOperation {
+    fn name(&self) -> Option<&str> {
+        self.name.as_deref()
+    }
+
+    fn from_api_response(wire: &Value) -> Result<Self> {
+        let mldev = op_conv::import_file_operation_from_mldev(wire, None, None)?;
+        Ok(serde_json::from_value(mldev)?)
+    }
+}
+
+impl OperationLike for crate::types::UploadToFileSearchStoreOperation {
+    fn name(&self) -> Option<&str> {
+        self.name.as_deref()
+    }
+
+    fn from_api_response(wire: &Value) -> Result<Self> {
+        let mldev = op_conv::upload_to_file_search_store_operation_from_mldev(wire, None, None)?;
+        Ok(serde_json::from_value(mldev)?)
     }
 }
 
@@ -45,7 +95,7 @@ impl Operations {
     /// converter, not a runtime condition a caller can trigger.
     pub async fn get<T>(&self, operation: &T) -> Result<T>
     where
-        T: OperationLike + Serialize + DeserializeOwned,
+        T: OperationLike,
     {
         let name = operation
             .name()
@@ -67,7 +117,7 @@ impl Operations {
             .request(Method::GET, &operation_name, None, None, None)
             .await?;
         let wire: Value = serde_json::from_slice(&response.body)?;
-        Ok(serde_json::from_value(wire)?)
+        T::from_api_response(&wire)
     }
 }
 
@@ -99,7 +149,7 @@ mod tests {
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
                 "name": "operations/abc123",
                 "done": true,
-                "response": {"generatedVideos": []}
+                "response": {"generateVideoResponse": {"generatedSamples": []}}
             })))
             .expect(1)
             .mount(&server)

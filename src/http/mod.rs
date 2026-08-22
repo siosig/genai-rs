@@ -10,12 +10,12 @@ pub(crate) mod upload;
 use std::collections::HashMap;
 use std::time::Duration;
 
-use backon::{ExponentialBuilder, Retryable};
+use backon::Retryable;
 use bytes::Bytes;
 use futures_core::Stream;
 use reqwest::{Method, StatusCode};
 use secrecy::{ExposeSecret, SecretString};
-use serde_json::Value;
+use serde_json::{Map, Value};
 
 use crate::error::{ApiError, Error};
 use crate::types::HttpOptions;
@@ -37,6 +37,58 @@ pub(crate) struct HttpResponse {
     pub status: StatusCode,
     pub headers: HashMap<String, String>,
     pub body: Bytes,
+}
+
+/// Normalizes a JSON key for case- and separator-insensitive matching, so
+/// `topP`, `top_p` and `TOPP` all collide. Ports Python's
+/// `_common._normalize_key_for_matching`.
+fn normalize_key_for_matching(key: &str) -> String {
+    key.replace('_', "").to_lowercase()
+}
+
+/// Recursively merges `update` into `target`, matching Python's
+/// `_common.recursive_dict_update`.
+///
+/// Two behaviours here are load-bearing rather than incidental, and both
+/// come from the Python original:
+///
+/// - **Nested objects merge instead of replacing.** `extra_body` is how a
+///   caller reaches a request field this crate's typed config doesn't model
+///   yet, and those fields usually sit *inside* an existing object (e.g. a
+///   new knob under `generationConfig`). A shallow insert would drop every
+///   sibling the converters had already written.
+/// - **Keys are aligned to the casing already present in the request.** The
+///   body a converter produced uses wire casing (`generationConfig`), but a
+///   caller writing `extra_body` by hand may reasonably use the Rust field
+///   spelling (`generation_config`). Python reconciles the two before
+///   merging (`_common.align_key_case`); without that, the two spellings
+///   would both be sent and the server would see a duplicate.
+///
+/// Lists are replaced wholesale, not concatenated -- also matching Python,
+/// which treats an `extra_body` list as the authoritative value.
+fn recursive_body_update(target: &mut Map<String, Value>, update: &Map<String, Value>) {
+    // Existing keys, indexed by their normalized form, so an update written
+    // in the other casing still lands on the same field.
+    let existing: HashMap<String, String> = target
+        .keys()
+        .map(|key| (normalize_key_for_matching(key), key.clone()))
+        .collect();
+
+    for (key, value) in update {
+        let aligned = existing
+            .get(&normalize_key_for_matching(key))
+            .cloned()
+            .unwrap_or_else(|| key.clone());
+
+        match (target.get_mut(&aligned), value) {
+            (Some(Value::Object(nested_target)), Value::Object(nested_update)) => {
+                recursive_body_update(nested_target, nested_update);
+            }
+            _ => {
+                target.insert(aligned, value.clone());
+            }
+        }
+    }
 }
 
 impl HttpResponse {
@@ -142,10 +194,8 @@ impl HttpClient {
             return body;
         };
         let mut merged = body;
-        if let (Value::Object(base), extra) = (&mut merged, extra) {
-            for (key, value) in extra {
-                base.insert(key.clone(), value.clone());
-            }
+        if let Value::Object(base) = &mut merged {
+            recursive_body_update(base, extra);
         }
         merged
     }
@@ -225,17 +275,7 @@ impl HttpClient {
         let policy = self.retry_policy(per_request);
         let timeout = self.timeout(per_request);
 
-        #[expect(
-            clippy::cast_possible_truncation,
-            reason = "exp_base is a small config value (typically 1.5-3.0); f32 precision is more than sufficient for exponential-backoff multiplier math"
-        )]
-        let exp_base = policy.exp_base as f32;
-        let backoff = ExponentialBuilder::default()
-            .with_min_delay(policy.initial_delay)
-            .with_max_delay(policy.max_delay)
-            .with_factor(exp_base)
-            .with_jitter()
-            .with_max_times(policy.attempts.saturating_sub(1) as usize);
+        let backoff = retry::JitteredBackoff::new(&policy);
 
         (|| self.send_once(&method, &url, &headers, body.as_ref(), timeout))
             .retry(backoff)
@@ -317,11 +357,11 @@ impl HttpClient {
 #[cfg(test)]
 mod tests {
     use secrecy::SecretString;
-    use serde_json::json;
-    use wiremock::matchers::{header, method, path};
+    use serde_json::{Value, json};
+    use wiremock::matchers::{body_json, header, method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
-    use super::HttpClient;
+    use super::{HttpClient, recursive_body_update};
     use crate::error::Error;
     use crate::types::{HttpOptions, HttpRetryOptions};
 
@@ -456,11 +496,83 @@ mod tests {
         server.verify().await;
     }
 
+    #[test]
+    fn recursive_body_update_merges_nested_objects_and_aligns_key_case() {
+        let mut target = json!({
+            "model": "models/x",
+            "generationConfig": {"temperature": 0.5, "maxOutputTokens": 1024},
+        });
+        let update = json!({
+            "extraField": "value",
+            // Rust field casing; must land on the existing wire-cased keys
+            // rather than adding a second, duplicate spelling.
+            "generation_config": {"top_p": 0.9, "max_output_tokens": 2048},
+        });
+        let Value::Object(target_map) = &mut target else {
+            unreachable!()
+        };
+        let Value::Object(update_map) = &update else {
+            unreachable!()
+        };
+        recursive_body_update(target_map, update_map);
+
+        assert_eq!(
+            target,
+            json!({
+                "model": "models/x",
+                "generationConfig": {
+                    // Sibling survived the nested override.
+                    "temperature": 0.5,
+                    // Aligned onto the existing wire-cased key and overrode it.
+                    "maxOutputTokens": 2048,
+                    // No `topP` existed to align onto, so the caller's own
+                    // spelling is kept verbatim -- confirmed byte-identical to
+                    // Python's `_common.recursive_dict_update` for this input.
+                    "top_p": 0.9,
+                },
+                "extraField": "value",
+            })
+        );
+    }
+
+    #[test]
+    fn recursive_body_update_replaces_lists_wholesale() {
+        // Matches Python, which treats an `extra_body` list as authoritative
+        // rather than concatenating.
+        let mut target = json!({"stopSequences": ["a", "b"]});
+        let update = json!({"stopSequences": ["z"]});
+        let Value::Object(target_map) = &mut target else {
+            unreachable!()
+        };
+        let Value::Object(update_map) = &update else {
+            unreachable!()
+        };
+        recursive_body_update(target_map, update_map);
+        assert_eq!(target, json!({"stopSequences": ["z"]}));
+    }
+
     #[tokio::test]
     async fn extra_body_is_deep_merged_into_request_body() {
         let server = MockServer::start().await;
+        // The previous version of this test only counted requests, so it
+        // passed even while `merged_body` was doing a shallow insert that
+        // dropped every sibling of an overridden nested object. Assert the
+        // exact body instead.
         Mock::given(method("POST"))
             .and(path("/x"))
+            .and(body_json(json!({
+                // Untouched top-level field survives.
+                "model": "models/x",
+                // Nested object is *merged*: `temperature` is still there,
+                // `topP` was added, `maxOutputTokens` was overridden.
+                "generationConfig": {
+                    "temperature": 0.5,
+                    "maxOutputTokens": 2048,
+                    "top_p": 0.9,
+                },
+                // A brand-new top-level field is added.
+                "extraField": "value",
+            })))
             .respond_with(ResponseTemplate::new(200).set_body_json(json!({})))
             .expect(1)
             .mount(&server)
@@ -468,6 +580,13 @@ mod tests {
 
         let mut extra = serde_json::Map::new();
         extra.insert("extraField".to_owned(), json!("value"));
+        // Written in Rust field casing (`generation_config` / `top_p`) to
+        // prove key alignment against the request's wire casing, matching
+        // Python's `_common.align_key_case`.
+        extra.insert(
+            "generation_config".to_owned(),
+            json!({"top_p": 0.9, "max_output_tokens": 2048}),
+        );
         let options = HttpOptions {
             extra_body: Some(extra),
             ..Default::default()
@@ -478,7 +597,10 @@ mod tests {
                 reqwest::Method::POST,
                 "x",
                 None,
-                Some(json!({"a": 1})),
+                Some(json!({
+                    "model": "models/x",
+                    "generationConfig": {"temperature": 0.5, "maxOutputTokens": 1024},
+                })),
                 None,
             )
             .await

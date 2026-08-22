@@ -1,0 +1,118 @@
+{
+  "converter": "_GenerateContentParameters_to_mldev",
+  "input": {
+    "model": "gemini-2.0-flash",
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Hello"
+          }
+        ]
+      }
+    ],
+    "config": {
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "top_k": 40,
+      "candidate_count": 2,
+      "max_output_tokens": 256,
+      "stop_sequences": [
+        "STOP"
+      ],
+      "system_instruction": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Be nice"
+          }
+        ]
+      },
+      "safety_settings": [
+        {
+          "category": "HARM_CATEGORY_HARASSMENT",
+          "threshold": "BLOCK_ONLY_HIGH"
+        }
+      ],
+      "tools": [
+        {
+          "function_declarations": [
+            {
+              "name": "get_weather",
+              "description": "gets the weather",
+              "parameters": {
+                "type": "OBJECT",
+                "properties": {
+                  "location": {
+                    "type": "STRING"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "response_mime_type": "application/json"
+    }
+  },
+  "expected": {
+    "_url": {
+      "model": "models/gemini-2.0-flash"
+    },
+    "contents": [
+      {
+        "parts": [
+          {
+            "text": "Hello"
+          }
+        ],
+        "role": "user"
+      }
+    ],
+    "systemInstruction": {
+      "parts": [
+        {
+          "text": "Be nice"
+        }
+      ],
+      "role": "user"
+    },
+    "safetySettings": [
+      {
+        "category": "HARM_CATEGORY_HARASSMENT",
+        "threshold": "BLOCK_ONLY_HIGH"
+      }
+    ],
+    "tools": [
+      {
+        "functionDeclarations": [
+          {
+            "description": "gets the weather",
+            "name": "get_weather",
+            "parameters": {
+              "properties": {
+                "location": {
+                  "type": "STRING"
+                }
+              },
+              "type": "OBJECT"
+            }
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "temperature": 0.7,
+      "topP": 0.9,
+      "topK": 40,
+      "candidateCount": 2,
+      "maxOutputTokens": 256,
+      "stopSequences": [
+        "STOP"
+      ],
+      "responseMimeType": "application/json"
+    }
+  },
+  "expected_error": null
+}

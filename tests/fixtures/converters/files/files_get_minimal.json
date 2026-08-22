@@ -1,0 +1,12 @@
+{
+  "converter": "_GetFileParameters_to_mldev",
+  "input": {
+    "name": "files/abc123"
+  },
+  "expected": {
+    "_url": {
+      "file": "abc123"
+    }
+  },
+  "expected_error": null
+}

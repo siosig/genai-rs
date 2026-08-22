@@ -1,0 +1,52 @@
+{
+  "converter": "_CreateCachedContentParameters_to_mldev",
+  "input": {
+    "model": "models/gemini-2.0-flash-001",
+    "config": {
+      "contents": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "cache me"
+            }
+          ]
+        }
+      ],
+      "system_instruction": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "sys"
+          }
+        ]
+      },
+      "ttl": "3600s",
+      "display_name": "my-cache"
+    }
+  },
+  "expected": {
+    "model": "models/gemini-2.0-flash-001",
+    "ttl": "3600s",
+    "displayName": "my-cache",
+    "contents": [
+      {
+        "parts": [
+          {
+            "text": "cache me"
+          }
+        ],
+        "role": "user"
+      }
+    ],
+    "systemInstruction": {
+      "parts": [
+        {
+          "text": "sys"
+        }
+      ],
+      "role": "user"
+    }
+  },
+  "expected_error": null
+}

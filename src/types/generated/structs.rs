@@ -153,6 +153,7 @@ pub struct AudioResponseFormat {
     /// Optional. Bit rate in bits per second (bps). Only applicable for compressed formats (MP3, Opus).
     #[serde(alias = "bitRate")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub bit_rate: Option<i64>,
     /// Optional. Delivery mode for the generated content.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -164,6 +165,7 @@ pub struct AudioResponseFormat {
     /// Optional. Sample rate for the generated audio in Hertz.
     #[serde(alias = "sampleRate")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub sample_rate: Option<i64>,
 }
 
@@ -305,6 +307,7 @@ pub struct AuthToken {
     pub new_session_expire_time: Option<String>,
     /// Optional. Input only. Immutable. The number of times the token can be used. If this value is zero then no limit is applied. Resuming a Live API session does not count as a use. If unspecified, the default is 1.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub uses: Option<i64>,
 }
 
@@ -326,10 +329,12 @@ pub struct AutomaticActivityDetection {
     /// The required duration of detected speech before start-of-speech is committed. The lower this value the more sensitive the start-of-speech detection is and the shorter speech can be recognized. However, this also increases the probability of false positives.
     #[serde(alias = "prefixPaddingMs")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub prefix_padding_ms: Option<i64>,
     /// The required duration of detected non-speech (e.g. silence) before end-of-speech is committed. The larger this value, the longer speech gaps can be without interrupting the user's activity but this will increase the model's latency.
     #[serde(alias = "silenceDurationMs")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub silence_duration_ms: Option<i64>,
 }
 
@@ -348,6 +353,7 @@ pub struct AutomaticFunctionCallingConfig {
     /// If not set, SDK will set maximum number of remote calls to 10.
     #[serde(alias = "maximumRemoteCalls")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub maximum_remote_calls: Option<i64>,
     /// If automatic function calling is enabled,
     /// whether to ignore call history to the response.
@@ -368,6 +374,7 @@ pub struct AutoraterConfig {
     /// is 32.
     #[serde(alias = "samplingCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub sampling_count: Option<i64>,
     /// Optional. Default is true. Whether to flip the candidate and baseline
     /// responses. This is only applicable to the pairwise metric. If enabled, also
@@ -410,10 +417,12 @@ pub struct AvatarConfig {
     /// The bitrate of compressed audio.
     #[serde(alias = "audioBitrateBps")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub audio_bitrate_bps: Option<i64>,
     /// The bitrate of compressed video output.
     #[serde(alias = "videoBitrateBps")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub video_bitrate_bps: Option<i64>,
 }
 
@@ -653,22 +662,27 @@ pub struct CachedContentUsageMetadata {
     /// Duration of audio in seconds. This field is not supported in Gemini API.
     #[serde(alias = "audioDurationSeconds")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub audio_duration_seconds: Option<i64>,
     /// Number of images. This field is not supported in Gemini API.
     #[serde(alias = "imageCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub image_count: Option<i64>,
     /// Number of text characters. This field is not supported in Gemini API.
     #[serde(alias = "textCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub text_count: Option<i64>,
     /// Total number of tokens that the cached content consumes.
     #[serde(alias = "totalTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub total_token_count: Option<i64>,
     /// Duration of video in seconds. This field is not supported in Gemini API.
     #[serde(alias = "videoDurationSeconds")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub video_duration_seconds: Option<i64>,
 }
 
@@ -720,6 +734,7 @@ pub struct Candidate {
     /// Number of tokens for this candidate.
     #[serde(alias = "tokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub token_count: Option<i64>,
     /// The reason why the model stopped generating tokens.
     /// If empty, the model has not stopped generating the tokens.
@@ -737,6 +752,7 @@ pub struct Candidate {
     pub avg_logprobs: Option<f64>,
     /// Output only. The 0-based index of this candidate in the list of generated responses. This is useful for distinguishing between multiple candidates when `candidate_count` > 1.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub index: Option<i64>,
     /// Output only. The detailed log probability information for the tokens in this candidate. This is useful for debugging, understanding model uncertainty, and identifying potential "hallucinations".
     #[serde(alias = "logprobsResult")]
@@ -762,9 +778,11 @@ pub struct Checkpoint {
     pub checkpoint_id: Option<String>,
     /// The epoch of the checkpoint.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub epoch: Option<i64>,
     /// The step of the checkpoint.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub step: Option<i64>,
 }
 
@@ -787,6 +805,7 @@ pub struct Citation {
     /// Output only. The end index of the citation in the content.
     #[serde(alias = "endIndex")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub end_index: Option<i64>,
     /// Output only. The license of the source of the citation.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -798,6 +817,7 @@ pub struct Citation {
     /// Output only. The start index of the citation in the content.
     #[serde(alias = "startIndex")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub start_index: Option<i64>,
     /// Output only. The title of the source of the citation.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -844,18 +864,22 @@ pub struct CompletionStats {
     /// Output only. The number of entities for which any error was encountered.
     #[serde(alias = "failedCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub failed_count: Option<i64>,
     /// Output only. In cases when enough errors are encountered a job, pipeline, or operation may be failed as a whole. Below is the number of entities for which the processing had not been finished (either in successful or failed state). Set to -1 if the number is unknown (for example, the operation failed before the total entity number could be collected).
     #[serde(alias = "incompleteCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub incomplete_count: Option<i64>,
     /// Output only. The number of entities that had been processed successfully.
     #[serde(alias = "successfulCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub successful_count: Option<i64>,
     /// Output only. The number of the successful forecast points that are generated by the forecasting model. This is ONLY used by the forecasting batch prediction.
     #[serde(alias = "successfulForecastPointCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub successful_forecast_point_count: Option<i64>,
 }
 
@@ -1009,6 +1033,7 @@ pub struct ContentReferenceImage {
     /// The id of the reference image.
     #[serde(alias = "referenceId")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub reference_id: Option<i64>,
     /// The type of the reference image. Only set by the SDK.
     #[serde(alias = "referenceType")]
@@ -1023,6 +1048,7 @@ pub struct ContextWindowCompressionConfig {
     /// Number of tokens (before running turn) that triggers context window compression mechanism.
     #[serde(alias = "triggerTokens")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub trigger_tokens: Option<i64>,
     /// Sliding window compression mechanism.
     #[serde(alias = "slidingWindow")]
@@ -1065,6 +1091,7 @@ pub struct ControlReferenceImage {
     /// The id of the reference image.
     #[serde(alias = "referenceId")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub reference_id: Option<i64>,
     /// The type of the reference image. Only set by the SDK.
     #[serde(alias = "referenceType")]
@@ -1113,10 +1140,12 @@ pub struct CountTokensResponse {
     /// Total number of tokens.
     #[serde(alias = "totalTokens")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub total_tokens: Option<i64>,
     /// Number of tokens in the cached part of the prompt (the cached content).
     #[serde(alias = "cachedContentTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub cached_content_token_count: Option<i64>,
 }
 
@@ -1127,6 +1156,7 @@ pub struct CountTokensResult {
     /// The total number of tokens.
     #[serde(alias = "totalTokens")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub total_tokens: Option<i64>,
 }
 
@@ -1159,6 +1189,7 @@ pub struct CreateAuthTokenConfig {
     /// then no limit is applied. Default is 1. Resuming a Live API session does
     /// not count as a use.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub uses: Option<i64>,
     /// Configuration specific to Live API connections created using this token.
     #[serde(alias = "liveConnectConstraints")]
@@ -1330,6 +1361,7 @@ pub struct CreateTuningJobConfig {
     /// Number of complete passes the model makes over the entire training dataset during training.
     #[serde(alias = "epochCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub epoch_count: Option<i64>,
     /// Multiplier for adjusting the default learning rate. 1P models only. Mutually exclusive with learning_rate.
     #[serde(alias = "learningRateMultiplier")]
@@ -1358,6 +1390,7 @@ pub struct CreateTuningJobConfig {
     /// The batch size hyperparameter for tuning. This is only supported for OSS models in Gemini Enterprise Agent Platform.
     #[serde(alias = "batchSize")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub batch_size: Option<i64>,
     /// The learning rate for tuning. OSS models only. Mutually exclusive with learning_rate_multiplier.
     #[serde(alias = "learningRate")]
@@ -1404,18 +1437,22 @@ pub struct CreateTuningJobConfig {
     /// Number of different responses to generate per prompt during tuning. Reinforcement tuning only.
     #[serde(alias = "samplesPerPrompt")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub samples_per_prompt: Option<i64>,
     /// How often at steps to evaluate the tuning job during training. Reinforcement tuning only.
     #[serde(alias = "evaluateInterval")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub evaluate_interval: Option<i64>,
     /// How often at steps to save checkpoints during training. Reinforcement tuning only.
     #[serde(alias = "checkpointInterval")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub checkpoint_interval: Option<i64>,
     /// The maximum number of tokens to generate per prompt. Reinforcement tuning only.
     #[serde(alias = "maxOutputTokens")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_output_tokens: Option<i64>,
     /// Indicates the maximum thinking depth. Use with earlier models shall result in error. Reinforcement tuning only.
     #[serde(alias = "thinkingLevel")]
@@ -1569,6 +1606,7 @@ pub struct DatasetDistribution {
 pub struct DatasetDistributionDistributionBucket {
     /// Output only. Number of values in the bucket.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub count: Option<i64>,
     /// Output only. Left bound of the bucket.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1587,6 +1625,7 @@ pub struct DatasetStats {
     /// Output only. A partial sample of the indices (starting from 1) of the dropped examples.
     #[serde(alias = "droppedExampleIndices")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<Vec<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>>")]
     pub dropped_example_indices: Option<Vec<i64>>,
     /// Output only. For each index in `dropped_example_indices`, the user-facing reason why the example was dropped.
     #[serde(alias = "droppedExampleReasons")]
@@ -1595,18 +1634,22 @@ pub struct DatasetStats {
     /// Output only. Number of billable characters in the tuning dataset.
     #[serde(alias = "totalBillableCharacterCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub total_billable_character_count: Option<i64>,
     /// Output only. Number of tuning characters in the tuning dataset.
     #[serde(alias = "totalTuningCharacterCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub total_tuning_character_count: Option<i64>,
     /// Output only. Number of examples in the tuning dataset.
     #[serde(alias = "tuningDatasetExampleCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub tuning_dataset_example_count: Option<i64>,
     /// Output only. Number of tuning steps for this Tuning Job.
     #[serde(alias = "tuningStepCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub tuning_step_count: Option<i64>,
     /// Output only. Sample user messages in the training dataset uri.
     #[serde(alias = "userDatasetExamples")]
@@ -1636,6 +1679,7 @@ pub struct DatasetStats {
     /// Output only. Number of billable tokens in the tuning dataset.
     #[serde(alias = "totalBillableTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub total_billable_token_count: Option<i64>,
 }
 
@@ -1813,6 +1857,7 @@ pub struct DistillationHyperParameters {
     /// during training.
     #[serde(alias = "epochCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub epoch_count: Option<i64>,
     /// Multiplier for adjusting the default learning rate.
     #[serde(alias = "learningRateMultiplier")]
@@ -1836,6 +1881,7 @@ pub struct DistillationHyperParameters {
     /// source models.
     #[serde(alias = "batchSize")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub batch_size: Option<i64>,
 }
 
@@ -1927,6 +1973,7 @@ pub struct Document {
     /// Output only. The size of raw bytes ingested into the Document.
     #[serde(alias = "sizeBytes")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub size_bytes: Option<i64>,
     /// Output only. The mime type of the Document.
     #[serde(alias = "mimeType")]
@@ -1998,6 +2045,7 @@ pub struct EditImageConfig {
     /// Number of images to generate.
     #[serde(alias = "numberOfImages")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub number_of_images: Option<i64>,
     /// Aspect ratio of the generated images. Supported values are
     /// "1:1", "3:4", "4:3", "9:16", and "16:9".
@@ -2013,6 +2061,7 @@ pub struct EditImageConfig {
     /// Random seed for image generation. This is not available when
     /// ``add_watermark`` is set to true.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub seed: Option<i64>,
     /// Filter level for safety filtering.
     #[serde(alias = "safetyFilterLevel")]
@@ -2043,6 +2092,7 @@ pub struct EditImageConfig {
     /// only).
     #[serde(alias = "outputCompressionQuality")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub output_compression_quality: Option<i64>,
     /// Whether to add a watermark to the generated images.
     #[serde(alias = "addWatermark")]
@@ -2059,6 +2109,7 @@ pub struct EditImageConfig {
     /// quality, while a lower value has better latency.
     #[serde(alias = "baseSteps")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub base_steps: Option<i64>,
 }
 
@@ -2106,6 +2157,7 @@ pub struct EmbedContentConfig {
     /// using the earlier model (`models/embedding-001`).
     #[serde(alias = "outputDimensionality")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub output_dimensionality: Option<i64>,
     /// Gemini Enterprise Agent Platform only. The MIME type of the input.
     #[serde(alias = "mimeType")]
@@ -2141,6 +2193,7 @@ pub struct EmbedContentMetadata {
     /// in the request.
     #[serde(alias = "billableCharacterCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub billable_character_count: Option<i64>,
 }
 
@@ -2457,6 +2510,7 @@ pub struct ExternalApiElasticSearchParams {
     /// Optional. Number of hits (chunks) to request. When specified, it is passed to Elasticsearch as the `num_hits` param.
     #[serde(alias = "numHits")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub num_hits: Option<i64>,
     /// The ElasticSearch search template to use.
     #[serde(alias = "searchTemplate")]
@@ -2530,6 +2584,7 @@ pub struct File {
     /// Output only. Size of the file in bytes.
     #[serde(alias = "sizeBytes")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub size_bytes: Option<i64>,
     /// Output only. The timestamp of when the `File` was created.
     #[serde(alias = "createTime")]
@@ -2605,6 +2660,7 @@ pub struct FileSearch {
     /// Optional. The number of semantic retrieval chunks to retrieve.
     #[serde(alias = "topK")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub top_k: Option<i64>,
     /// Optional. Metadata filter to apply to the semantic retrieval documents and chunks.
     #[serde(alias = "metadataFilter")]
@@ -2634,18 +2690,22 @@ pub struct FileSearchStore {
     /// Output only. The number of documents in the `FileSearchStore` that are active and ready for retrieval.
     #[serde(alias = "activeDocumentsCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub active_documents_count: Option<i64>,
     /// Output only. The number of documents in the `FileSearchStore` that are being processed.
     #[serde(alias = "pendingDocumentsCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub pending_documents_count: Option<i64>,
     /// Output only. The number of documents in the `FileSearchStore` that have failed processing.
     #[serde(alias = "failedDocumentsCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub failed_documents_count: Option<i64>,
     /// Output only. The size of raw bytes ingested into the `FileSearchStore`. This is the total size of all the documents in the `FileSearchStore`.
     #[serde(alias = "sizeBytes")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub size_bytes: Option<i64>,
     /// The embedding model used by the FileSearchStore.
     #[serde(alias = "embeddingModel")]
@@ -2665,6 +2725,7 @@ pub struct FileStatus {
     pub message: Option<String>,
     /// The status code. 0 for OK, 1 for CANCELLED
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub code: Option<i64>,
 }
 
@@ -2942,10 +3003,12 @@ pub struct GenerateContentConfig {
     /// Number of response variations to return.
     #[serde(alias = "candidateCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub candidate_count: Option<i64>,
     /// Maximum number of tokens that can be generated in the response.
     #[serde(alias = "maxOutputTokens")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_output_tokens: Option<i64>,
     /// List of strings that tells the model to stop generating text if one
     /// of the strings is encountered in the response.
@@ -2960,6 +3023,7 @@ pub struct GenerateContentConfig {
     /// Number of top candidate tokens to return the log probabilities for
     /// at each generation step.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub logprobs: Option<i64>,
     /// Positive values penalize tokens that already appear in the
     /// generated text, increasing the probability of generating more diverse
@@ -2977,6 +3041,7 @@ pub struct GenerateContentConfig {
     /// effort to provide the same response for repeated requests. By default, a
     /// random number is used.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub seed: Option<i64>,
     /// Output response mimetype of the generated candidate text.
     /// Supported mimetype:
@@ -3172,10 +3237,12 @@ pub struct GenerateContentResponseUsageMetadata {
     /// Output only. The number of tokens in the cached content that was used for this request.
     #[serde(alias = "cachedContentTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub cached_content_token_count: Option<i64>,
     /// The total number of tokens in the generated candidates.
     #[serde(alias = "candidatesTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub candidates_token_count: Option<i64>,
     /// Output only. A detailed breakdown of the token count for each modality in the generated candidates.
     #[serde(alias = "candidatesTokensDetails")]
@@ -3184,6 +3251,7 @@ pub struct GenerateContentResponseUsageMetadata {
     /// The total number of tokens in the prompt. This includes any text, images, or other media provided in the request. When `cached_content` is set, this also includes the number of tokens in the cached content.
     #[serde(alias = "promptTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub prompt_token_count: Option<i64>,
     /// Output only. A detailed breakdown of the token count for each modality in the prompt.
     #[serde(alias = "promptTokensDetails")]
@@ -3192,10 +3260,12 @@ pub struct GenerateContentResponseUsageMetadata {
     /// Output only. The number of tokens that were part of the model's generated "thoughts" output, if applicable.
     #[serde(alias = "thoughtsTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub thoughts_token_count: Option<i64>,
     /// Output only. The number of tokens in the results from tool executions, which are provided back to the model as input, if applicable.
     #[serde(alias = "toolUsePromptTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub tool_use_prompt_token_count: Option<i64>,
     /// Output only. A detailed breakdown by modality of the token counts from the results of tool executions, which are provided back to the model as input.
     #[serde(alias = "toolUsePromptTokensDetails")]
@@ -3204,6 +3274,7 @@ pub struct GenerateContentResponseUsageMetadata {
     /// The total number of tokens for the entire request. This is the sum of `prompt_token_count`, `candidates_token_count`, `tool_use_prompt_token_count`, and `thoughts_token_count`.
     #[serde(alias = "totalTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub total_token_count: Option<i64>,
     /// Output only. The traffic type for this request.
     #[serde(alias = "trafficType")]
@@ -3230,6 +3301,7 @@ pub struct GenerateImagesConfig {
     /// Number of images to generate.
     #[serde(alias = "numberOfImages")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub number_of_images: Option<i64>,
     /// Aspect ratio of the generated images. Supported values are
     /// "1:1", "3:4", "4:3", "9:16", and "16:9".
@@ -3245,6 +3317,7 @@ pub struct GenerateImagesConfig {
     /// Random seed for image generation. This is not available when
     /// ``add_watermark`` is set to true.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub seed: Option<i64>,
     /// Filter level for safety filtering.
     #[serde(alias = "safetyFilterLevel")]
@@ -3275,6 +3348,7 @@ pub struct GenerateImagesConfig {
     /// only).
     #[serde(alias = "outputCompressionQuality")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub output_compression_quality: Option<i64>,
     /// Whether to add a watermark to the generated images.
     #[serde(alias = "addWatermark")]
@@ -3324,6 +3398,7 @@ pub struct GenerateVideosConfig {
     /// Number of output videos.
     #[serde(alias = "numberOfVideos")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub number_of_videos: Option<i64>,
     /// The gcs bucket where to save the generated videos.
     #[serde(alias = "outputGcsUri")]
@@ -3331,16 +3406,19 @@ pub struct GenerateVideosConfig {
     pub output_gcs_uri: Option<String>,
     /// Frames per second for video generation.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub fps: Option<i64>,
     /// Duration of the clip for video generation in seconds.
     #[serde(alias = "durationSeconds")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub duration_seconds: Option<i64>,
     /// The RNG seed. If RNG seed is exactly same for each request with
     /// unchanged inputs, the prediction results will be consistent. Otherwise,
     /// a random RNG seed will be used each time to produce a different
     /// result.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub seed: Option<i64>,
     /// The aspect ratio for the generated video. 16:9 (landscape) and
     /// 9:16 (portrait) are supported.
@@ -3443,6 +3521,7 @@ pub struct GenerateVideosResponse {
     /// Returns if any videos were filtered due to RAI policies.
     #[serde(alias = "raiMediaFilteredCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub rai_media_filtered_count: Option<i64>,
     /// Returns rai failure reasons if any.
     #[serde(alias = "raiMediaFilteredReasons")]
@@ -3533,6 +3612,7 @@ pub struct GenerationConfig {
     /// Optional. The number of candidate responses to generate. A higher `candidate_count` can provide more options to choose from, but it also consumes more resources. This can be useful for generating a variety of responses and selecting the best one.
     #[serde(alias = "candidateCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub candidate_count: Option<i64>,
     /// Optional. If enabled, the model will detect emotions and adapt its responses accordingly. For example, if the model detects that the user is frustrated, it may provide a more empathetic response.
     #[serde(alias = "enableAffectiveDialog")]
@@ -3544,10 +3624,12 @@ pub struct GenerationConfig {
     pub frequency_penalty: Option<f64>,
     /// Optional. The number of top log probabilities to return for each token. This can be used to see which other tokens were considered likely candidates for a given position. A higher value will return more options, but it will also increase the size of the response.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub logprobs: Option<i64>,
     /// Optional. The maximum number of tokens to generate in the response. A token is approximately four characters. The default value varies by model. This parameter can be used to control the length of the generated text and prevent overly long responses.
     #[serde(alias = "maxOutputTokens")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_output_tokens: Option<i64>,
     /// Optional. The token resolution at which input media content is sampled. This is used to control the trade-off between the quality of the response and the number of tokens used to represent the media. A higher resolution allows the model to perceive more detail, which can lead to a more nuanced response, but it will also use more tokens. This does not affect the image dimensions sent to the model.
     #[serde(alias = "mediaResolution")]
@@ -3579,6 +3661,7 @@ pub struct GenerationConfig {
     pub routing_config: Option<crate::types::GenerationConfigRoutingConfig>,
     /// Optional. A seed for the random number generator. By setting a seed, you can make the model's output mostly deterministic. For a given prompt and parameters (like temperature, top_p, etc.), the model will produce the same response every time. However, it's not a guaranteed absolute deterministic behavior. This is different from parameters like `temperature`, which control the *level* of randomness. `seed` ensures that the "random" choices the model makes are the same on every run, making it essential for testing and ensuring reproducible results.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub seed: Option<i64>,
     /// Optional. The speech generation config.
     #[serde(alias = "speechConfig")]
@@ -3680,6 +3763,7 @@ pub struct GenerationConfigThinkingConfig {
     /// Indicates the thinking budget in tokens. 0 is DISABLED. -1 is AUTOMATIC. The default values and allowed ranges are model dependent.
     #[serde(alias = "thinkingBudget")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub thinking_budget: Option<i64>,
     /// Optional. The number of thoughts tokens that the model should generate.
     #[serde(alias = "thinkingLevel")]
@@ -3857,6 +3941,7 @@ pub struct GoogleMapsRouting {}
 pub struct GoogleRpcStatus {
     /// The status code, which should be an enum value of google.rpc.Code.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub code: Option<i64>,
     /// A list of messages that carry the error details. There is a common set of message types for APIs to use.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -3915,12 +4000,15 @@ pub struct GoogleSearchRetrieval {
 pub struct GoogleTypeDate {
     /// Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub day: Option<i64>,
     /// Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub month: Option<i64>,
     /// Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub year: Option<i64>,
 }
 
@@ -4113,6 +4201,7 @@ pub struct GroundingChunkMapsRoute {
     /// The total distance of the route, in meters.
     #[serde(alias = "distanceMeters")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub distance_meters: Option<i64>,
     /// The total duration of the route.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -4158,6 +4247,7 @@ pub struct GroundingChunkRetrievedContext {
     /// Optional. Page number of the retrieved context, if applicable. This field is not supported in Vertex AI.
     #[serde(alias = "pageNumber")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub page_number: Option<i64>,
     /// Optional. The media blob resource name for multimodal file search results. Format: fileSearchStores/{file_search_store_id}/media/{blob_id}. This field is not supported in Vertex AI.
     #[serde(alias = "mediaId")]
@@ -4272,6 +4362,7 @@ pub struct GroundingSupport {
     /// retrieved content attributed to the claim.
     #[serde(alias = "groundingChunkIndices")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<Vec<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>>")]
     pub grounding_chunk_indices: Option<Vec<i64>>,
     /// Segment of the content this support belongs to.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -4279,6 +4370,7 @@ pub struct GroundingSupport {
     /// Indices into the `rendered_parts` field of the `GroundingMetadata` message. These indices specify which rendered parts are associated with this support message.
     #[serde(alias = "renderedParts")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<Vec<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>>")]
     pub rendered_parts: Option<Vec<i64>>,
 }
 
@@ -4350,6 +4442,7 @@ pub struct ImageConfig {
     /// ``image/jpeg`` only). This field is not supported in Gemini API.
     #[serde(alias = "outputCompressionQuality")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub output_compression_quality: Option<i64>,
     /// Optional. The image output format for generated images. This field is not supported in Gemini API.
     #[serde(alias = "imageOutputOptions")]
@@ -4366,6 +4459,7 @@ pub struct ImageConfigImageOutputOptions {
     /// Optional. The compression quality of the output image.
     #[serde(alias = "compressionQuality")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub compression_quality: Option<i64>,
     /// Optional. The image format that the output should be saved as.
     #[serde(alias = "mimeType")]
@@ -4552,10 +4646,12 @@ pub struct JSONSchema {
     /// An array instance is valid if its size is greater than, or equal to, the value of this keyword.
     #[serde(alias = "minItems")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub min_items: Option<i64>,
     /// An array instance is valid if its size is less than, or equal to, the value of this keyword.
     #[serde(alias = "maxItems")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_items: Option<i64>,
     /// Validation succeeds if the instance is equal to one of the elements in this keyword’s array value.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -4569,10 +4665,12 @@ pub struct JSONSchema {
     /// An object instance is valid if its number of properties is greater than, or equal to, the value of this keyword.
     #[serde(alias = "minProperties")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub min_properties: Option<i64>,
     /// An object instance is valid if its number of properties is less than, or equal to, the value of this keyword.
     #[serde(alias = "maxProperties")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_properties: Option<i64>,
     /// Validation succeeds if the numeric instance is greater than or equal to the given number.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -4583,10 +4681,12 @@ pub struct JSONSchema {
     /// A string instance is valid against this keyword if its length is greater than, or equal to, the value of this keyword.
     #[serde(alias = "minLength")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub min_length: Option<i64>,
     /// A string instance is valid against this keyword if its length is less than, or equal to, the value of this keyword.
     #[serde(alias = "maxLength")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_length: Option<i64>,
     /// A string instance is considered valid if the regular expression matches the instance successfully.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -4626,6 +4726,7 @@ pub struct JobError {
     pub details: Option<Vec<String>>,
     /// The status code.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub code: Option<i64>,
     /// A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the `details` field.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -4713,6 +4814,7 @@ pub struct ListBatchJobsConfig {
     /// `ListBatchJobsConfig.page_size`.
     #[serde(alias = "pageSize")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub page_size: Option<i64>,
     /// `ListBatchJobsConfig.page_token`.
     #[serde(alias = "pageToken")]
@@ -4752,6 +4854,7 @@ pub struct ListCachedContentsConfig {
     /// `ListCachedContentsConfig.page_size`.
     #[serde(alias = "pageSize")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub page_size: Option<i64>,
     /// `ListCachedContentsConfig.page_token`.
     #[serde(alias = "pageToken")]
@@ -4819,6 +4922,7 @@ pub struct ListDocumentsConfig {
     /// `ListDocumentsConfig.page_size`.
     #[serde(alias = "pageSize")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub page_size: Option<i64>,
     /// `ListDocumentsConfig.page_token`.
     #[serde(alias = "pageToken")]
@@ -4854,6 +4958,7 @@ pub struct ListFileSearchStoresConfig {
     /// `ListFileSearchStoresConfig.page_size`.
     #[serde(alias = "pageSize")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub page_size: Option<i64>,
     /// `ListFileSearchStoresConfig.page_token`.
     #[serde(alias = "pageToken")]
@@ -4890,6 +4995,7 @@ pub struct ListFilesConfig {
     /// `ListFilesConfig.page_size`.
     #[serde(alias = "pageSize")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub page_size: Option<i64>,
     /// `ListFilesConfig.page_token`.
     #[serde(alias = "pageToken")]
@@ -4956,6 +5062,7 @@ pub struct ListModelsConfig {
     /// `ListModelsConfig.page_size`.
     #[serde(alias = "pageSize")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub page_size: Option<i64>,
     /// `ListModelsConfig.page_token`.
     #[serde(alias = "pageToken")]
@@ -5029,6 +5136,7 @@ pub struct ListTuningJobsConfig {
     /// `ListTuningJobsConfig.page_size`.
     #[serde(alias = "pageSize")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub page_size: Option<i64>,
     /// `ListTuningJobsConfig.page_token`.
     #[serde(alias = "pageToken")]
@@ -5282,6 +5390,7 @@ pub struct LiveConnectConfig {
     /// Maximum number of tokens that can be generated in the response.
     #[serde(alias = "maxOutputTokens")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_output_tokens: Option<i64>,
     /// If specified, the media resolution specified will be used.
     #[serde(alias = "mediaResolution")]
@@ -5291,6 +5400,7 @@ pub struct LiveConnectConfig {
     /// effort to provide the same response for repeated requests. By default, a
     /// random number is used.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub seed: Option<i64>,
     /// The speech generation configuration.
     #[serde(alias = "speechConfig")]
@@ -5476,10 +5586,12 @@ pub struct LiveMusicGenerationConfig {
     /// tokens with the highest probabilities. Range is \[1, 1000\].
     #[serde(alias = "topK")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub top_k: Option<i64>,
     /// Seeds audio generation. If not set, the request uses a randomly
     /// generated seed.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub seed: Option<i64>,
     /// Controls how closely the model follows prompts.
     /// Higher guidance follows more closely, but will make transitions more
@@ -5488,6 +5600,7 @@ pub struct LiveMusicGenerationConfig {
     pub guidance: Option<f64>,
     /// Beats per minute. Range is \[60, 200\].
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub bpm: Option<i64>,
     /// Density of sounds. Range is \[0.0, 1.0\].
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -5764,6 +5877,7 @@ pub struct LiveServerSessionResumptionUpdate {
     /// Note: This should not be used for when resuming a session at some time later -- in those cases partial audio and video frames are likely not needed.
     #[serde(alias = "lastConsumedClientMessageIndex")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub last_consumed_client_message_index: Option<i64>,
 }
 
@@ -5846,6 +5960,7 @@ pub struct LogprobsResultCandidate {
     /// The token's numerical ID. While the `token` field provides the string representation of the token, the `token_id` is the numerical representation that the model uses internally. This can be useful for developers who want to build custom logic based on the model's vocabulary.
     #[serde(alias = "tokenId")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub token_id: Option<i64>,
 }
 
@@ -5873,6 +5988,7 @@ pub struct MaskReferenceConfig {
     /// Automatically creates an image mask based on specific objects.
     #[serde(alias = "segmentationClasses")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<Vec<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>>")]
     pub segmentation_classes: Option<Vec<i64>>,
     /// Dilation percentage of the mask provided.
     /// Float between 0 and 1.
@@ -5900,6 +6016,7 @@ pub struct MaskReferenceImage {
     /// The id of the reference image.
     #[serde(alias = "referenceId")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub reference_id: Option<i64>,
     /// The type of the reference image. Only set by the SDK.
     #[serde(alias = "referenceType")]
@@ -5967,6 +6084,7 @@ pub struct ModalityTokenCount {
     /// The number of tokens counted for this modality.
     #[serde(alias = "tokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub token_count: Option<i64>,
 }
 
@@ -6004,10 +6122,12 @@ pub struct Model {
     /// The maximum number of input tokens that the model can handle.
     #[serde(alias = "inputTokenLimit")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub input_token_limit: Option<i64>,
     /// The maximum number of output tokens that the model can generate.
     #[serde(alias = "outputTokenLimit")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub output_token_limit: Option<i64>,
     /// List of actions that are supported by the model.
     #[serde(alias = "supportedActions")]
@@ -6045,6 +6165,7 @@ pub struct Model {
     /// likely words.
     #[serde(alias = "topK")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub top_k: Option<i64>,
     /// Whether the model supports thinking features. If true, thoughts are
     /// returned only if the model supports thought and thoughts are available.
@@ -6284,6 +6405,7 @@ pub struct PartMediaResolution {
     /// Specifies the required sequence length for media tokenization.
     #[serde(alias = "numTokens")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub num_tokens: Option<i64>,
 }
 
@@ -6429,6 +6551,7 @@ pub struct PreferenceOptimizationDataStats {
     /// Output only. A partial sample of the indices (starting from 1) of the dropped examples.
     #[serde(alias = "droppedExampleIndices")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<Vec<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>>")]
     pub dropped_example_indices: Option<Vec<i64>>,
     /// Output only. For each index in `dropped_example_indices`, the user-facing reason why the example was dropped.
     #[serde(alias = "droppedExampleReasons")]
@@ -6445,14 +6568,17 @@ pub struct PreferenceOptimizationDataStats {
     /// Output only. Number of billable tokens in the tuning dataset.
     #[serde(alias = "totalBillableTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub total_billable_token_count: Option<i64>,
     /// Output only. Number of examples in the tuning dataset.
     #[serde(alias = "tuningDatasetExampleCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub tuning_dataset_example_count: Option<i64>,
     /// Output only. Number of tuning steps for this Tuning Job.
     #[serde(alias = "tuningStepCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub tuning_step_count: Option<i64>,
     /// Output only. Sample user examples in the training dataset.
     #[serde(alias = "userDatasetExamples")]
@@ -6484,6 +6610,7 @@ pub struct PreferenceOptimizationHyperParameters {
     /// Optional. Number of complete passes the model makes over the entire training dataset during training.
     #[serde(alias = "epochCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub epoch_count: Option<i64>,
     /// Optional. Multiplier for adjusting the default learning rate.
     #[serde(alias = "learningRateMultiplier")]
@@ -6585,10 +6712,12 @@ pub struct RagChunkPageSpan {
     /// Page where chunk starts in the document. Inclusive. 1-indexed.
     #[serde(alias = "firstPage")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub first_page: Option<i64>,
     /// Page where chunk ends in the document. Inclusive. 1-indexed.
     #[serde(alias = "lastPage")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub last_page: Option<i64>,
 }
 
@@ -6611,6 +6740,7 @@ pub struct RagRetrievalConfig {
     /// Optional. The number of contexts to retrieve.
     #[serde(alias = "topK")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub top_k: Option<i64>,
 }
 
@@ -6702,6 +6832,7 @@ pub struct RawReferenceImage {
     /// The id of the reference image.
     #[serde(alias = "referenceId")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub reference_id: Option<i64>,
     /// The type of the reference image. Only set by the SDK.
     #[serde(alias = "referenceType")]
@@ -6741,11 +6872,13 @@ pub struct RecontextImageConfig {
     /// Number of images to generate.
     #[serde(alias = "numberOfImages")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub number_of_images: Option<i64>,
     /// The number of sampling steps. A higher value has better image
     /// quality, while a lower value has better latency.
     #[serde(alias = "baseSteps")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub base_steps: Option<i64>,
     /// Cloud Storage URI used to store the generated images.
     #[serde(alias = "outputGcsUri")]
@@ -6753,6 +6886,7 @@ pub struct RecontextImageConfig {
     pub output_gcs_uri: Option<String>,
     /// Random seed for image generation.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub seed: Option<i64>,
     /// Filter level for safety filtering.
     #[serde(alias = "safetyFilterLevel")]
@@ -6775,6 +6909,7 @@ pub struct RecontextImageConfig {
     /// only).
     #[serde(alias = "outputCompressionQuality")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub output_compression_quality: Option<i64>,
     /// Whether to use the prompt rewriting logic.
     #[serde(alias = "enhancePrompt")]
@@ -6981,6 +7116,7 @@ pub struct ReinforcementTuningHyperParameters {
     /// Optional. Number of training epoches for the tuning job.
     #[serde(alias = "epochCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub epoch_count: Option<i64>,
     /// Learning rate multiplier for Reinforcement Learning.
     #[serde(alias = "learningRateMultiplier")]
@@ -6993,22 +7129,27 @@ pub struct ReinforcementTuningHyperParameters {
     /// Optional. Number of different responses to generate per prompt during tuning.
     #[serde(alias = "samplesPerPrompt")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub samples_per_prompt: Option<i64>,
     /// Optional. Batch size for the tuning job. How many prompts to process at a train step. If not set, the batch size will be determined automatically.
     #[serde(alias = "batchSize")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub batch_size: Option<i64>,
     /// Optional. How often at steps to evaluate the tuning job during training. If not set, evel will be run per epoch. `total_steps = epoch_count * samples_per_prompt / total_prompts_in_dataset`
     #[serde(alias = "evaluateInterval")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub evaluate_interval: Option<i64>,
     /// Optional. How often at steps to save checkpoints during training. If not set, one checkpoint per epoch will be set. ```total_steps = epoch_count * samples_per_prompt / total_prompts_in_dataset```
     #[serde(alias = "checkpointInterval")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub checkpoint_interval: Option<i64>,
     /// Optional. The maximum number of tokens to generate per prompt. Default to 32768.
     #[serde(alias = "maxOutputTokens")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_output_tokens: Option<i64>,
     /// Indicates the maximum thinking depth during tuning. Starting from Gemini 3.5 models, the old thinking_budget will no longer be supported and will result in a user error if set. Instead, users should use the thinking_level parameter to control the maximum thinking depth.
     #[serde(alias = "thinkingLevel")]
@@ -7017,10 +7158,12 @@ pub struct ReinforcementTuningHyperParameters {
     /// Optional. The thinking budget for the tuning job to optimize for (Gemini 2.5 only). * -1 means dynamic thinking * 0 means no thinking * > 0 means thinking budget in tokens If not set, default to -1 (dynamic thinking).
     #[serde(alias = "thinkingBudget")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub thinking_budget: Option<i64>,
     /// Optional. Number of steps for the tuning job (mutually exclusive with epoch_count).
     #[serde(alias = "stepCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub step_count: Option<i64>,
 }
 
@@ -7213,6 +7356,7 @@ pub struct ReplayResponse {
     /// `ReplayResponse.status_code`.
     #[serde(alias = "statusCode")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub status_code: Option<i64>,
     /// `ReplayResponse.headers`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -7489,14 +7633,17 @@ pub struct Schema {
     /// Optional. If type is `ARRAY`, `max_items` specifies the maximum number of items in an array.
     #[serde(alias = "maxItems")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_items: Option<i64>,
     /// Optional. If type is `STRING`, `max_length` specifies the maximum length of the string.
     #[serde(alias = "maxLength")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_length: Option<i64>,
     /// Optional. If type is `OBJECT`, `max_properties` specifies the maximum number of properties that can be provided.
     #[serde(alias = "maxProperties")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_properties: Option<i64>,
     /// Optional. If type is `INTEGER` or `NUMBER`, `maximum` specifies the maximum allowed value.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -7504,14 +7651,17 @@ pub struct Schema {
     /// Optional. If type is `ARRAY`, `min_items` specifies the minimum number of items in an array.
     #[serde(alias = "minItems")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub min_items: Option<i64>,
     /// Optional. If type is `STRING`, `min_length` specifies the minimum length of the string.
     #[serde(alias = "minLength")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub min_length: Option<i64>,
     /// Optional. If type is `OBJECT`, `min_properties` specifies the minimum number of properties that can be provided.
     #[serde(alias = "minProperties")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub min_properties: Option<i64>,
     /// Optional. If type is `INTEGER` or `NUMBER`, `minimum` specifies the minimum allowed value.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -7588,17 +7738,20 @@ pub struct Segment {
     /// Offset from the start of the Part, inclusive, starting at zero.
     #[serde(alias = "startIndex")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub start_index: Option<i64>,
     /// Output only. End index in the given Part, measured in bytes.
     ///
     /// Offset from the start of the Part, exclusive, starting at zero.
     #[serde(alias = "endIndex")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub end_index: Option<i64>,
     /// Output only. The index of a Part object within its parent
     /// Content object.
     #[serde(alias = "partIndex")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub part_index: Option<i64>,
     /// Output only. The text corresponding to the segment from the
     /// response.
@@ -7621,6 +7774,7 @@ pub struct SegmentImageConfig {
     /// confidence score.
     #[serde(alias = "maxPredictions")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_predictions: Option<i64>,
     /// The confidence score threshold for the detections as a decimal
     /// value. Only predictions with a confidence score higher than this
@@ -7700,6 +7854,7 @@ pub struct SingleEmbedContentResponse {
     /// The error encountered while processing the request.
     #[serde(alias = "tokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub token_count: Option<i64>,
 }
 
@@ -7747,6 +7902,7 @@ pub struct SlidingWindow {
     /// Session reduction target -- how many tokens we should keep. Window shortening operation has some latency costs, so we should avoid running it on every turn. Should be < trigger_tokens. If not set, trigger_tokens/2 is assumed.
     #[serde(alias = "targetTokens")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub target_tokens: Option<i64>,
 }
 
@@ -7844,6 +8000,7 @@ pub struct StyleReferenceImage {
     /// The id of the reference image.
     #[serde(alias = "referenceId")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub reference_id: Option<i64>,
     /// The type of the reference image. Only set by the SDK.
     #[serde(alias = "referenceType")]
@@ -7889,6 +8046,7 @@ pub struct SubjectReferenceImage {
     /// The id of the reference image.
     #[serde(alias = "referenceId")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub reference_id: Option<i64>,
     /// The type of the reference image. Only set by the SDK.
     #[serde(alias = "referenceType")]
@@ -7914,10 +8072,12 @@ pub struct SupervisedHyperParameters {
     /// Optional. Batch size for tuning. This feature is only available for open source models.
     #[serde(alias = "batchSize")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub batch_size: Option<i64>,
     /// Optional. Number of complete passes the model makes over the entire training dataset during training.
     #[serde(alias = "epochCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub epoch_count: Option<i64>,
     /// Optional. Learning rate for tuning. Mutually exclusive with `learning_rate_multiplier`. This feature is only available for open source models.
     #[serde(alias = "learningRate")]
@@ -7942,30 +8102,37 @@ pub struct SupervisedTuningDataStats {
     /// Output only. Number of billable characters in the tuning dataset.
     #[serde(alias = "totalBillableCharacterCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub total_billable_character_count: Option<i64>,
     /// Output only. Number of billable tokens in the tuning dataset.
     #[serde(alias = "totalBillableTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub total_billable_token_count: Option<i64>,
     /// Output only. The number of examples in the dataset that have been dropped. An example can be dropped for reasons including: too many tokens, contains an invalid image, contains too many images, etc.
     #[serde(alias = "totalTruncatedExampleCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub total_truncated_example_count: Option<i64>,
     /// Output only. Number of tuning characters in the tuning dataset.
     #[serde(alias = "totalTuningCharacterCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub total_tuning_character_count: Option<i64>,
     /// Output only. A partial sample of the indices (starting from 1) of the dropped examples.
     #[serde(alias = "truncatedExampleIndices")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<Vec<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>>")]
     pub truncated_example_indices: Option<Vec<i64>>,
     /// Output only. Number of examples in the tuning dataset.
     #[serde(alias = "tuningDatasetExampleCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub tuning_dataset_example_count: Option<i64>,
     /// Output only. Number of tuning steps for this Tuning Job.
     #[serde(alias = "tuningStepCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub tuning_step_count: Option<i64>,
     /// Output only. Sample user messages in the training dataset uri.
     #[serde(alias = "userDatasetExamples")]
@@ -7995,6 +8162,7 @@ pub struct SupervisedTuningDatasetDistribution {
     /// Output only. Sum of a given population of values that are billable.
     #[serde(alias = "billableSum")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub billable_sum: Option<i64>,
     /// Output only. Defines the histogram bucket.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -8019,6 +8187,7 @@ pub struct SupervisedTuningDatasetDistribution {
     pub p95: Option<f64>,
     /// Output only. Sum of a given population of values.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub sum: Option<i64>,
 }
 
@@ -8213,6 +8382,7 @@ pub struct ThinkingConfig {
     /// Indicates the thinking budget in tokens. 0 is DISABLED. -1 is AUTOMATIC. The default values and allowed ranges are model dependent.
     #[serde(alias = "thinkingBudget")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub thinking_budget: Option<i64>,
     /// Optional. The number of thoughts tokens that the model should generate.
     #[serde(alias = "thinkingLevel")]
@@ -8230,6 +8400,7 @@ pub struct TokensInfo {
     /// A list of token ids from the input.
     #[serde(alias = "tokenIds")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<Vec<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>>")]
     pub token_ids: Option<Vec<i64>>,
     /// A list of tokens from the input.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -8476,9 +8647,11 @@ pub struct TunedModelCheckpoint {
     pub checkpoint_id: Option<String>,
     /// The epoch of the checkpoint.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub epoch: Option<i64>,
     /// The step of the checkpoint.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub step: Option<i64>,
     /// The Endpoint resource name that the checkpoint is deployed to.
     /// Format: `projects/{project}/locations/{location}/endpoints/{endpoint}`.
@@ -8703,10 +8876,12 @@ pub struct TuningJobMetadata {
     /// Output only. The number of epochs that have been completed.
     #[serde(alias = "completedEpochCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub completed_epoch_count: Option<i64>,
     /// Output only. The number of steps that have been completed. Set for Multi-Step RL.
     #[serde(alias = "completedStepCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub completed_step_count: Option<i64>,
 }
 
@@ -8985,6 +9160,7 @@ pub struct UpscaleImageConfig {
     /// ``output_mime_type`` is ``image/jpeg``.
     #[serde(alias = "outputCompressionQuality")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub output_compression_quality: Option<i64>,
     /// Whether to add an image enhancing step before upscaling.
     /// It is expected to suppress the noise and JPEG compression artifacts
@@ -9104,26 +9280,32 @@ pub struct UsageMetadata {
     /// The total number of tokens in the prompt. This includes any text, images, or other media provided in the request. When `cached_content` is set, this also includes the number of tokens in the cached content.
     #[serde(alias = "promptTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub prompt_token_count: Option<i64>,
     /// Output only. The number of tokens in the cached content that was used for this request.
     #[serde(alias = "cachedContentTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub cached_content_token_count: Option<i64>,
     /// Total number of tokens across all the generated response candidates.
     #[serde(alias = "responseTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub response_token_count: Option<i64>,
     /// Output only. The number of tokens in the results from tool executions, which are provided back to the model as input, if applicable.
     #[serde(alias = "toolUsePromptTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub tool_use_prompt_token_count: Option<i64>,
     /// Output only. The number of tokens that were part of the model's generated "thoughts" output, if applicable.
     #[serde(alias = "thoughtsTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub thoughts_token_count: Option<i64>,
     /// The total number of tokens for the entire request. This is the sum of `prompt_token_count`, `candidates_token_count`, `tool_use_prompt_token_count`, and `thoughts_token_count`.
     #[serde(alias = "totalTokenCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub total_token_count: Option<i64>,
     /// Output only. A detailed breakdown of the token count for each modality in the prompt.
     #[serde(alias = "promptTokensDetails")]
@@ -9221,6 +9403,7 @@ pub struct VeoHyperParameters {
     /// Optional. Number of complete passes the model makes over the entire training dataset during training.
     #[serde(alias = "epochCount")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub epoch_count: Option<i64>,
     /// Optional. Multiplier for adjusting the default learning rate.
     #[serde(alias = "learningRateMultiplier")]
@@ -9312,6 +9495,7 @@ pub struct VertexAISearch {
     /// Optional. Number of search results to return per query. The default value is 10. The maximumm allowed value is 10.
     #[serde(alias = "maxResults")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_results: Option<i64>,
 }
 
@@ -9369,6 +9553,7 @@ pub struct VertexRagStore {
     /// Optional. Number of top k results to return from the selected corpora.
     #[serde(alias = "similarityTopK")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub similarity_top_k: Option<i64>,
     /// Optional. Currently only supported for Gemini Multimodal Live API. In Gemini Multimodal Live API, if `store_context` bool is specified, Gemini will leverage it to automatically memorize the interactions between the client and Gemini, and retrieve context when needed to augment the response generation for users' ongoing and future interactions.
     #[serde(alias = "storeContext")]
@@ -9612,10 +9797,12 @@ pub struct WhiteSpaceConfig {
     /// Maximum number of tokens per chunk.
     #[serde(alias = "maxTokensPerChunk")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_tokens_per_chunk: Option<i64>,
     /// Maximum number of overlapping tokens between two adjacent chunks.
     #[serde(alias = "maxOverlapTokens")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<serde_with::PickFirst<(_, serde_with::DisplayFromStr)>>")]
     pub max_overlap_tokens: Option<i64>,
 }
 

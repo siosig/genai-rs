@@ -3,7 +3,9 @@
 
 use google_genai::Client;
 use google_genai::types::HttpOptions;
-use wiremock::matchers::{header, headers, method, path, query_param, query_param_is_missing};
+use wiremock::matchers::{
+    body_json, header, headers, method, path, query_param, query_param_is_missing,
+};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
 #[expect(
@@ -312,5 +314,45 @@ async fn download_requests_alt_media_and_returns_raw_bytes() {
         .await
         .unwrap();
     assert_eq!(bytes.as_ref(), payload.as_slice());
+    server.verify().await;
+}
+
+#[tokio::test]
+async fn register_files_posts_the_uris_and_parses_the_returned_files() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/v1beta/files:register"))
+        .and(body_json(serde_json::json!({
+            "uris": ["gs://bucket/a.txt", "gs://bucket/b.txt"]
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "files": [
+                {"name": "files/aaa", "mimeType": "text/plain", "sizeBytes": "11"},
+                {"name": "files/bbb", "mimeType": "text/plain", "sizeBytes": "22"}
+            ]
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let response = test_client(server.uri())
+        .files()
+        .register_files(
+            vec![
+                "gs://bucket/a.txt".to_owned(),
+                "gs://bucket/b.txt".to_owned(),
+            ],
+            None,
+        )
+        .await
+        .unwrap();
+
+    let files = response.files.unwrap();
+    assert_eq!(files.len(), 2);
+    assert_eq!(files[0].name.as_deref(), Some("files/aaa"));
+    // `sizeBytes` arrives as a JSON *string* per proto3's int64 encoding;
+    // the generated types accept both that and a bare number.
+    assert_eq!(files[0].size_bytes, Some(11));
+    assert_eq!(files[1].size_bytes, Some(22));
     server.verify().await;
 }

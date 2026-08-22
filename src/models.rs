@@ -37,14 +37,39 @@ pub struct Models {
 }
 
 impl Models {
-    /// Generates content from a model in a single request. Mirrors
-    /// Python's `Models.generate_content`.
+    /// Generates content from a model. Mirrors Python's
+    /// `Models.generate_content`.
+    ///
+    /// If `config.tools` includes a [`crate::types::Tool`] built by
+    /// [`crate::types::Tool::from_function`] (or, with feature `mcp`,
+    /// `crate::mcp::mcp_tools`), this drives the automatic-function-calling
+    /// (AFC) loop described in [`crate::afc`] instead of issuing a single
+    /// request; otherwise this behaves exactly like a single request,
+    /// unchanged.
     ///
     /// # Errors
-    /// Returns [`crate::Error::Api`] for a non-2xx response, or
-    /// [`crate::Error::UnsupportedByBackend`] if `config` sets a field
-    /// only the Vertex AI backend supports.
+    /// Returns [`crate::Error::Api`] for a non-2xx response,
+    /// [`crate::Error::UnsupportedByBackend`] if `config` sets a field only
+    /// the Vertex AI backend supports, or [`crate::Error::FunctionCall`] if
+    /// AFC is active and the model calls an unregistered function or with
+    /// arguments that do not match a registered tool's declared type.
     pub async fn generate_content(
+        &self,
+        model: &str,
+        contents: impl Into<Contents>,
+        config: Option<GenerateContentConfig>,
+    ) -> Result<GenerateContentResponse> {
+        crate::afc::generate_content(self, model, contents.into(), config).await
+    }
+
+    /// The single-request implementation behind [`Self::generate_content`],
+    /// with no automatic-function-calling behavior. [`crate::afc`] calls
+    /// this once per AFC round; callers that don't need AFC reach it via
+    /// [`Self::generate_content`].
+    ///
+    /// # Errors
+    /// See [`Self::generate_content`].
+    pub(crate) async fn generate_content_once(
         &self,
         model: &str,
         contents: impl Into<Contents>,
@@ -93,6 +118,11 @@ impl Models {
     /// Generates content, streaming incremental [`GenerateContentResponse`]
     /// chunks as they arrive. Mirrors Python's
     /// `Models.generate_content_stream`.
+    ///
+    /// Automatic function calling is unary-only (matching Python): this
+    /// method never drives the [`crate::afc`] loop, even if `config.tools`
+    /// contains callable tools. A `functionCall` part in a streamed chunk is
+    /// returned to the caller as-is.
     ///
     /// # Errors
     /// See [`Self::generate_content`]. A mid-stream failure yields one
