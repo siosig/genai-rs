@@ -130,9 +130,15 @@ pydantic モデルの集合がバージョンで変わる（3.12 は `BlobImageU
 ## 言語の方針
 
 追跡ファイルは**英語**で書く。日本語版はファイル名に `.ja` を入れて原文の隣に
-置く（`SECURITY.ja.md`、`CONTRIBUTING.ja.md`）。`english-only-content` フックが
-これを強制している。日本語版が必要な生成物は、文字列を生成器内のエスケープでは
-なく `.ja` のデータファイルに外出しするのも同じ理由。
+置く（`README.ja.md`、`SECURITY.ja.md`、`CONTRIBUTING.ja.md`、
+`docs/migrating-from-python.ja.md`）。`english-only-content` フックがこれを強制して
+いて、**入力ファイルにも適用される** — `tools/codegen/parity-matrix.ja.md` は
+parity 生成器が読む日本語の契約文書で、まさにその理由でサフィックスが付いている。
+
+日本語版が必要な生成物は、文字列を生成器内のエスケープではなく `.ja` のデータ
+ファイル（`tools/codegen/parity_strings.ja.toml`）に外出しする。同ファイルは現状
+未使用で、これを消費する `gen_parity.py` の locale 対応がまだツリーに無いため
+`docs/parity.md` は英語のみ。
 
 コミットメッセージも英語（`hooks/commit-msg`）。
 

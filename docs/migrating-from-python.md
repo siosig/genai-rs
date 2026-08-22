@@ -1,5 +1,7 @@
 # Migrating from the `google-genai` Python SDK
 
+Japanese version: [migrating-from-python.ja.md](migrating-from-python.ja.md)
+
 ## Table of Contents
 
 - [Overview](#overview)

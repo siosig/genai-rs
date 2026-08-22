@@ -132,10 +132,17 @@ Change it there, never in the output.
 ## Language policy
 
 Tracked files are written in **English**. A Japanese translation lives beside
-the original with a `.ja` in its name (`SECURITY.ja.md`, `CONTRIBUTING.ja.md`).
-The `english-only-content` hook enforces this. A generated document that needs a
-Japanese version keeps its strings in a `.ja` data file rather than as escapes
-inside the generator, for the same reason.
+the original with a `.ja` in its name: `README.ja.md`, `SECURITY.ja.md`,
+`CONTRIBUTING.ja.md`, `docs/migrating-from-python.ja.md`. The
+`english-only-content` hook enforces this, and it applies to *inputs* too --
+`tools/codegen/parity-matrix.ja.md` is a Japanese contract document that the
+parity generator reads, and it carries the suffix for exactly that reason.
+
+A generated document that needs a Japanese version keeps its strings in a `.ja`
+data file (`tools/codegen/parity_strings.ja.toml`) rather than as escapes inside
+the generator. That file is currently unused: the locale support in
+`gen_parity.py` that would consume it is not in the tree yet, so `docs/parity.md`
+is English-only.
 
 Commit messages are English too (`hooks/commit-msg`).
 

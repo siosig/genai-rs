@@ -9,6 +9,8 @@
 
 Rust port of the Google Gen AI Python SDK for the Gemini Developer API.
 
+Japanese version: [README.ja.md](README.ja.md)
+
 ## Table of Contents
 
 - [Overview](#overview)

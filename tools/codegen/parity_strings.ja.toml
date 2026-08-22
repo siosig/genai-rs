@@ -1,5 +1,10 @@
 # Japanese strings for gen_parity.py (renders docs/parity.ja.md).
 #
+# NOT CURRENTLY USED. The locale support in gen_parity.py that reads this file is
+# not in the tree, so the generator emits docs/parity.md only. Kept because it is
+# hand-written input, not generated output: when the locale support lands, this
+# is what it consumes. See CONTRIBUTING.md, "Language policy".
+#
 # Kept out of gen_parity.py itself because the repository's pre-commit hook
 # rejects CJK outside `*.ja*` files, and `\uXXXX`-escaping a whole document's
 # prose would be unreadable. Every key below is required: gen_parity.py exits

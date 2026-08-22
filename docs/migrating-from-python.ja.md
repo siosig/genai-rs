@@ -510,5 +510,5 @@ Python で deprecated な `AsyncSession.send` と `start_stream` は移植して
 
 ## 完全な対応表
 
-[`docs/parity.ja.md`](parity.ja.md) はコードと同じ真実の源から生成されていて、Python の全メソッド・
+[`docs/parity.md`](parity.md)（英語）はコードと同じ真実の源から生成されていて、Python の全メソッド・
 全型に対する Rust 側の対応を、未移植のものも含めて列挙している。
