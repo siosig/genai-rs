@@ -1,0 +1,48 @@
+{
+  "converter": "_ImportFileParameters_to_mldev",
+  "input": {
+    "file_search_store_name": "fileSearchStores/store-1",
+    "file_name": "files/abc123",
+    "config": {
+      "custom_metadata": [
+        {
+          "key": "topic",
+          "string_value": "rust"
+        },
+        {
+          "key": "rank",
+          "numeric_value": 1.0
+        }
+      ],
+      "chunking_config": {
+        "white_space_config": {
+          "max_tokens_per_chunk": 200,
+          "max_overlap_tokens": 20
+        }
+      }
+    }
+  },
+  "expected": {
+    "_url": {
+      "file_search_store_name": "fileSearchStores/store-1"
+    },
+    "fileName": "files/abc123",
+    "customMetadata": [
+      {
+        "key": "topic",
+        "string_value": "rust"
+      },
+      {
+        "key": "rank",
+        "numeric_value": 1.0
+      }
+    ],
+    "chunkingConfig": {
+      "white_space_config": {
+        "max_tokens_per_chunk": 200,
+        "max_overlap_tokens": 20
+      }
+    }
+  },
+  "expected_error": null
+}

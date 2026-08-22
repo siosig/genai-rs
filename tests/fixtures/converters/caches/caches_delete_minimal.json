@@ -1,0 +1,12 @@
+{
+  "converter": "_DeleteCachedContentParameters_to_mldev",
+  "input": {
+    "name": "cachedContents/abc123"
+  },
+  "expected": {
+    "_url": {
+      "name": "cachedContents/abc123"
+    }
+  },
+  "expected_error": null
+}

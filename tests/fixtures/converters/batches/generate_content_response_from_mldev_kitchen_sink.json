@@ -1,0 +1,102 @@
+{
+  "converter": "_GenerateContentResponse_from_mldev",
+  "input": {
+    "sdkHttpResponse": {
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    "candidates": [
+      {
+        "content": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "hello"
+            }
+          ]
+        },
+        "finishReason": "STOP",
+        "index": 0,
+        "avgLogprobs": -0.25,
+        "tokenCount": 12,
+        "citationMetadata": {
+          "citationSources": [
+            {
+              "startIndex": 0,
+              "endIndex": 5,
+              "uri": "https://example.com",
+              "license": "MIT"
+            }
+          ]
+        },
+        "safetyRatings": [
+          {
+            "category": "HARM_CATEGORY_HARASSMENT",
+            "probability": "NEGLIGIBLE"
+          }
+        ]
+      }
+    ],
+    "modelVersion": "gemini-2.0-flash-001",
+    "promptFeedback": {
+      "blockReason": "SAFETY"
+    },
+    "usageMetadata": {
+      "promptTokenCount": 5,
+      "candidatesTokenCount": 7,
+      "totalTokenCount": 12
+    },
+    "responseId": "resp-1"
+  },
+  "expected": {
+    "sdk_http_response": {
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    "candidates": [
+      {
+        "content": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "hello"
+            }
+          ]
+        },
+        "citation_metadata": {
+          "citations": [
+            {
+              "startIndex": 0,
+              "endIndex": 5,
+              "uri": "https://example.com",
+              "license": "MIT"
+            }
+          ]
+        },
+        "token_count": 12,
+        "finish_reason": "STOP",
+        "avg_logprobs": -0.25,
+        "index": 0,
+        "safety_ratings": [
+          {
+            "category": "HARM_CATEGORY_HARASSMENT",
+            "probability": "NEGLIGIBLE"
+          }
+        ]
+      }
+    ],
+    "model_version": "gemini-2.0-flash-001",
+    "prompt_feedback": {
+      "blockReason": "SAFETY"
+    },
+    "response_id": "resp-1",
+    "usage_metadata": {
+      "promptTokenCount": 5,
+      "candidatesTokenCount": 7,
+      "totalTokenCount": 12
+    }
+  },
+  "expected_error": null
+}

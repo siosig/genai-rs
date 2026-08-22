@@ -1,0 +1,9 @@
+{
+  "converter": "_SessionResumptionConfig_to_mldev",
+  "input": {
+    "handle": "h1",
+    "transparent": true
+  },
+  "expected": null,
+  "expected_error": "field `transparent` is only supported by the Vertex AI backend"
+}

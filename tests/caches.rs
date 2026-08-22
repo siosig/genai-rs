@@ -2,28 +2,14 @@
 //! against a wiremock server, driven entirely through the crate's public
 //! API (this is a separate test crate, so only `pub` items are visible).
 
-use google_genai::Client;
-use google_genai::types::HttpOptions;
+mod common;
+
+use common::test_client;
 use google_genai::types::{
     Content, CreateCachedContentConfig, ListCachedContentsConfig, Part, UpdateCachedContentConfig,
 };
 use wiremock::matchers::{body_json, method, path, query_param, query_param_is_missing};
 use wiremock::{Mock, MockServer, ResponseTemplate};
-
-#[expect(
-    clippy::unwrap_used,
-    reason = "test helper: a broken Client::builder() here is a test-setup bug, not a runtime condition"
-)]
-fn test_client(base_url: String) -> Client {
-    Client::builder()
-        .api_key("test-key")
-        .http_options(HttpOptions {
-            base_url: Some(base_url),
-            ..Default::default()
-        })
-        .build()
-        .unwrap()
-}
 
 #[tokio::test]
 async fn create_posts_the_flattened_config_body_to_cached_contents() {

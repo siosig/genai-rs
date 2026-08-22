@@ -1,0 +1,12 @@
+{
+  "converter": "_GenerateImagesParameters_to_mldev",
+  "input": {
+    "model": "imagen-3.0-generate-002",
+    "prompt": "a red bicycle",
+    "config": {
+      "safety_filter_level": "BLOCK_NONE"
+    }
+  },
+  "expected": null,
+  "expected_error": "field `safety_filter_level` is only supported by the Vertex AI backend"
+}

@@ -1,0 +1,42 @@
+{
+  "converter": "_InlinedResponse_from_mldev",
+  "input": {
+    "response": {
+      "candidates": [
+        {
+          "content": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "hi"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "metadata": {
+      "k": "v"
+    }
+  },
+  "expected": {
+    "response": {
+      "candidates": [
+        {
+          "content": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "hi"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "metadata": {
+      "k": "v"
+    }
+  },
+  "expected_error": null
+}

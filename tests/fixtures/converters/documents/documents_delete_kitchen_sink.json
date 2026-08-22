@@ -1,0 +1,18 @@
+{
+  "converter": "_DeleteDocumentParameters_to_mldev",
+  "input": {
+    "name": "ragStores/store-1/documents/doc-1",
+    "config": {
+      "force": true
+    }
+  },
+  "expected": {
+    "_url": {
+      "name": "ragStores/store-1/documents/doc-1"
+    },
+    "_query": {
+      "force": true
+    }
+  },
+  "expected_error": null
+}

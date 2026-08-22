@@ -2,28 +2,16 @@
 //! cancel/delete). Runs against the public API only, via `wiremock`,
 //! mirroring `src/batches.rs`'s own module doc.
 
+mod common;
+
+use common::test_client;
 use google_genai::types::{
     BatchJobDestination, BatchJobSource, Content, CreateBatchJobConfig, EmbeddingsBatchJobSource,
-    HttpOptions, InlinedRequest, JobState, ListBatchJobsConfig, Part,
+    InlinedRequest, JobState, ListBatchJobsConfig, Part,
 };
-use google_genai::{Backend, Client, Error};
+use google_genai::{Backend, Error};
 use wiremock::matchers::{body_json, method, path, query_param};
 use wiremock::{Mock, MockServer, ResponseTemplate};
-
-#[expect(
-    clippy::unwrap_used,
-    reason = "test helper: a broken Client::builder() here is a test-setup bug, not a runtime condition"
-)]
-fn test_client(base_url: String) -> Client {
-    Client::builder()
-        .api_key("test-key")
-        .http_options(HttpOptions {
-            base_url: Some(base_url),
-            ..Default::default()
-        })
-        .build()
-        .unwrap()
-}
 
 fn batch_job_response(name: &str, state: &str) -> serde_json::Value {
     serde_json::json!({

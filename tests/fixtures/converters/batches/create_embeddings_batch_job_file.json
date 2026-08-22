@@ -1,0 +1,20 @@
+{
+  "converter": "_CreateEmbeddingsBatchJobParameters_to_mldev",
+  "input": {
+    "model": "text-embedding-004",
+    "src": {
+      "file_name": "files/embed-input"
+    }
+  },
+  "expected": {
+    "_url": {
+      "model": "models/text-embedding-004"
+    },
+    "batch": {
+      "inputConfig": {
+        "file_name": "files/embed-input"
+      }
+    }
+  },
+  "expected_error": null
+}

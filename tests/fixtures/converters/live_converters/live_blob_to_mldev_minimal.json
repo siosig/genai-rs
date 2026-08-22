@@ -1,0 +1,12 @@
+{
+  "converter": "_Blob_to_mldev",
+  "input": {
+    "data": "aGVsbG8=",
+    "mime_type": "audio/pcm"
+  },
+  "expected": {
+    "data": "aGVsbG8=",
+    "mimeType": "audio/pcm"
+  },
+  "expected_error": null
+}

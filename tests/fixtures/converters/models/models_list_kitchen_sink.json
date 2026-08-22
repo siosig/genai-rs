@@ -1,0 +1,22 @@
+{
+  "converter": "_ListModelsParameters_to_mldev",
+  "input": {
+    "config": {
+      "page_size": 20,
+      "page_token": "tok",
+      "filter": "displayName=foo",
+      "query_base": true
+    }
+  },
+  "expected": {
+    "_query": {
+      "pageSize": 20,
+      "pageToken": "tok",
+      "filter": "displayName=foo"
+    },
+    "_url": {
+      "models_url": "models"
+    }
+  },
+  "expected_error": null
+}

@@ -1,0 +1,18 @@
+{
+  "converter": "_GenerateImagesParameters_to_mldev",
+  "input": {
+    "model": "imagen-3.0-generate-002",
+    "prompt": "a cat"
+  },
+  "expected": {
+    "_url": {
+      "model": "models/imagen-3.0-generate-002"
+    },
+    "instances": [
+      {
+        "prompt": "a cat"
+      }
+    ]
+  },
+  "expected_error": null
+}

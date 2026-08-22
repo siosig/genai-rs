@@ -1,27 +1,13 @@
 //! Integration tests for `client.files()`: upload (resumable protocol,
 //! multi-chunk), get, list (Pager), delete, and download.
 
-use google_genai::Client;
-use google_genai::types::HttpOptions;
+mod common;
+
+use common::test_client;
 use wiremock::matchers::{
     body_json, header, headers, method, path, query_param, query_param_is_missing,
 };
 use wiremock::{Mock, MockServer, ResponseTemplate};
-
-#[expect(
-    clippy::unwrap_used,
-    reason = "test helper: a broken Client::builder() here is a test-setup bug, not a runtime condition"
-)]
-fn test_client(base_url: String) -> Client {
-    Client::builder()
-        .api_key("test-key")
-        .http_options(HttpOptions {
-            base_url: Some(base_url),
-            ..Default::default()
-        })
-        .build()
-        .unwrap()
-}
 
 /// Writes `data` to a fresh temp file and returns its path. No `tempfile`
 /// dependency is available, so tests remove the file themselves once done.

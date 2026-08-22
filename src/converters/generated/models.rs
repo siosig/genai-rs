@@ -757,6 +757,14 @@ pub(crate) fn generate_images_config_to_mldev(
     if getv(Some(from_object), &["seed"]).is_some() {
         return Err(vertex_only_error("seed"));
     }
+    if matches!(
+        getv(Some(from_object), &["safety_filter_level"])
+            .as_ref()
+            .and_then(Value::as_str),
+        Some("BLOCK_NONE")
+    ) {
+        return Err(vertex_only_error("safety_filter_level"));
+    }
     if getv(Some(from_object), &["safety_filter_level"]).is_some() {
         let __v = getv(Some(from_object), &["safety_filter_level"]).unwrap_or(Value::Null);
         setv(
@@ -764,6 +772,14 @@ pub(crate) fn generate_images_config_to_mldev(
             &["parameters", "safetySetting"],
             __v,
         )?;
+    }
+    if matches!(
+        getv(Some(from_object), &["person_generation"])
+            .as_ref()
+            .and_then(Value::as_str),
+        Some("ALLOW_ALL")
+    ) {
+        return Err(vertex_only_error("person_generation"));
     }
     if getv(Some(from_object), &["person_generation"]).is_some() {
         let __v = getv(Some(from_object), &["person_generation"]).unwrap_or(Value::Null);
@@ -1766,6 +1782,14 @@ pub(crate) fn video_generation_reference_image_to_mldev(
             root_object,
         )?;
         setv(Some(&mut to_object), &["image"], __v)?;
+    }
+    if matches!(
+        getv(Some(from_object), &["reference_type"])
+            .as_ref()
+            .and_then(Value::as_str),
+        Some("STYLE")
+    ) {
+        return Err(vertex_only_error("reference_type"));
     }
     if getv(Some(from_object), &["reference_type"]).is_some() {
         let __v = getv(Some(from_object), &["reference_type"]).unwrap_or(Value::Null);

@@ -1,0 +1,11 @@
+{
+  "converter": "_ListBatchJobsParameters_to_mldev",
+  "input": {
+    "config": {
+      "page_size": 5,
+      "filter": "state=RUNNING"
+    }
+  },
+  "expected": null,
+  "expected_error": "field `filter` is only supported by the Vertex AI backend"
+}

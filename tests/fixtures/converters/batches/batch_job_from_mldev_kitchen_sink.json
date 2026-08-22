@@ -1,0 +1,30 @@
+{
+  "converter": "_BatchJob_from_mldev",
+  "input": {
+    "name": "batches/abc123",
+    "metadata": {
+      "displayName": "my-batch",
+      "state": "BATCH_STATE_SUCCEEDED",
+      "createTime": "2026-01-01T00:00:00Z",
+      "endTime": "2026-01-01T01:00:00Z",
+      "updateTime": "2026-01-01T01:00:00Z",
+      "model": "models/gemini-2.0-flash",
+      "output": {
+        "responsesFile": "files/batch-output"
+      }
+    }
+  },
+  "expected": {
+    "name": "batches/abc123",
+    "display_name": "my-batch",
+    "state": "JOB_STATE_SUCCEEDED",
+    "create_time": "2026-01-01T00:00:00Z",
+    "end_time": "2026-01-01T01:00:00Z",
+    "update_time": "2026-01-01T01:00:00Z",
+    "model": "models/gemini-2.0-flash",
+    "dest": {
+      "file_name": "files/batch-output"
+    }
+  },
+  "expected_error": null
+}

@@ -3,25 +3,12 @@
 //! since that's the only operation-returning method currently
 //! implemented. Runs against the public API only, via `wiremock`.
 
-use google_genai::Client;
-use google_genai::types::{GenerateVideosSource, HttpOptions};
+mod common;
+
+use common::test_client;
+use google_genai::types::GenerateVideosSource;
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
-
-#[expect(
-    clippy::unwrap_used,
-    reason = "test helper: a broken Client::builder() here is a test-setup bug, not a runtime condition"
-)]
-fn test_client(base_url: String) -> Client {
-    Client::builder()
-        .api_key("test-key")
-        .http_options(HttpOptions {
-            base_url: Some(base_url),
-            ..Default::default()
-        })
-        .build()
-        .unwrap()
-}
 
 #[tokio::test]
 async fn generate_videos_then_operations_get_returns_the_completed_operation() {

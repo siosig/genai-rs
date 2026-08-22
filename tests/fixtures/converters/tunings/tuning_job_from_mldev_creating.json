@@ -1,0 +1,16 @@
+{
+  "converter": "_TuningJob_from_mldev",
+  "input": {
+    "name": "tunedModels/abc123",
+    "state": "CREATING"
+  },
+  "expected": {
+    "name": "tunedModels/abc123",
+    "state": "JOB_STATE_RUNNING",
+    "tuned_model": {
+      "model": "tunedModels/abc123",
+      "endpoint": "tunedModels/abc123"
+    }
+  },
+  "expected_error": null
+}

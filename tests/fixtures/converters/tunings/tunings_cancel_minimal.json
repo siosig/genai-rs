@@ -1,0 +1,12 @@
+{
+  "converter": "_CancelTuningJobParameters_to_mldev",
+  "input": {
+    "name": "tunedModels/abc123"
+  },
+  "expected": {
+    "_url": {
+      "name": "tunedModels/abc123"
+    }
+  },
+  "expected_error": null
+}

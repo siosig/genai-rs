@@ -1,0 +1,12 @@
+{
+  "converter": "_SafetySetting_to_mldev",
+  "input": {
+    "category": "HARM_CATEGORY_HARASSMENT",
+    "threshold": "BLOCK_ONLY_HIGH"
+  },
+  "expected": {
+    "category": "HARM_CATEGORY_HARASSMENT",
+    "threshold": "BLOCK_ONLY_HIGH"
+  },
+  "expected_error": null
+}

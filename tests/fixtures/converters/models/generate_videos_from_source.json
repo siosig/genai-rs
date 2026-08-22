@@ -1,0 +1,28 @@
+{
+  "converter": "_GenerateVideosParameters_to_mldev",
+  "input": {
+    "model": "veo-3.0-generate-001",
+    "source": {
+      "prompt": "extend this",
+      "video": {
+        "video_bytes": "aGVsbG8=",
+        "mime_type": "video/mp4"
+      }
+    }
+  },
+  "expected": {
+    "_url": {
+      "model": "models/veo-3.0-generate-001"
+    },
+    "instances": [
+      {
+        "prompt": "extend this",
+        "video": {
+          "encodedVideo": "aGVsbG8=",
+          "encoding": "video/mp4"
+        }
+      }
+    ]
+  },
+  "expected_error": null
+}

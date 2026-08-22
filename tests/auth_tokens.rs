@@ -3,25 +3,12 @@
 //! `src/auth_tokens.rs`'s own unit tests but exercised from outside the
 //! crate.
 
-use google_genai::Client;
-use google_genai::types::{CreateAuthTokenConfig, HttpOptions, LiveConnectConstraints};
+mod common;
+
+use common::test_client;
+use google_genai::types::{CreateAuthTokenConfig, LiveConnectConstraints};
 use wiremock::matchers::{body_json, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
-
-#[expect(
-    clippy::unwrap_used,
-    reason = "test helper: a broken Client::builder() here is a test-setup bug, not a runtime condition"
-)]
-fn test_client(base_url: String) -> Client {
-    Client::builder()
-        .api_key("test-key")
-        .http_options(HttpOptions {
-            base_url: Some(base_url),
-            ..Default::default()
-        })
-        .build()
-        .unwrap()
-}
 
 #[tokio::test]
 async fn create_posts_uses_expire_time_and_returns_the_token_name() {

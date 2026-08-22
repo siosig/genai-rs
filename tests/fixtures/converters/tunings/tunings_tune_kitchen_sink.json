@@ -1,0 +1,36 @@
+{
+  "converter": "_CreateTuningJobParametersPrivate_to_mldev",
+  "input": {
+    "base_model": "models/gemini-2.0-flash-001",
+    "training_dataset": {
+      "examples": [
+        {
+          "text_input": "in",
+          "output": "out"
+        },
+        {
+          "text_input": "in2",
+          "output": "out2"
+        }
+      ]
+    },
+    "config": {
+      "tuned_model_display_name": "my-tuned-model",
+      "epoch_count": 5,
+      "batch_size": 4,
+      "learning_rate": 0.001
+    }
+  },
+  "expected": {
+    "baseModel": "models/gemini-2.0-flash-001",
+    "displayName": "my-tuned-model",
+    "tuningTask": {
+      "hyperparameters": {
+        "epochCount": 5,
+        "batchSize": 4,
+        "learningRate": 0.001
+      }
+    }
+  },
+  "expected_error": null
+}

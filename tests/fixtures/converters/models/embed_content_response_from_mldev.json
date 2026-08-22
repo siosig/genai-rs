@@ -1,0 +1,42 @@
+{
+  "converter": "_EmbedContentResponse_from_mldev",
+  "input": {
+    "sdkHttpResponse": {
+      "headers": {
+        "x": "y"
+      }
+    },
+    "embeddings": [
+      {
+        "values": [
+          0.1,
+          0.2,
+          0.3
+        ]
+      }
+    ],
+    "metadata": {
+      "billableCharacterCount": 12
+    }
+  },
+  "expected": {
+    "sdk_http_response": {
+      "headers": {
+        "x": "y"
+      }
+    },
+    "embeddings": [
+      {
+        "values": [
+          0.1,
+          0.2,
+          0.3
+        ]
+      }
+    ],
+    "metadata": {
+      "billableCharacterCount": 12
+    }
+  },
+  "expected_error": null
+}

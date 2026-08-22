@@ -21,6 +21,21 @@ jobs:
           components: rustfmt
       - run: cargo fmt --all --check
 
+  # `rustfmt.toml` sets `group_imports` and `imports_granularity`, which are
+  # nightly-only: stable `cargo fmt` ignores them silently, so the import
+  # ordering AGENTS.md specifies is only actually checked here. Advisory —
+  # nightly rustfmt can change formatting between releases, and that must not
+  # be able to break the merge queue.
+  fmt-check-nightly:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt
+      - run: cargo +nightly fmt --all --check
+
   clippy:
     runs-on: ubuntu-latest
     steps:

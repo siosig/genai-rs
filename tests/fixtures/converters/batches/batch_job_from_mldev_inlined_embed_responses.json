@@ -1,0 +1,44 @@
+{
+  "converter": "_BatchJob_from_mldev",
+  "input": {
+    "name": "batches/abc123",
+    "metadata": {
+      "state": "BATCH_STATE_SUCCEEDED",
+      "output": {
+        "inlinedEmbedContentResponses": {
+          "inlinedResponses": [
+            {
+              "response": {
+                "embedding": {
+                  "values": [
+                    0.1,
+                    0.2
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "expected": {
+    "name": "batches/abc123",
+    "state": "JOB_STATE_SUCCEEDED",
+    "dest": {
+      "inlined_embed_content_responses": [
+        {
+          "response": {
+            "embedding": {
+              "values": [
+                0.1,
+                0.2
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "expected_error": null
+}

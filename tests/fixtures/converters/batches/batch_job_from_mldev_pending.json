@@ -1,0 +1,14 @@
+{
+  "converter": "_BatchJob_from_mldev",
+  "input": {
+    "name": "batches/abc123",
+    "metadata": {
+      "state": "BATCH_STATE_PENDING"
+    }
+  },
+  "expected": {
+    "name": "batches/abc123",
+    "state": "JOB_STATE_PENDING"
+  },
+  "expected_error": null
+}

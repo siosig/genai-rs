@@ -1,0 +1,12 @@
+{
+  "converter": "_GetDocumentParameters_to_mldev",
+  "input": {
+    "name": "ragStores/store-1/documents/doc-1"
+  },
+  "expected": {
+    "_url": {
+      "name": "ragStores/store-1/documents/doc-1"
+    }
+  },
+  "expected_error": null
+}

@@ -1,0 +1,18 @@
+{
+  "converter": "_VideoGenerationReferenceImage_to_mldev",
+  "input": {
+    "image": {
+      "image_bytes": "aGVsbG8=",
+      "mime_type": "image/png"
+    },
+    "reference_type": "ASSET"
+  },
+  "expected": {
+    "image": {
+      "bytesBase64Encoded": "aGVsbG8=",
+      "mimeType": "image/png"
+    },
+    "referenceType": "ASSET"
+  },
+  "expected_error": null
+}

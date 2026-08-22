@@ -1,0 +1,81 @@
+{
+  "converter": "_CreateEmbeddingsBatchJobParameters_to_mldev",
+  "input": {
+    "model": "text-embedding-004",
+    "src": {
+      "inlined_requests": {
+        "contents": [
+          {
+            "role": "user",
+            "parts": [
+              {
+                "text": "first"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "parts": [
+              {
+                "text": "second"
+              }
+            ]
+          }
+        ],
+        "config": {
+          "task_type": "RETRIEVAL_DOCUMENT",
+          "title": "t",
+          "output_dimensionality": 32
+        }
+      }
+    },
+    "config": {
+      "display_name": "my-embeddings-batch"
+    }
+  },
+  "expected": {
+    "_url": {
+      "model": "models/text-embedding-004"
+    },
+    "batch": {
+      "inputConfig": {
+        "requests": {
+          "requests": [
+            {
+              "request": {
+                "content": {
+                  "parts": [
+                    {
+                      "text": "first"
+                    }
+                  ],
+                  "role": "user"
+                },
+                "taskType": "RETRIEVAL_DOCUMENT",
+                "title": "t",
+                "outputDimensionality": 32
+              }
+            },
+            {
+              "request": {
+                "content": {
+                  "parts": [
+                    {
+                      "text": "second"
+                    }
+                  ],
+                  "role": "user"
+                },
+                "taskType": "RETRIEVAL_DOCUMENT",
+                "title": "t",
+                "outputDimensionality": 32
+              }
+            }
+          ]
+        }
+      },
+      "displayName": "my-embeddings-batch"
+    }
+  },
+  "expected_error": null
+}

@@ -1,0 +1,12 @@
+{
+  "converter": "_GenerateVideosParameters_to_mldev",
+  "input": {
+    "model": "veo-3.0-generate-001",
+    "prompt": "a cat",
+    "config": {
+      "generate_audio": true
+    }
+  },
+  "expected": null,
+  "expected_error": "field `generate_audio` is only supported by the Vertex AI backend"
+}

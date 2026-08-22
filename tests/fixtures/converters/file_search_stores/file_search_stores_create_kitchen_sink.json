@@ -1,0 +1,14 @@
+{
+  "converter": "_CreateFileSearchStoreParameters_to_mldev",
+  "input": {
+    "config": {
+      "display_name": "my-store",
+      "embedding_model": "text-embedding-004"
+    }
+  },
+  "expected": {
+    "displayName": "my-store",
+    "embeddingModel": "models/text-embedding-004"
+  },
+  "expected_error": null
+}

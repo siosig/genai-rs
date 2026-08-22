@@ -1,0 +1,8 @@
+{
+  "converter": "_ImageConfig_to_mldev",
+  "input": {
+    "output_mime_type": "image/jpeg"
+  },
+  "expected": null,
+  "expected_error": "field `output_mime_type` is only supported by the Vertex AI backend"
+}

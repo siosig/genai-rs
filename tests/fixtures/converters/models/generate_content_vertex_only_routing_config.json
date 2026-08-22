@@ -1,0 +1,25 @@
+{
+  "converter": "_GenerateContentParameters_to_mldev",
+  "input": {
+    "model": "gemini-2.0-flash",
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "hi"
+          }
+        ]
+      }
+    ],
+    "config": {
+      "routing_config": {
+        "auto_mode": {
+          "model_routing_preference": "BALANCED"
+        }
+      }
+    }
+  },
+  "expected": null,
+  "expected_error": "field `routing_config` is only supported by the Vertex AI backend"
+}

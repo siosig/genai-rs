@@ -1,0 +1,44 @@
+{
+  "converter": "_Content_to_mldev",
+  "input": {
+    "role": "user",
+    "parts": [
+      {
+        "text": "hi"
+      },
+      {
+        "inline_data": {
+          "data": "aGVsbG8=",
+          "mime_type": "image/png"
+        }
+      },
+      {
+        "file_data": {
+          "file_uri": "files/abc",
+          "mime_type": "image/png"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "parts": [
+      {
+        "text": "hi"
+      },
+      {
+        "inlineData": {
+          "data": "aGVsbG8=",
+          "mimeType": "image/png"
+        }
+      },
+      {
+        "fileData": {
+          "fileUri": "files/abc",
+          "mimeType": "image/png"
+        }
+      }
+    ],
+    "role": "user"
+  },
+  "expected_error": null
+}

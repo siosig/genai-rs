@@ -1,0 +1,59 @@
+{
+  "converter": "_ListModelsResponse_from_mldev",
+  "input": {
+    "nextPageToken": "tok",
+    "models": [
+      {
+        "name": "models/gemini-2.0-flash",
+        "displayName": "Gemini 2.0 Flash",
+        "description": "fast",
+        "version": "001",
+        "inputTokenLimit": 1048576,
+        "outputTokenLimit": 8192,
+        "supportedGenerationMethods": [
+          "generateContent"
+        ],
+        "temperature": 1.0,
+        "maxTemperature": 2.0,
+        "topP": 0.95,
+        "topK": 40
+      }
+    ]
+  },
+  "expected": {
+    "next_page_token": "tok",
+    "models": [
+      {
+        "name": "models/gemini-2.0-flash",
+        "display_name": "Gemini 2.0 Flash",
+        "description": "fast",
+        "version": "001",
+        "tuned_model_info": {
+          "name": "models/gemini-2.0-flash",
+          "displayName": "Gemini 2.0 Flash",
+          "description": "fast",
+          "version": "001",
+          "inputTokenLimit": 1048576,
+          "outputTokenLimit": 8192,
+          "supportedGenerationMethods": [
+            "generateContent"
+          ],
+          "temperature": 1.0,
+          "maxTemperature": 2.0,
+          "topP": 0.95,
+          "topK": 40
+        },
+        "input_token_limit": 1048576,
+        "output_token_limit": 8192,
+        "supported_actions": [
+          "generateContent"
+        ],
+        "temperature": 1.0,
+        "max_temperature": 2.0,
+        "top_p": 0.95,
+        "top_k": 40
+      }
+    ]
+  },
+  "expected_error": null
+}

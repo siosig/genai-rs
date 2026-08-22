@@ -1,0 +1,22 @@
+{
+  "converter": "_ListFileSearchStoresResponse_from_mldev",
+  "input": {
+    "nextPageToken": "tok",
+    "fileSearchStores": [
+      {
+        "name": "fileSearchStores/store-1",
+        "displayName": "my-store"
+      }
+    ]
+  },
+  "expected": {
+    "next_page_token": "tok",
+    "file_search_stores": [
+      {
+        "name": "fileSearchStores/store-1",
+        "displayName": "my-store"
+      }
+    ]
+  },
+  "expected_error": null
+}

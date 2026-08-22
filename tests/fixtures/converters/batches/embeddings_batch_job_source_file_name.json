@@ -1,0 +1,10 @@
+{
+  "converter": "_EmbeddingsBatchJobSource_to_mldev",
+  "input": {
+    "file_name": "files/embed-input"
+  },
+  "expected": {
+    "file_name": "files/embed-input"
+  },
+  "expected_error": null
+}

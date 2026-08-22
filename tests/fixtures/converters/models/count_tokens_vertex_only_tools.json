@@ -1,0 +1,25 @@
+{
+  "converter": "_CountTokensParameters_to_mldev",
+  "input": {
+    "model": "gemini-2.0-flash",
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "hi"
+          }
+        ]
+      }
+    ],
+    "config": {
+      "tools": [
+        {
+          "google_search": {}
+        }
+      ]
+    }
+  },
+  "expected": null,
+  "expected_error": "field `tools` is only supported by the Vertex AI backend"
+}

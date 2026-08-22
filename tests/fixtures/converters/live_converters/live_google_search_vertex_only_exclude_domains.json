@@ -1,0 +1,10 @@
+{
+  "converter": "_GoogleSearch_to_mldev",
+  "input": {
+    "exclude_domains": [
+      "example.com"
+    ]
+  },
+  "expected": null,
+  "expected_error": "field `exclude_domains` is only supported by the Vertex AI backend"
+}

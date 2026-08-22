@@ -1,0 +1,12 @@
+{
+  "converter": "_LiveMusicConnectParameters_to_mldev",
+  "input": {
+    "model": "models/lyria-realtime-exp"
+  },
+  "expected": {
+    "setup": {
+      "model": "models/lyria-realtime-exp"
+    }
+  },
+  "expected_error": null
+}

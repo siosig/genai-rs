@@ -1,0 +1,11 @@
+{
+  "converter": "_LiveConnectParameters_to_mldev",
+  "input": {
+    "model": "gemini-2.0-flash-live-001",
+    "config": {
+      "explicit_vad_signal": true
+    }
+  },
+  "expected": null,
+  "expected_error": "field `explicit_vad_signal` is only supported by the Vertex AI backend"
+}

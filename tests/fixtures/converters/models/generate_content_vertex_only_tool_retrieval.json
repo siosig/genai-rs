@@ -1,0 +1,29 @@
+{
+  "converter": "_GenerateContentParameters_to_mldev",
+  "input": {
+    "model": "gemini-2.0-flash",
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "hi"
+          }
+        ]
+      }
+    ],
+    "config": {
+      "tools": [
+        {
+          "retrieval": {
+            "vertex_ai_search": {
+              "datastore": "ds"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "expected": null,
+  "expected_error": "field `retrieval` is only supported by the Vertex AI backend"
+}

@@ -1,0 +1,12 @@
+{
+  "converter": "_FileData_to_mldev",
+  "input": {
+    "file_uri": "files/abc",
+    "mime_type": "image/png"
+  },
+  "expected": {
+    "fileUri": "files/abc",
+    "mimeType": "image/png"
+  },
+  "expected_error": null
+}

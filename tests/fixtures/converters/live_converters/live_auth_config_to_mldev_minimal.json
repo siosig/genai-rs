@@ -1,0 +1,10 @@
+{
+  "converter": "_AuthConfig_to_mldev",
+  "input": {
+    "api_key": "secret"
+  },
+  "expected": {
+    "apiKey": "secret"
+  },
+  "expected_error": null
+}

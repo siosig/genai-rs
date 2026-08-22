@@ -1,0 +1,40 @@
+{
+  "converter": "_UploadToFileSearchStoreParameters_to_mldev",
+  "input": {
+    "file_search_store_name": "fileSearchStores/store-1",
+    "config": {
+      "mime_type": "text/plain",
+      "display_name": "notes.txt",
+      "custom_metadata": [
+        {
+          "key": "topic",
+          "string_value": "rust"
+        }
+      ],
+      "chunking_config": {
+        "white_space_config": {
+          "max_tokens_per_chunk": 100
+        }
+      }
+    }
+  },
+  "expected": {
+    "_url": {
+      "file_search_store_name": "fileSearchStores/store-1"
+    },
+    "mimeType": "text/plain",
+    "displayName": "notes.txt",
+    "customMetadata": [
+      {
+        "key": "topic",
+        "string_value": "rust"
+      }
+    ],
+    "chunkingConfig": {
+      "white_space_config": {
+        "max_tokens_per_chunk": 100
+      }
+    }
+  },
+  "expected_error": null
+}

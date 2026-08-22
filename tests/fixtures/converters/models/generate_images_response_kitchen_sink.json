@@ -1,0 +1,72 @@
+{
+  "converter": "_GenerateImagesResponse_from_mldev",
+  "input": {
+    "sdkHttpResponse": {
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    "predictions": [
+      {
+        "bytesBase64Encoded": "aGVsbG8=",
+        "mimeType": "image/png",
+        "raiFilteredReason": "blocked",
+        "safetyAttributes": {
+          "categories": [
+            "Violence"
+          ],
+          "scores": [
+            0.1
+          ]
+        },
+        "contentType": "Positive Prompt"
+      }
+    ],
+    "positivePromptSafetyAttributes": {
+      "safetyAttributes": {
+        "categories": [
+          "Death"
+        ],
+        "scores": [
+          0.2
+        ]
+      },
+      "contentType": "Positive Prompt"
+    }
+  },
+  "expected": {
+    "sdk_http_response": {
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    "generated_images": [
+      {
+        "image": {
+          "image_bytes": "aGVsbG8=",
+          "mime_type": "image/png"
+        },
+        "rai_filtered_reason": "blocked",
+        "safety_attributes": {
+          "categories": [
+            "Violence"
+          ],
+          "scores": [
+            0.1
+          ],
+          "content_type": "Positive Prompt"
+        }
+      }
+    ],
+    "positive_prompt_safety_attributes": {
+      "categories": [
+        "Death"
+      ],
+      "scores": [
+        0.2
+      ],
+      "content_type": "Positive Prompt"
+    }
+  },
+  "expected_error": null
+}

@@ -1,0 +1,32 @@
+{
+  "converter": "_ListDocumentsResponse_from_mldev",
+  "input": {
+    "sdkHttpResponse": {
+      "headers": {
+        "x": "y"
+      }
+    },
+    "nextPageToken": "tok",
+    "documents": [
+      {
+        "name": "ragStores/store-1/documents/doc-1",
+        "displayName": "doc one"
+      }
+    ]
+  },
+  "expected": {
+    "sdk_http_response": {
+      "headers": {
+        "x": "y"
+      }
+    },
+    "next_page_token": "tok",
+    "documents": [
+      {
+        "name": "ragStores/store-1/documents/doc-1",
+        "displayName": "doc one"
+      }
+    ]
+  },
+  "expected_error": null
+}

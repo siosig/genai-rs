@@ -1,0 +1,23 @@
+{
+  "converter": "_GenerateImagesResponse_from_mldev",
+  "input": {
+    "predictions": [
+      {
+        "bytesBase64Encoded": "aGVsbG8=",
+        "mimeType": "image/png"
+      }
+    ]
+  },
+  "expected": {
+    "generated_images": [
+      {
+        "image": {
+          "image_bytes": "aGVsbG8=",
+          "mime_type": "image/png"
+        },
+        "safety_attributes": {}
+      }
+    ]
+  },
+  "expected_error": null
+}

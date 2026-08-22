@@ -1,0 +1,14 @@
+{
+  "converter": "_LiveSendRealtimeInputParameters_to_mldev",
+  "input": {
+    "text": "hello",
+    "activity_start": {},
+    "activity_end": {}
+  },
+  "expected": {
+    "text": "hello",
+    "activityStart": {},
+    "activityEnd": {}
+  },
+  "expected_error": null
+}

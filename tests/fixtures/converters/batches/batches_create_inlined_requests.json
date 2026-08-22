@@ -1,0 +1,62 @@
+{
+  "converter": "_CreateBatchJobParameters_to_mldev",
+  "input": {
+    "model": "gemini-2.0-flash",
+    "src": {
+      "inlined_requests": [
+        {
+          "model": "gemini-2.0-flash",
+          "contents": [
+            {
+              "role": "user",
+              "parts": [
+                {
+                  "text": "hi"
+                }
+              ]
+            }
+          ],
+          "metadata": {
+            "key": "value"
+          }
+        }
+      ]
+    },
+    "config": {
+      "display_name": "my-batch"
+    }
+  },
+  "expected": {
+    "_url": {
+      "model": "models/gemini-2.0-flash"
+    },
+    "batch": {
+      "inputConfig": {
+        "requests": {
+          "requests": [
+            {
+              "request": {
+                "model": "models/gemini-2.0-flash",
+                "contents": [
+                  {
+                    "parts": [
+                      {
+                        "text": "hi"
+                      }
+                    ],
+                    "role": "user"
+                  }
+                ]
+              },
+              "metadata": {
+                "key": "value"
+              }
+            }
+          ]
+        }
+      },
+      "displayName": "my-batch"
+    }
+  },
+  "expected_error": null
+}

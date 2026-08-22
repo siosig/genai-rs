@@ -1,0 +1,8 @@
+{
+  "converter": "_ImageConfig_to_mldev",
+  "input": {
+    "person_generation": "ALLOW_ADULT"
+  },
+  "expected": null,
+  "expected_error": "field `person_generation` is only supported by the Vertex AI backend"
+}

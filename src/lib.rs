@@ -144,16 +144,16 @@
 //! | `live` | yes | [`live`]: the bidirectional realtime (WebSocket) API |
 //! | `blocking` | no | `google_genai::blocking`: a synchronous mirror of this API |
 //! | `mcp` | no | `google_genai::mcp`: exposes MCP server tools to the model |
-//! | `live-tests` | no | Opts the repo's own network-dependent tests in; not used by library code |
 //!
 //! # Errors
 //!
 //! Every fallible call returns [`Result<T>`](Result), whose error is the
 //! [`Error`] enum: [`Error::Api`] (boxed [`ApiError`] with `code`,
 //! `status`, `message`), [`Error::Http`], [`Error::Json`],
-//! [`Error::Validation`], [`Error::UnsupportedByBackend`],
+//! [`Error::Io`], [`Error::Validation`], [`Error::UnsupportedByBackend`],
 //! [`Error::UnsupportedBackend`], [`Error::FunctionCall`],
-//! [`Error::Stream`], [`Error::Upload`], [`Error::NoMorePages`], and
+//! [`Error::WebSocket`] (with the `live` feature), [`Error::Stream`],
+//! [`Error::Upload`], [`Error::NoMorePages`], and
 //! [`Error::BlockingInsideRuntime`].
 //!
 //! ```

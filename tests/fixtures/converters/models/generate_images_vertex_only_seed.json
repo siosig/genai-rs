@@ -1,0 +1,12 @@
+{
+  "converter": "_GenerateImagesParameters_to_mldev",
+  "input": {
+    "model": "imagen-3.0-generate-002",
+    "prompt": "a cat",
+    "config": {
+      "seed": 42
+    }
+  },
+  "expected": null,
+  "expected_error": "field `seed` is only supported by the Vertex AI backend"
+}

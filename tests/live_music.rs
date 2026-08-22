@@ -4,27 +4,12 @@
 
 mod common;
 
+use common::test_client;
 use common::ws_server::start_mock_ws_server;
 use futures_util::{SinkExt, StreamExt};
-use google_genai::Client;
-use google_genai::types::{HttpOptions, LiveMusicGenerationConfig, WeightedPrompt};
+use google_genai::types::{LiveMusicGenerationConfig, WeightedPrompt};
 use serde_json::{Value, json};
 use tokio_tungstenite::tungstenite::Message;
-
-#[expect(
-    clippy::unwrap_used,
-    reason = "test helper: a broken Client::builder() here is a test-setup bug, not a runtime condition"
-)]
-fn test_client(base_url: String) -> Client {
-    Client::builder()
-        .api_key("test-key")
-        .http_options(HttpOptions {
-            base_url: Some(base_url),
-            ..Default::default()
-        })
-        .build()
-        .unwrap()
-}
 
 #[expect(
     clippy::unwrap_used,

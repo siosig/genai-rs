@@ -1,0 +1,58 @@
+{
+  "converter": "_GenerateVideosOperation_from_mldev",
+  "input": {
+    "name": "models/veo-3.0-generate-001/operations/abc123",
+    "metadata": {
+      "@type": "type.googleapis.com/x",
+      "progressPercent": 50
+    },
+    "done": true,
+    "response": {
+      "generateVideoResponse": {
+        "generatedSamples": [
+          {
+            "video": {
+              "uri": "https://example.com/out.mp4",
+              "encodedVideo": "aGVsbG8=",
+              "encoding": "video/mp4"
+            }
+          }
+        ],
+        "raiMediaFilteredCount": 0
+      }
+    }
+  },
+  "expected": {
+    "name": "models/veo-3.0-generate-001/operations/abc123",
+    "metadata": {
+      "@type": "type.googleapis.com/x",
+      "progressPercent": 50
+    },
+    "done": true,
+    "response": {
+      "generated_videos": [
+        {
+          "video": {
+            "uri": "https://example.com/out.mp4",
+            "video_bytes": "aGVsbG8=",
+            "mime_type": "video/mp4"
+          }
+        }
+      ],
+      "rai_media_filtered_count": 0
+    },
+    "result": {
+      "generated_videos": [
+        {
+          "video": {
+            "uri": "https://example.com/out.mp4",
+            "video_bytes": "aGVsbG8=",
+            "mime_type": "video/mp4"
+          }
+        }
+      ],
+      "rai_media_filtered_count": 0
+    }
+  },
+  "expected_error": null
+}

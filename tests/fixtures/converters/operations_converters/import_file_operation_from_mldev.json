@@ -1,0 +1,20 @@
+{
+  "converter": "_ImportFileOperation_from_mldev",
+  "input": {
+    "name": "fileSearchStores/store-1/operations/op-1",
+    "metadata": {
+      "progressPercent": 10
+    },
+    "done": true,
+    "response": {}
+  },
+  "expected": {
+    "name": "fileSearchStores/store-1/operations/op-1",
+    "metadata": {
+      "progressPercent": 10
+    },
+    "done": true,
+    "response": {}
+  },
+  "expected_error": null
+}

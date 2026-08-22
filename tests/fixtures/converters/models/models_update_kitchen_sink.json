@@ -1,0 +1,20 @@
+{
+  "converter": "_UpdateModelParameters_to_mldev",
+  "input": {
+    "model": "tunedModels/abc123",
+    "config": {
+      "display_name": "renamed",
+      "description": "new description",
+      "default_checkpoint_id": "ckpt-2"
+    }
+  },
+  "expected": {
+    "_url": {
+      "name": "tunedModels/abc123"
+    },
+    "displayName": "renamed",
+    "description": "new description",
+    "defaultCheckpointId": "ckpt-2"
+  },
+  "expected_error": null
+}

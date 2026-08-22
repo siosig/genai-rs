@@ -7,34 +7,22 @@
 //! (`test_client`/`model_reply` helpers, sequencing responses with
 //! `up_to_n_times(1)` mocks mounted in order).
 
+mod common;
+
 use std::collections::HashMap;
 
+use common::test_client;
+use google_genai::Error;
 use google_genai::afc::function_tool;
 use google_genai::error::FunctionCallError;
 use google_genai::types::{
-    AutomaticFunctionCallingConfig, Content, FunctionDeclaration, GenerateContentConfig,
-    HttpOptions, Part, Schema, Tool, Type,
+    AutomaticFunctionCallingConfig, Content, FunctionDeclaration, GenerateContentConfig, Part,
+    Schema, Tool, Type,
 };
-use google_genai::{Client, Error};
 use schemars::JsonSchema;
 use serde::Deserialize;
 use wiremock::ResponseTemplate;
 use wiremock::matchers::{body_partial_json, method};
-
-#[expect(
-    clippy::unwrap_used,
-    reason = "test helper: a broken Client::builder() here is a test-setup bug, not a runtime condition"
-)]
-fn test_client(base_url: String) -> Client {
-    Client::builder()
-        .api_key("test-key")
-        .http_options(HttpOptions {
-            base_url: Some(base_url),
-            ..Default::default()
-        })
-        .build()
-        .unwrap()
-}
 
 fn model_reply(text: &str) -> serde_json::Value {
     serde_json::json!({

@@ -1,0 +1,16 @@
+{
+  "converter": "_UpdateCachedContentParameters_to_mldev",
+  "input": {
+    "name": "cachedContents/abc123",
+    "config": {
+      "expire_time": "2026-06-01T00:00:00Z"
+    }
+  },
+  "expected": {
+    "_url": {
+      "name": "cachedContents/abc123"
+    },
+    "expireTime": "2026-06-01T00:00:00Z"
+  },
+  "expected_error": null
+}

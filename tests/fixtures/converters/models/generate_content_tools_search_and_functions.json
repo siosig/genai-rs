@@ -1,0 +1,142 @@
+{
+  "converter": "_GenerateContentParameters_to_mldev",
+  "input": {
+    "model": "tunedModels/my-tuned-model",
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "hi"
+          }
+        ]
+      },
+      {
+        "role": "model",
+        "parts": [
+          {
+            "text": "hello"
+          }
+        ]
+      }
+    ],
+    "config": {
+      "tools": [
+        {
+          "google_search": {}
+        },
+        {
+          "url_context": {}
+        },
+        {
+          "function_declarations": [
+            {
+              "name": "lookup",
+              "description": "looks something up",
+              "parameters": {
+                "type": "OBJECT",
+                "properties": {
+                  "q": {
+                    "type": "STRING"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "tool_config": {
+        "function_calling_config": {
+          "mode": "ANY",
+          "allowed_function_names": [
+            "lookup"
+          ]
+        }
+      },
+      "thinking_config": {
+        "include_thoughts": true,
+        "thinking_budget": 1024
+      },
+      "response_modalities": [
+        "TEXT"
+      ],
+      "seed": 7,
+      "presence_penalty": 0.1,
+      "frequency_penalty": 0.2,
+      "logprobs": 3,
+      "response_logprobs": true,
+      "media_resolution": "MEDIA_RESOLUTION_LOW"
+    }
+  },
+  "expected": {
+    "_url": {
+      "model": "tunedModels/my-tuned-model"
+    },
+    "contents": [
+      {
+        "parts": [
+          {
+            "text": "hi"
+          }
+        ],
+        "role": "user"
+      },
+      {
+        "parts": [
+          {
+            "text": "hello"
+          }
+        ],
+        "role": "model"
+      }
+    ],
+    "tools": [
+      {
+        "googleSearch": {}
+      },
+      {
+        "urlContext": {}
+      },
+      {
+        "functionDeclarations": [
+          {
+            "description": "looks something up",
+            "name": "lookup",
+            "parameters": {
+              "properties": {
+                "q": {
+                  "type": "STRING"
+                }
+              },
+              "type": "OBJECT"
+            }
+          }
+        ]
+      }
+    ],
+    "toolConfig": {
+      "functionCallingConfig": {
+        "allowedFunctionNames": [
+          "lookup"
+        ],
+        "mode": "ANY"
+      }
+    },
+    "generationConfig": {
+      "responseLogprobs": true,
+      "logprobs": 3,
+      "presencePenalty": 0.1,
+      "frequencyPenalty": 0.2,
+      "seed": 7,
+      "responseModalities": [
+        "TEXT"
+      ],
+      "mediaResolution": "MEDIA_RESOLUTION_LOW",
+      "thinkingConfig": {
+        "include_thoughts": true,
+        "thinking_budget": 1024
+      }
+    }
+  },
+  "expected_error": null
+}

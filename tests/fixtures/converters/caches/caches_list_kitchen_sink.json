@@ -1,0 +1,16 @@
+{
+  "converter": "_ListCachedContentsParameters_to_mldev",
+  "input": {
+    "config": {
+      "page_size": 10,
+      "page_token": "tok"
+    }
+  },
+  "expected": {
+    "_query": {
+      "pageSize": 10,
+      "pageToken": "tok"
+    }
+  },
+  "expected_error": null
+}

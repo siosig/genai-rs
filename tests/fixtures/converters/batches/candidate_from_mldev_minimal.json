@@ -1,0 +1,28 @@
+{
+  "converter": "_Candidate_from_mldev",
+  "input": {
+    "content": {
+      "role": "model",
+      "parts": [
+        {
+          "text": "hi"
+        }
+      ]
+    },
+    "finishReason": "MAX_TOKENS",
+    "index": 1
+  },
+  "expected": {
+    "content": {
+      "role": "model",
+      "parts": [
+        {
+          "text": "hi"
+        }
+      ]
+    },
+    "finish_reason": "MAX_TOKENS",
+    "index": 1
+  },
+  "expected_error": null
+}

@@ -1,0 +1,26 @@
+{
+  "converter": "_ListBatchJobsResponse_from_mldev",
+  "input": {
+    "nextPageToken": "tok",
+    "operations": [
+      {
+        "name": "batches/abc123",
+        "metadata": {
+          "state": "BATCH_STATE_RUNNING",
+          "model": "models/x"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "next_page_token": "tok",
+    "batch_jobs": [
+      {
+        "name": "batches/abc123",
+        "state": "JOB_STATE_RUNNING",
+        "model": "models/x"
+      }
+    ]
+  },
+  "expected_error": null
+}

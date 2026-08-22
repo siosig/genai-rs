@@ -14,18 +14,30 @@
 //! Without `GENAI_E2E_EXPENSIVE=1` each test skips (rather than fails), so
 //! running the whole `--ignored` set stays safe by default.
 //!
-//! Tuning is deliberately not covered: `tunings().tune` creates a
-//! long-lived tuned model that would linger on the project, and
-//! `tunings().list` is Vertex-AI-only in the upstream SDK (this crate
-//! returns `UnsupportedByBackend`), so there is no way to enumerate and
-//! clean up what a test created.
+//! Tuning (US8 scenario 1) *is* covered below, but the test skips today:
+//! the Gemini Developer API answers `POST /v1beta/tunedModels` with
+//! **501 UNIMPLEMENTED** for every base model tried (`gemini-flash-latest`,
+//! `gemini-2.5-flash`, and the legacy `gemini-1.5-flash-001-tuning`), and
+//! `GET /v1beta/tunedModels` answers 501 as well, so no tuning job can be
+//! created against this backend at all. The test therefore treats a 501 as
+//! "not served" and skips, and starts exercising the real flow the moment
+//! the endpoint comes back.
+//!
+//! An earlier version of this comment gave a different reason -- that a
+//! tuned model could never be cleaned up, because `tunings().list` is
+//! Vertex-AI-only here. That reason was wrong. Cleanup is possible:
+//! `models().delete(name)` runs `name` through `t_model`
+//! (`src/transformers.rs`), which passes a `tunedModels/...` prefix
+//! straight through, so it issues `DELETE /v1beta/tunedModels/{id}`; and
+//! `models().list(..)` with `query_base: Some(false)` enumerates tuned
+//! models via `t_models_url`. The test below does exactly that cleanup.
 
 use futures_util::StreamExt;
-use google_genai::Client;
 use google_genai::types::{
-    BatchJobSource, Content, CreateBatchJobConfig, GenerateVideosSource, InlinedRequest,
-    LiveConnectConfig, Modality, Part,
+    BatchJobSource, Content, CreateBatchJobConfig, CreateTuningJobConfig, GenerateVideosSource,
+    InlinedRequest, JobState, LiveConnectConfig, Modality, Part, TuningDataset, TuningExample,
 };
+use google_genai::{Client, Error};
 
 /// A currently-served video-generation model.
 const VIDEO_MODEL: &str = "veo-3.1-fast-generate-preview";
@@ -33,6 +45,8 @@ const VIDEO_MODEL: &str = "veo-3.1-fast-generate-preview";
 const LIVE_MODEL: &str = "gemini-3.1-flash-live-preview";
 /// A small text model, used for batch requests.
 const TEXT_MODEL: &str = "gemini-flash-latest";
+/// The base model a tuning job would be built on.
+const TUNING_BASE_MODEL: &str = TEXT_MODEL;
 
 /// Builds a live client, or returns `None` when the API key or the
 /// expensive-test opt-in is missing (in which case the caller skips).
@@ -229,4 +243,88 @@ async fn test_e2e_live_session_audio_turn() {
         audio_bytes > 0,
         "live session produced no audio data (received {audio_bytes} bytes)"
     );
+}
+
+/// US8 scenario 1: a tuning job is created, its name and state come back,
+/// `tunings().get` confirms it, and the tuned model the job produced is
+/// deleted again so the test leaves nothing behind.
+///
+/// Skips (rather than fails) on `501 UNIMPLEMENTED`, which is what the
+/// Gemini Developer API currently answers for `POST /v1beta/tunedModels`
+/// -- see this file's module doc. `tunings().list` is not used: it is
+/// Vertex-AI-only in the upstream SDK and this crate returns
+/// `UnsupportedByBackend` for it (`tests/tunings.rs` covers that), so the
+/// created job is confirmed with `tunings().get` instead.
+#[tokio::test]
+#[ignore = "expensive: creates a tuned model; needs GENAI_E2E_EXPENSIVE=1"]
+async fn test_e2e_tuning_create_get_and_delete_tuned_model() {
+    let client = client_or_skip!();
+    let dataset = TuningDataset {
+        examples: Some(
+            [
+                ("1 + 1", "2"),
+                ("2 + 2", "4"),
+                ("3 + 3", "6"),
+                ("4 + 4", "8"),
+            ]
+            .into_iter()
+            .map(|(text_input, output)| TuningExample {
+                text_input: Some(text_input.to_owned()),
+                output: Some(output.to_owned()),
+            })
+            .collect(),
+        ),
+        ..Default::default()
+    };
+
+    let job = match client
+        .tunings()
+        .tune(
+            TUNING_BASE_MODEL,
+            dataset,
+            Some(CreateTuningJobConfig {
+                tuned_model_display_name: Some("genai-rs e2e tuning smoke".to_owned()),
+                epoch_count: Some(1),
+                ..Default::default()
+            }),
+        )
+        .await
+    {
+        Ok(job) => job,
+        Err(Error::Api(error)) if error.code == 501 => {
+            eprintln!(
+                "skipping: tuning is not served on this backend \
+                 (POST /v1beta/tunedModels -> 501 {}): {}",
+                error.status.as_deref().unwrap_or("UNIMPLEMENTED"),
+                error.message
+            );
+            return;
+        }
+        Err(error) => panic!("tunings tune failed: {error}"),
+    };
+
+    let name = job.name.clone().expect("created tuning job has no name");
+    eprintln!("created tuning job {name}");
+    assert!(
+        name.starts_with("tunedModels/"),
+        "tuning job name is not a tunedModels resource: {name}"
+    );
+    assert_eq!(
+        job.state,
+        Some(JobState::JobStateQueued),
+        "tune() should synthesize a queued stub job"
+    );
+
+    let fetched = client.tunings().get(&name, None).await;
+
+    // Clean up before asserting on the fetch, so a surprising `get`
+    // response can't leave a tuned model behind on the project.
+    // `models().delete` accepts a `tunedModels/...` name unchanged, so
+    // this is `DELETE /v1beta/{name}`.
+    let deleted = client.models().delete(&name, None).await;
+
+    let fetched = fetched.expect("tunings get failed");
+    assert_eq!(fetched.name.as_deref(), Some(name.as_str()));
+    assert!(fetched.state.is_some(), "fetched job carried no state");
+    deleted.unwrap_or_else(|error| panic!("deleting tuned model {name} failed: {error}"));
 }

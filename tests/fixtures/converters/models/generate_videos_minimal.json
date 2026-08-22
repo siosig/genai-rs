@@ -1,0 +1,18 @@
+{
+  "converter": "_GenerateVideosParameters_to_mldev",
+  "input": {
+    "model": "veo-3.0-generate-001",
+    "prompt": "a cat"
+  },
+  "expected": {
+    "_url": {
+      "model": "models/veo-3.0-generate-001"
+    },
+    "instances": [
+      {
+        "prompt": "a cat"
+      }
+    ]
+  },
+  "expected_error": null
+}

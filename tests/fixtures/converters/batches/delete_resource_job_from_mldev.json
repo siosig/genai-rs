@@ -1,0 +1,22 @@
+{
+  "converter": "_DeleteResourceJob_from_mldev",
+  "input": {
+    "sdkHttpResponse": {
+      "headers": {
+        "x": "y"
+      }
+    },
+    "name": "batches/abc123",
+    "done": true
+  },
+  "expected": {
+    "sdk_http_response": {
+      "headers": {
+        "x": "y"
+      }
+    },
+    "name": "batches/abc123",
+    "done": true
+  },
+  "expected_error": null
+}

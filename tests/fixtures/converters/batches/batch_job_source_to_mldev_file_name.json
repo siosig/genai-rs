@@ -1,0 +1,10 @@
+{
+  "converter": "_BatchJobSource_to_mldev",
+  "input": {
+    "file_name": "files/batch-input"
+  },
+  "expected": {
+    "fileName": "files/batch-input"
+  },
+  "expected_error": null
+}

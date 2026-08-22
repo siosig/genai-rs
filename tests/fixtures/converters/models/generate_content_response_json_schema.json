@@ -1,0 +1,52 @@
+{
+  "converter": "_GenerateContentParameters_to_mldev",
+  "input": {
+    "model": "gemini-2.0-flash",
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "who?"
+          }
+        ]
+      }
+    ],
+    "config": {
+      "response_json_schema": {
+        "type": "object",
+        "properties": {
+          "answer": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "_url": {
+      "model": "models/gemini-2.0-flash"
+    },
+    "contents": [
+      {
+        "parts": [
+          {
+            "text": "who?"
+          }
+        ],
+        "role": "user"
+      }
+    ],
+    "generationConfig": {
+      "responseJsonSchema": {
+        "type": "object",
+        "properties": {
+          "answer": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "expected_error": null
+}

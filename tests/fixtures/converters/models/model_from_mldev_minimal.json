@@ -1,0 +1,16 @@
+{
+  "converter": "_Model_from_mldev",
+  "input": {
+    "name": "models/gemini-2.0-flash",
+    "version": "001"
+  },
+  "expected": {
+    "name": "models/gemini-2.0-flash",
+    "version": "001",
+    "tuned_model_info": {
+      "name": "models/gemini-2.0-flash",
+      "version": "001"
+    }
+  },
+  "expected_error": null
+}

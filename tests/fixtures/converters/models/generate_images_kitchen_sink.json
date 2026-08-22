@@ -1,0 +1,46 @@
+{
+  "converter": "_GenerateImagesParameters_to_mldev",
+  "input": {
+    "model": "imagen-3.0-generate-002",
+    "prompt": "a red bicycle",
+    "config": {
+      "number_of_images": 2,
+      "aspect_ratio": "16:9",
+      "guidance_scale": 7.5,
+      "safety_filter_level": "BLOCK_ONLY_HIGH",
+      "person_generation": "ALLOW_ADULT",
+      "include_safety_attributes": true,
+      "include_rai_reason": true,
+      "language": "en",
+      "output_mime_type": "image/jpeg",
+      "output_compression_quality": 80,
+      "image_size": "2K"
+    }
+  },
+  "expected": {
+    "_url": {
+      "model": "models/imagen-3.0-generate-002"
+    },
+    "instances": [
+      {
+        "prompt": "a red bicycle"
+      }
+    ],
+    "parameters": {
+      "sampleCount": 2,
+      "aspectRatio": "16:9",
+      "guidanceScale": 7.5,
+      "safetySetting": "BLOCK_ONLY_HIGH",
+      "personGeneration": "ALLOW_ADULT",
+      "includeSafetyAttributes": true,
+      "includeRaiReason": true,
+      "language": "en",
+      "outputOptions": {
+        "mimeType": "image/jpeg",
+        "compressionQuality": 80
+      },
+      "sampleImageSize": "2K"
+    }
+  },
+  "expected_error": null
+}

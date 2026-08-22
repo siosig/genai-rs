@@ -1,0 +1,12 @@
+{
+  "converter": "_GetModelParameters_to_mldev",
+  "input": {
+    "model": "gemini-2.0-flash"
+  },
+  "expected": {
+    "_url": {
+      "name": "models/gemini-2.0-flash"
+    }
+  },
+  "expected_error": null
+}

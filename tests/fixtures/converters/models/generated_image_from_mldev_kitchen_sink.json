@@ -1,0 +1,34 @@
+{
+  "converter": "_GeneratedImage_from_mldev",
+  "input": {
+    "bytesBase64Encoded": "aGVsbG8=",
+    "mimeType": "image/png",
+    "raiFilteredReason": "blocked",
+    "safetyAttributes": {
+      "categories": [
+        "Violence"
+      ],
+      "scores": [
+        0.3
+      ]
+    },
+    "contentType": "Positive Prompt"
+  },
+  "expected": {
+    "image": {
+      "image_bytes": "aGVsbG8=",
+      "mime_type": "image/png"
+    },
+    "rai_filtered_reason": "blocked",
+    "safety_attributes": {
+      "categories": [
+        "Violence"
+      ],
+      "scores": [
+        0.3
+      ],
+      "content_type": "Positive Prompt"
+    }
+  },
+  "expected_error": null
+}

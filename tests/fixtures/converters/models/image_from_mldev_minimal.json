@@ -1,0 +1,12 @@
+{
+  "converter": "_Image_from_mldev",
+  "input": {
+    "bytesBase64Encoded": "aGVsbG8=",
+    "mimeType": "image/png"
+  },
+  "expected": {
+    "image_bytes": "aGVsbG8=",
+    "mime_type": "image/png"
+  },
+  "expected_error": null
+}

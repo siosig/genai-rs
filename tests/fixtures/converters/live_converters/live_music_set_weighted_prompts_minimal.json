@@ -1,0 +1,28 @@
+{
+  "converter": "_LiveMusicSetWeightedPromptsParameters_to_mldev",
+  "input": {
+    "weighted_prompts": [
+      {
+        "text": "minimal techno",
+        "weight": 1.0
+      },
+      {
+        "text": "ambient",
+        "weight": 0.5
+      }
+    ]
+  },
+  "expected": {
+    "weightedPrompts": [
+      {
+        "text": "minimal techno",
+        "weight": 1.0
+      },
+      {
+        "text": "ambient",
+        "weight": 0.5
+      }
+    ]
+  },
+  "expected_error": null
+}

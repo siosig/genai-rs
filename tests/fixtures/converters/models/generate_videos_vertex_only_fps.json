@@ -1,0 +1,12 @@
+{
+  "converter": "_GenerateVideosParameters_to_mldev",
+  "input": {
+    "model": "veo-3.0-generate-001",
+    "prompt": "a cat",
+    "config": {
+      "fps": 24
+    }
+  },
+  "expected": null,
+  "expected_error": "field `fps` is only supported by the Vertex AI backend"
+}

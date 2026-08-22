@@ -1,0 +1,12 @@
+{
+  "converter": "_GenerateImagesParameters_to_mldev",
+  "input": {
+    "model": "imagen-3.0-generate-002",
+    "prompt": "a cat",
+    "config": {
+      "add_watermark": true
+    }
+  },
+  "expected": null,
+  "expected_error": "field `add_watermark` is only supported by the Vertex AI backend"
+}

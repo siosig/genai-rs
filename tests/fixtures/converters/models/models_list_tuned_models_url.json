@@ -1,0 +1,14 @@
+{
+  "converter": "_ListModelsParameters_to_mldev",
+  "input": {
+    "config": {
+      "query_base": false
+    }
+  },
+  "expected": {
+    "_url": {
+      "models_url": "tunedModels"
+    }
+  },
+  "expected_error": null
+}

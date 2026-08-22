@@ -82,7 +82,7 @@ The "Test(s)" column comes from scanning `tests/**.rs` and the `#[cfg(test)]` mo
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `models.generate_content` | `models::Models::generate_content` | ✅ Implemented | `src/models.rs::generate_content_deserializes_unknown_response_fields_without_failing`<br>`src/models.rs::generate_content_maps_a_client_error_to_api_error`<br>`src/models.rs::generate_content_posts_to_the_model_generate_content_path`<br>and 25 more |
+| `models.generate_content` | `models::Models::generate_content` | ✅ Implemented | `src/models.rs::generate_content_deserializes_unknown_response_fields_without_failing`<br>`src/models.rs::generate_content_maps_a_client_error_to_api_error`<br>`src/models.rs::generate_content_posts_to_the_model_generate_content_path`<br>and 27 more |
 | `models.generate_content_stream` | `models::Models::generate_content_stream` | ✅ Implemented | `src/models.rs::generate_content_stream_yields_chunks_in_order`<br>`tests/blocking_parity.rs::generate_content_stream_yields_chunks_via_iterator`<br>`tests/e2e.rs::test_e2e_generate_content_stream` |
 | `models.embed_content` | `models::Models::embed_content` | ✅ Implemented | `src/models.rs::embed_content_posts_to_batch_embed_contents`<br>`tests/e2e.rs::test_e2e_embed_content` |
 | `models.count_tokens` | `models::Models::count_tokens` | ✅ Implemented | `src/models.rs::count_tokens_posts_and_parses_total`<br>`tests/e2e.rs::test_e2e_count_tokens` |
@@ -90,8 +90,8 @@ The "Test(s)" column comes from scanning `tests/**.rs` and the `#[cfg(test)]` mo
 | `models.get` | `models::Models::get` | ✅ Implemented | `src/models.rs::get_fetches_a_model_by_resource_name` |
 | `models.list` | `models::Models::list` | ✅ Implemented | `src/models.rs::list_defaults_query_base_to_true_and_pages`<br>`src/models.rs::list_uses_tuned_models_collection_when_query_base_is_false`<br>`tests/blocking_parity.rs::list_paginates_via_the_blocking_pager`<br>and 2 more |
 | `models.update` | `models::Models::update` | ✅ Implemented | `src/models.rs::update_patches_a_tuned_model` |
-| `models.delete` | `models::Models::delete` | ✅ Implemented | `src/models.rs::delete_removes_a_tuned_model` |
-| `models.generate_images` | `models::Models::generate_images` | ✅ Implemented (`#[deprecated]`) | `src/models.rs::generate_images_posts_prompt_to_predict` |
+| `models.delete` | `models::Models::delete` | ✅ Implemented | `src/models.rs::delete_removes_a_tuned_model`<br>`tests/e2e_expensive.rs::test_e2e_tuning_create_get_and_delete_tuned_model` |
+| `models.generate_images` | `models::Models::generate_images` | ✅ Implemented (`#[deprecated]`) | `src/models.rs::generate_images_posts_prompt_to_predict`<br>`src/models.rs::generate_images_rejects_every_vertex_only_config_field` |
 | `models.generate_videos` | `models::Models::generate_videos` | ✅ Implemented | `src/models.rs::generate_videos_posts_to_predict_long_running_and_parses_operation`<br>`tests/e2e_expensive.rs::test_e2e_generate_videos_and_poll_operation`<br>`tests/operations.rs::generate_videos_then_operations_get_returns_the_completed_operation` |
 | `models.edit_image` | — | ⏭ Not ported (Vertex AI only) | — |
 | `models.recontext_image` | — | ⏭ Not ported (Vertex AI only) | — |
@@ -102,10 +102,10 @@ The "Test(s)" column comes from scanning `tests/**.rs` and the `#[cfg(test)]` mo
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `chats.create` | `chats::Chats::create` | ✅ Implemented (sync variant is hand-written) | `tests/chats.rs::create_with_history_seeds_the_chat_before_any_send`<br>`src/chats.rs::send_message_excludes_an_invalid_response_from_curated_history_only`<br>`src/chats.rs::send_message_records_both_turns_and_replays_curated_history`<br>and 6 more |
-| `chats.Chat.send_message` | `chats::Chat::send_message` | ✅ Implemented (sync variant is hand-written) | `src/chats.rs::send_message_excludes_an_invalid_response_from_curated_history_only`<br>`src/chats.rs::send_message_records_both_turns_and_replays_curated_history` |
+| `chats.create` | `chats::Chats::create` | ✅ Implemented (sync variant is hand-written) | `tests/chats.rs::create_with_history_seeds_the_chat_before_any_send`<br>`src/chats.rs::send_message_excludes_an_invalid_response_from_curated_history_only`<br>`src/chats.rs::send_message_records_both_turns_and_replays_curated_history`<br>and 7 more |
+| `chats.Chat.send_message` | `chats::Chat::send_message` | ✅ Implemented (sync variant is hand-written) | `src/chats.rs::send_message_excludes_an_invalid_response_from_curated_history_only`<br>`src/chats.rs::send_message_records_both_turns_and_replays_curated_history`<br>`src/chats.rs::send_message_with_afc_records_only_the_final_turn` |
 | `chats.Chat.send_message_stream` | `chats::Chat::send_message_stream` | ✅ Implemented (sync variant is hand-written) | `tests/blocking_parity.rs::chat_send_message_and_send_message_stream_record_history`<br>`tests/chats.rs::streaming_send_records_the_accumulated_model_reply_once_drained` |
-| `chats.Chat.get_history` | `chats::Chat::get_history` | ✅ Implemented (sync variant is hand-written) | `src/chats.rs::send_message_excludes_an_invalid_response_from_curated_history_only`<br>`src/chats.rs::send_message_records_both_turns_and_replays_curated_history` |
+| `chats.Chat.get_history` | `chats::Chat::get_history` | ✅ Implemented (sync variant is hand-written) | `src/chats.rs::send_message_excludes_an_invalid_response_from_curated_history_only`<br>`src/chats.rs::send_message_records_both_turns_and_replays_curated_history`<br>`src/chats.rs::send_message_with_afc_records_only_the_final_turn` |
 | `chats.Chat.record_history` | `chats::Chat::record_history` | ✅ Implemented (private helper, sync variant is hand-written) | `tests/blocking_parity.rs::chat_send_message_and_send_message_stream_record_history` |
 
 ### files
@@ -123,18 +123,18 @@ The "Test(s)" column comes from scanning `tests/**.rs` and the `#[cfg(test)]` mo
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `caches.create` | `caches::Caches::create` | ✅ Implemented | `src/caches.rs::create_posts_to_cached_contents_with_the_flattened_config_body`<br>`src/caches.rs::create_sends_ttl_and_contents_in_the_request_body`<br>`tests/caches.rs::create_posts_the_flattened_config_body_to_cached_contents`<br>and 1 more |
-| `caches.get` | `caches::Caches::get` | ✅ Implemented | `src/caches.rs::get_fetches_by_normalized_resource_name`<br>`tests/caches.rs::get_fetches_by_normalized_resource_name`<br>`tests/caches.rs::get_maps_a_client_error_to_api_error` |
+| `caches.create` | `caches::Caches::create` | ✅ Implemented | `src/caches.rs::create_posts_to_cached_contents_with_the_flattened_config_body`<br>`src/caches.rs::create_sends_ttl_and_contents_in_the_request_body`<br>`tests/caches.rs::create_posts_the_flattened_config_body_to_cached_contents`<br>and 2 more |
+| `caches.get` | `caches::Caches::get` | ✅ Implemented | `src/caches.rs::get_fetches_by_normalized_resource_name`<br>`tests/caches.rs::get_fetches_by_normalized_resource_name`<br>`tests/caches.rs::get_maps_a_client_error_to_api_error`<br>and 1 more |
 | `caches.list` | `caches::Caches::list` | ✅ Implemented | `src/caches.rs::list_returns_a_pager_that_fetches_subsequent_pages`<br>`src/caches.rs::list_sends_page_size_as_a_query_parameter`<br>`tests/caches.rs::list_returns_a_pager_that_fetches_subsequent_pages`<br>and 1 more |
-| `caches.update` | `caches::Caches::update` | ✅ Implemented | `src/caches.rs::update_patches_by_name_with_the_ttl_body`<br>`tests/caches.rs::update_patches_by_name_with_the_ttl_body` |
-| `caches.delete` | `caches::Caches::delete` | ✅ Implemented | `src/caches.rs::delete_maps_a_client_error_to_api_error`<br>`src/caches.rs::delete_removes_by_name_and_deserializes_the_empty_response`<br>`tests/caches.rs::delete_deserializes_the_sdk_http_response_alias`<br>and 1 more |
+| `caches.update` | `caches::Caches::update` | ✅ Implemented | `src/caches.rs::update_patches_by_name_with_the_ttl_body`<br>`tests/caches.rs::update_patches_by_name_with_the_ttl_body`<br>`tests/e2e.rs::test_e2e_cached_content_update_and_delete` |
+| `caches.delete` | `caches::Caches::delete` | ✅ Implemented | `src/caches.rs::delete_maps_a_client_error_to_api_error`<br>`src/caches.rs::delete_removes_by_name_and_deserializes_the_empty_response`<br>`tests/caches.rs::delete_deserializes_the_sdk_http_response_alias`<br>and 3 more |
 
 ### tunings
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `tunings.tune` | `tunings::Tunings::tune` | ✅ Implemented | `src/tunings.rs::tune_falls_back_to_the_operation_name_when_metadata_has_no_tuned_model`<br>`src/tunings.rs::tune_posts_to_tuned_models_and_synthesizes_a_queued_job`<br>`src/tunings.rs::tune_rejects_a_vertex_only_config_field`<br>and 3 more |
-| `tunings.get` | `tunings::Tunings::get` | ✅ Implemented | `src/tunings.rs::get_fetches_the_job_by_name`<br>`src/tunings.rs::get_maps_a_client_error_to_api_error`<br>`tests/tunings.rs::get_fetches_a_tuning_job_by_resource_name` |
+| `tunings.tune` | `tunings::Tunings::tune` | ✅ Implemented | `src/tunings.rs::tune_falls_back_to_the_operation_name_when_metadata_has_no_tuned_model`<br>`src/tunings.rs::tune_posts_to_tuned_models_and_synthesizes_a_queued_job`<br>`src/tunings.rs::tune_rejects_a_vertex_only_config_field`<br>and 4 more |
+| `tunings.get` | `tunings::Tunings::get` | ✅ Implemented | `src/tunings.rs::get_fetches_the_job_by_name`<br>`src/tunings.rs::get_maps_a_client_error_to_api_error`<br>`tests/tunings.rs::get_fetches_a_tuning_job_by_resource_name`<br>and 1 more |
 | `tunings.list` | `tunings::Tunings::list` | ⚠️ `UnsupportedByBackend` (Vertex AI only) | `src/tunings.rs::list_is_unsupported_by_the_gemini_developer_api_backend`<br>`tests/tunings.rs::list_is_unsupported_by_the_gemini_developer_api_backend` |
 | `tunings.cancel` | `tunings::Tunings::cancel` | ✅ Implemented | `src/tunings.rs::cancel_posts_to_the_cancel_suffix`<br>`tests/tunings.rs::cancel_maps_a_not_found_response_to_an_api_error`<br>`tests/tunings.rs::cancel_posts_to_the_cancel_suffix_and_succeeds_on_an_empty_response` |
 | `tunings.validate_reward` | — | ⏭ Not ported (Vertex AI only) | — |
@@ -241,6 +241,13 @@ Parity on the type side is `gen_types.py`'s own job: the moment it meets an anno
 | `tunings.validate_reward` | `tunings.py::validate_reward` carries the same `vertexai` guard. Vertex AI only (reward model validation is a Vertex AI tuning feature). |
 | `errors` (row in the source of truth) | The `APIError` family are types, not methods. Rust implements them as the `crate::error::Error` enum (`Api` / `Function*` / `UnknownApiResponse` and friends), verified by the `#[cfg(test)]` tests in `src/error.rs`. |
 | `pagers` (row in the source of truth) | `Pager` / `AsyncPager` are types, not methods. Rust implements them as `crate::pager::Pager<T>` (`page()` / `name()` / `page_size()` / `config()` / `next_page()`), verified by the `#[cfg(test)]` tests in `src/pager.rs` and by the tests for each `list` method. |
+| `models.compute_tokens` | ⚠️ stub (always errors) (per the source of truth) |
+| `models.edit_image` | ⏭ later (Vertex AI) (per the source of truth) |
+| `models.upscale_image` | ⏭ later (Vertex AI) (per the source of truth) |
+| `models.recontext_image` | ⏭ later (Vertex AI) (per the source of truth) |
+| `models.segment_image` | ⏭ later (Vertex AI) (per the source of truth) |
+| `tunings.list` | ⚠️ stub (always errors) (per the source of truth) |
+| `tunings.validate_reward` | ⏭ later (Vertex AI) (per the source of truth) |
 | `tunings.display_experiment_button` | N/A (IPython only) (per the source of truth) |
 | `tunings.display_model_tuning_button` | N/A (IPython only) (per the source of truth) |
 | `live.AsyncSession.send` | ⏭ out of scope (deprecated, replacement available) (per the source of truth) |

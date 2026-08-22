@@ -1,0 +1,22 @@
+{
+  "converter": "_ListFilesResponse_from_mldev",
+  "input": {
+    "nextPageToken": "tok",
+    "files": [
+      {
+        "name": "files/abc123",
+        "displayName": "my file"
+      }
+    ]
+  },
+  "expected": {
+    "next_page_token": "tok",
+    "files": [
+      {
+        "name": "files/abc123",
+        "displayName": "my file"
+      }
+    ]
+  },
+  "expected_error": null
+}

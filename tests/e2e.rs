@@ -18,7 +18,8 @@
 use futures_util::StreamExt;
 use google_genai::Client;
 use google_genai::types::{
-    Content, CountTokensConfig, EmbedContentConfig, GenerateContentConfig, Part, Tool,
+    Content, CountTokensConfig, CreateCachedContentConfig, EmbedContentConfig,
+    GenerateContentConfig, Part, Tool, UpdateCachedContentConfig,
 };
 
 /// A small, currently-served text model. `*-latest` aliases are used
@@ -28,6 +29,24 @@ use google_genai::types::{
 const TEXT_MODEL: &str = "gemini-flash-latest";
 /// The current embedding model.
 const EMBED_MODEL: &str = "gemini-embedding-001";
+/// An image-capable model driven through `generate_content`.
+///
+/// Deliberately *not* `models().generate_images` (Imagen's `{model}:predict`):
+/// enumerating this key's catalogue via `models().list(..)` shows **no**
+/// model advertising `predict` at all (the served generation methods are
+/// `generateContent`, `countTokens`, `createCachedContent`,
+/// `batchGenerateContent`, `embedContent`, `countTextTokens`,
+/// `asyncBatchEmbedContent`, `generateAnswer`, `predictLongRunning` and
+/// `bidiGenerateContent`), so `:predict` has nothing to talk to. That
+/// matches the upstream deprecation of `generate_images` in favour of
+/// `generate_content` with an image-capable model, which this model is:
+/// it returns an `inline_data` image part with no `response_modalities`
+/// override needed.
+const IMAGE_MODEL: &str = "gemini-2.5-flash-image";
+/// A model that advertises `createCachedContent`. Explicit caching has a
+/// minimum cached-token count, so [`long_cacheable_text`] is sized well
+/// past it.
+const CACHE_MODEL: &str = TEXT_MODEL;
 
 /// Builds a live client, or returns `None` when no API key is configured
 /// (in which case the caller skips instead of failing).
@@ -343,4 +362,193 @@ async fn test_e2e_files_upload_get_delete() {
         .delete(&name, None)
         .await
         .expect("files delete failed");
+}
+
+/// Builds a block of text long enough to satisfy explicit caching's
+/// minimum cached-token count (this comes out at roughly 4.6k tokens).
+/// The per-section readings are distinctive so the model has to consult
+/// the cached content to answer the question in
+/// [`test_e2e_cached_content_create_and_use`].
+fn long_cacheable_text() -> String {
+    use std::fmt::Write as _;
+
+    let mut text = String::new();
+    for i in 1..=120 {
+        // Writing to a `String` is infallible, so the `fmt::Result` is
+        // discarded rather than unwrapped.
+        let _ = writeln!(
+            text,
+            "Section {i}: the Aurora Borealis Research Station logged a magnetometer \
+             reading of {i} nanotesla at local midnight, with clear skies and no \
+             auroral substorm activity."
+        );
+    }
+    text
+}
+
+/// Creates a cached content over [`long_cacheable_text`], returning it
+/// together with its resource name.
+#[expect(
+    clippy::expect_used,
+    reason = "test helper: a failed cache create/name here is a live-API or test-setup problem the caller wants surfaced as a panic, exactly as if it were inline in the #[test] fn"
+)]
+async fn create_test_cache(client: &Client) -> (String, google_genai::types::CachedContent) {
+    let cached = client
+        .caches()
+        .create(
+            CACHE_MODEL,
+            Some(CreateCachedContentConfig {
+                contents: Some(vec![Content {
+                    role: Some("user".to_owned()),
+                    parts: Some(vec![Part::from_text(long_cacheable_text())]),
+                }]),
+                ttl: Some("300s".to_owned()),
+                display_name: Some("genai-rs e2e cache".to_owned()),
+                ..Default::default()
+            }),
+        )
+        .await
+        .expect("caches create failed");
+    let name = cached.name.clone().expect("cached content has no name");
+    (name, cached)
+}
+
+/// US7 scenario 1: an image-generation request returns image bytes and a
+/// MIME type.
+#[tokio::test]
+#[ignore = "calls the live Gemini API; run with --ignored"]
+async fn test_e2e_generate_image() {
+    let client = client_or_skip!();
+    let response = client
+        .models()
+        .generate_content(
+            IMAGE_MODEL,
+            "Generate a simple picture of a red circle on a white background.",
+            None,
+        )
+        .await
+        .expect("image generate_content failed");
+
+    let images: Vec<_> = response
+        .candidates
+        .iter()
+        .flatten()
+        .filter_map(|candidate| candidate.content.as_ref())
+        .filter_map(|content| content.parts.as_ref())
+        .flatten()
+        .filter_map(|part| part.inline_data.as_ref())
+        .collect();
+
+    let image = images
+        .first()
+        .expect("response carried no inline image part");
+    let mime = image.mime_type.as_deref().unwrap_or_default();
+    assert!(
+        mime.starts_with("image/"),
+        "inline part was not an image: {mime:?}"
+    );
+    let bytes = image.data.as_ref().map_or(0, Vec::len);
+    assert!(bytes > 0, "image part carried no bytes");
+    eprintln!("generated {bytes} bytes of {mime}");
+}
+
+/// US6 scenario 3: a cache is created with a name and an expiry, and a
+/// generation that references it bills the cached tokens as cached.
+#[tokio::test]
+#[ignore = "calls the live Gemini API; run with --ignored"]
+async fn test_e2e_cached_content_create_and_use() {
+    let client = client_or_skip!();
+    let (name, cached) = create_test_cache(&client).await;
+    assert!(
+        cached.expire_time.as_deref().is_some_and(|t| !t.is_empty()),
+        "cached content has no expire_time"
+    );
+    assert!(
+        cached
+            .usage_metadata
+            .and_then(|u| u.total_token_count)
+            .unwrap_or(0)
+            > 0,
+        "cached content reported no cached tokens"
+    );
+
+    let response = client
+        .models()
+        .generate_content(
+            CACHE_MODEL,
+            "What was the reading in Section 42? Answer with the number only.",
+            Some(GenerateContentConfig {
+                cached_content: Some(name.clone()),
+                ..Default::default()
+            }),
+        )
+        .await
+        .expect("generate_content with cached_content failed");
+
+    let cached_tokens = response
+        .usage_metadata
+        .as_ref()
+        .and_then(|u| u.cached_content_token_count)
+        .unwrap_or(0);
+    assert!(
+        cached_tokens > 0,
+        "usage metadata did not attribute any tokens to the cache: {:?}",
+        response.usage_metadata
+    );
+    assert!(
+        response.text().unwrap_or_default().contains("42"),
+        "model did not answer from the cached content: {:?}",
+        response.text()
+    );
+
+    client
+        .caches()
+        .delete(&name, None)
+        .await
+        .expect("caches delete failed");
+}
+
+/// US6 scenario 4: updating a cache returns the new expiry, and getting a
+/// deleted cache is an error.
+#[tokio::test]
+#[ignore = "calls the live Gemini API; run with --ignored"]
+async fn test_e2e_cached_content_update_and_delete() {
+    let client = client_or_skip!();
+    let (name, cached) = create_test_cache(&client).await;
+    let original_expiry = cached.expire_time.clone().expect("no expire_time");
+
+    let updated = client
+        .caches()
+        .update(
+            &name,
+            Some(UpdateCachedContentConfig {
+                ttl: Some("900s".to_owned()),
+                ..Default::default()
+            }),
+        )
+        .await
+        .expect("caches update failed");
+    let new_expiry = updated.expire_time.clone().expect("no expire_time");
+    assert_ne!(
+        new_expiry, original_expiry,
+        "expire_time did not move after extending the ttl"
+    );
+
+    client
+        .caches()
+        .delete(&name, None)
+        .await
+        .expect("caches delete failed");
+
+    // The Gemini API answers a get on a deleted cache with 403, not 404,
+    // so this asserts on the error kind rather than a status code.
+    let error = client
+        .caches()
+        .get(&name, None)
+        .await
+        .expect_err("getting a deleted cache should fail");
+    assert!(
+        matches!(error, google_genai::Error::Api(_)),
+        "expected an API error after deletion, got {error:?}"
+    );
 }

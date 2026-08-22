@@ -1,0 +1,151 @@
+{
+  "converter": "_LiveConnectParameters_to_mldev",
+  "input": {
+    "model": "gemini-2.0-flash-live-001",
+    "config": {
+      "response_modalities": [
+        "AUDIO"
+      ],
+      "temperature": 0.4,
+      "top_p": 0.8,
+      "top_k": 20,
+      "max_output_tokens": 512,
+      "media_resolution": "MEDIA_RESOLUTION_MEDIUM",
+      "seed": 11,
+      "thinking_config": {
+        "include_thoughts": false,
+        "thinking_budget": 0
+      },
+      "enable_affective_dialog": true,
+      "system_instruction": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "be brief"
+          }
+        ]
+      },
+      "tools": [
+        {
+          "google_search": {}
+        }
+      ],
+      "session_resumption": {
+        "handle": "handle-1"
+      },
+      "input_audio_transcription": {
+        "language_codes": [
+          "en-US"
+        ]
+      },
+      "output_audio_transcription": {},
+      "realtime_input_config": {
+        "automatic_activity_detection": {
+          "disabled": false,
+          "prefix_padding_ms": 20,
+          "silence_duration_ms": 100
+        },
+        "activity_handling": "START_OF_ACTIVITY_INTERRUPTS",
+        "turn_coverage": "TURN_INCLUDES_ONLY_ACTIVITY"
+      },
+      "context_window_compression": {
+        "trigger_tokens": 16000,
+        "sliding_window": {
+          "target_tokens": 8000
+        }
+      },
+      "proactivity": {
+        "proactive_audio": true
+      },
+      "history_config": {
+        "initial_history_in_client_content": true
+      },
+      "safety_settings": [
+        {
+          "category": "HARM_CATEGORY_HARASSMENT",
+          "threshold": "BLOCK_ONLY_HIGH"
+        }
+      ],
+      "translation_config": {
+        "echo_target_language": true,
+        "target_language_code": "ja-JP"
+      }
+    }
+  },
+  "expected": {
+    "setup": {
+      "model": "models/gemini-2.0-flash-live-001",
+      "generationConfig": {
+        "responseModalities": [
+          "AUDIO"
+        ],
+        "temperature": 0.4,
+        "topP": 0.8,
+        "topK": 20,
+        "maxOutputTokens": 512,
+        "mediaResolution": "MEDIA_RESOLUTION_MEDIUM",
+        "seed": 11,
+        "thinkingConfig": {
+          "include_thoughts": false,
+          "thinking_budget": 0
+        },
+        "enableAffectiveDialog": true,
+        "translationConfig": {
+          "echo_target_language": true,
+          "target_language_code": "ja-JP"
+        }
+      },
+      "systemInstruction": {
+        "parts": [
+          {
+            "text": "be brief"
+          }
+        ],
+        "role": "user"
+      },
+      "tools": [
+        {
+          "googleSearch": {}
+        }
+      ],
+      "sessionResumption": {
+        "handle": "handle-1"
+      },
+      "inputAudioTranscription": {
+        "language_codes": [
+          "en-US"
+        ]
+      },
+      "outputAudioTranscription": {},
+      "realtimeInputConfig": {
+        "automatic_activity_detection": {
+          "disabled": false,
+          "prefix_padding_ms": 20,
+          "silence_duration_ms": 100
+        },
+        "activity_handling": "START_OF_ACTIVITY_INTERRUPTS",
+        "turn_coverage": "TURN_INCLUDES_ONLY_ACTIVITY"
+      },
+      "contextWindowCompression": {
+        "trigger_tokens": 16000,
+        "sliding_window": {
+          "target_tokens": 8000
+        }
+      },
+      "proactivity": {
+        "proactive_audio": true
+      },
+      "historyConfig": {
+        "initial_history_in_client_content": true
+      },
+      "safetySettings": [
+        {
+          "category": "HARM_CATEGORY_HARASSMENT",
+          "threshold": "BLOCK_ONLY_HIGH"
+        }
+      ]
+    },
+    "config": {}
+  },
+  "expected_error": null
+}

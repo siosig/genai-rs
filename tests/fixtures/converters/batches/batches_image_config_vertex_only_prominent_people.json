@@ -1,0 +1,10 @@
+{
+  "converter": "_ImageConfig_to_mldev",
+  "input": {
+    "prominent_people": {
+      "people": []
+    }
+  },
+  "expected": null,
+  "expected_error": "field `prominent_people` is only supported by the Vertex AI backend"
+}

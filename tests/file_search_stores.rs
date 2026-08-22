@@ -3,7 +3,9 @@
 //! only, via `wiremock`, mirroring `src/file_search_stores.rs`'s and
 //! `src/documents.rs`'s own unit tests but exercised from outside the crate.
 
-use google_genai::Client;
+mod common;
+
+use common::test_client;
 use google_genai::types::{
     CreateFileSearchStoreConfig, DeleteDocumentConfig, DeleteFileSearchStoreConfig,
     ImportFileConfig, ListDocumentsConfig, UploadToFileSearchStoreConfig,
@@ -12,21 +14,6 @@ use wiremock::matchers::{
     body_json, header, headers, method, path, query_param, query_param_is_missing,
 };
 use wiremock::{Mock, MockServer, ResponseTemplate};
-
-#[expect(
-    clippy::unwrap_used,
-    reason = "test helper: a broken Client::builder() here is a test-setup bug, not a runtime condition"
-)]
-fn test_client(base_url: String) -> Client {
-    Client::builder()
-        .api_key("test-key")
-        .http_options(google_genai::types::HttpOptions {
-            base_url: Some(base_url),
-            ..Default::default()
-        })
-        .build()
-        .unwrap()
-}
 
 #[tokio::test]
 async fn create_get_list_delete_a_file_search_store() {

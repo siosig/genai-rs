@@ -1,0 +1,100 @@
+{
+  "converter": "_LiveServerMessage_from_mldev",
+  "input": {
+    "setupComplete": {
+      "sessionId": "sess-1"
+    },
+    "serverContent": {
+      "modelTurn": {
+        "role": "model",
+        "parts": [
+          {
+            "text": "hi"
+          }
+        ]
+      },
+      "turnComplete": true
+    },
+    "toolCall": {
+      "functionCalls": [
+        {
+          "id": "c1",
+          "name": "lookup",
+          "args": {}
+        }
+      ]
+    },
+    "toolCallCancellation": {
+      "ids": [
+        "c1"
+      ]
+    },
+    "usageMetadata": {
+      "promptTokenCount": 3,
+      "totalTokenCount": 9
+    },
+    "goAway": {
+      "timeLeft": "5s"
+    },
+    "sessionResumptionUpdate": {
+      "newHandle": "h2",
+      "resumable": true
+    },
+    "voiceActivityDetectionSignal": {
+      "vadSignalType": "START_OF_SPEECH"
+    },
+    "voiceActivity": {
+      "type": "ACTIVITY_START",
+      "audioOffset": "1.5s"
+    }
+  },
+  "expected": {
+    "setup_complete": {
+      "sessionId": "sess-1"
+    },
+    "server_content": {
+      "modelTurn": {
+        "role": "model",
+        "parts": [
+          {
+            "text": "hi"
+          }
+        ]
+      },
+      "turnComplete": true
+    },
+    "tool_call": {
+      "functionCalls": [
+        {
+          "id": "c1",
+          "name": "lookup",
+          "args": {}
+        }
+      ]
+    },
+    "tool_call_cancellation": {
+      "ids": [
+        "c1"
+      ]
+    },
+    "usage_metadata": {
+      "promptTokenCount": 3,
+      "totalTokenCount": 9
+    },
+    "go_away": {
+      "timeLeft": "5s"
+    },
+    "session_resumption_update": {
+      "newHandle": "h2",
+      "resumable": true
+    },
+    "voice_activity_detection_signal": {
+      "vadSignalType": "START_OF_SPEECH"
+    },
+    "voice_activity": {
+      "voice_activity_type": "ACTIVITY_START",
+      "audio_offset": "1.5s"
+    }
+  },
+  "expected_error": null
+}

@@ -51,7 +51,8 @@ impl Client {
         ClientBuilder::default()
     }
 
-    /// The effective HTTP options this client was built with.
+    /// The shared HTTP transport this client was built with, used by
+    /// every resource handle to issue requests.
     #[must_use]
     pub(crate) fn http(&self) -> &HttpClient {
         &self.inner.http

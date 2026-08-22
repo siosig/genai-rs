@@ -1,0 +1,14 @@
+{
+  "converter": "_ImportFileParameters_to_mldev",
+  "input": {
+    "file_search_store_name": "fileSearchStores/store-1",
+    "file_name": "files/abc123"
+  },
+  "expected": {
+    "_url": {
+      "file_search_store_name": "fileSearchStores/store-1"
+    },
+    "fileName": "files/abc123"
+  },
+  "expected_error": null
+}

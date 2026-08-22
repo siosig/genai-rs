@@ -1,0 +1,11 @@
+{
+  "converter": "_TunedModel_from_mldev",
+  "input": {
+    "name": "tunedModels/abc123"
+  },
+  "expected": {
+    "model": "tunedModels/abc123",
+    "endpoint": "tunedModels/abc123"
+  },
+  "expected_error": null
+}

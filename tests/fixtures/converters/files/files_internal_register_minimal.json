@@ -1,0 +1,16 @@
+{
+  "converter": "_InternalRegisterFilesParameters_to_mldev",
+  "input": {
+    "uris": [
+      "https://example.com/a.txt",
+      "https://example.com/b.txt"
+    ]
+  },
+  "expected": {
+    "uris": [
+      "https://example.com/a.txt",
+      "https://example.com/b.txt"
+    ]
+  },
+  "expected_error": null
+}

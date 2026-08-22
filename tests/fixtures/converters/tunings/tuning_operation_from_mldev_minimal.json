@@ -1,0 +1,28 @@
+{
+  "converter": "_TuningOperation_from_mldev",
+  "input": {
+    "sdkHttpResponse": {
+      "headers": {
+        "x": "y"
+      }
+    },
+    "name": "tunedModels/abc123/operations/op-1",
+    "metadata": {
+      "completedPercent": 42
+    },
+    "done": false
+  },
+  "expected": {
+    "sdk_http_response": {
+      "headers": {
+        "x": "y"
+      }
+    },
+    "name": "tunedModels/abc123/operations/op-1",
+    "metadata": {
+      "completedPercent": 42
+    },
+    "done": false
+  },
+  "expected_error": null
+}

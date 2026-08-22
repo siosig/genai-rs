@@ -1,0 +1,36 @@
+{
+  "converter": "_LiveMusicSetConfigParameters_to_mldev",
+  "input": {
+    "music_generation_config": {
+      "temperature": 1.1,
+      "top_k": 40,
+      "seed": 3,
+      "guidance": 4.0,
+      "bpm": 120,
+      "density": 0.5,
+      "brightness": 0.7,
+      "scale": "C_MAJOR_A_MINOR",
+      "mute_bass": false,
+      "mute_drums": false,
+      "only_bass_and_drums": false,
+      "music_generation_mode": "QUALITY"
+    }
+  },
+  "expected": {
+    "musicGenerationConfig": {
+      "temperature": 1.1,
+      "top_k": 40,
+      "seed": 3,
+      "guidance": 4.0,
+      "bpm": 120,
+      "density": 0.5,
+      "brightness": 0.7,
+      "scale": "C_MAJOR_A_MINOR",
+      "mute_bass": false,
+      "mute_drums": false,
+      "only_bass_and_drums": false,
+      "music_generation_mode": "QUALITY"
+    }
+  },
+  "expected_error": null
+}

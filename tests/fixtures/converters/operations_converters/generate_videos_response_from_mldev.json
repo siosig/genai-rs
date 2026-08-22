@@ -1,0 +1,32 @@
+{
+  "converter": "_GenerateVideosResponse_from_mldev",
+  "input": {
+    "generatedSamples": [
+      {
+        "video": {
+          "uri": "https://example.com/out.mp4",
+          "encoding": "video/mp4"
+        }
+      }
+    ],
+    "raiMediaFilteredCount": 1,
+    "raiMediaFilteredReasons": [
+      "policy"
+    ]
+  },
+  "expected": {
+    "generated_videos": [
+      {
+        "video": {
+          "uri": "https://example.com/out.mp4",
+          "mime_type": "video/mp4"
+        }
+      }
+    ],
+    "rai_media_filtered_count": 1,
+    "rai_media_filtered_reasons": [
+      "policy"
+    ]
+  },
+  "expected_error": null
+}

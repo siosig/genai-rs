@@ -2,26 +2,13 @@
 //! Runs against the public API only, via `wiremock`, mirroring
 //! `src/chats.rs`'s own unit tests but exercised from outside the crate.
 
+mod common;
+
+use common::test_client;
 use futures_util::StreamExt;
-use google_genai::Client;
-use google_genai::types::{Content, HttpOptions, Part};
+use google_genai::types::{Content, Part};
 use wiremock::matchers::method;
 use wiremock::{Mock, MockServer, ResponseTemplate};
-
-#[expect(
-    clippy::unwrap_used,
-    reason = "test helper: a broken Client::builder() here is a test-setup bug, not a runtime condition"
-)]
-fn test_client(base_url: String) -> Client {
-    Client::builder()
-        .api_key("test-key")
-        .http_options(HttpOptions {
-            base_url: Some(base_url),
-            ..Default::default()
-        })
-        .build()
-        .unwrap()
-}
 
 fn model_reply(text: &str) -> serde_json::Value {
     serde_json::json!({

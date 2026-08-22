@@ -1,0 +1,10 @@
+{
+  "converter": "_Blob_to_mldev",
+  "input": {
+    "data": "aGVsbG8=",
+    "mime_type": "audio/pcm",
+    "display_name": "clip"
+  },
+  "expected": null,
+  "expected_error": "field `display_name` is only supported by the Vertex AI backend"
+}

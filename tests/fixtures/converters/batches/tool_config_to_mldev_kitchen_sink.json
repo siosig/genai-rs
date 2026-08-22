@@ -1,0 +1,22 @@
+{
+  "converter": "_ToolConfig_to_mldev",
+  "input": {
+    "function_calling_config": {
+      "mode": "ANY",
+      "allowed_function_names": [
+        "lookup",
+        "search"
+      ]
+    }
+  },
+  "expected": {
+    "functionCallingConfig": {
+      "allowedFunctionNames": [
+        "lookup",
+        "search"
+      ],
+      "mode": "ANY"
+    }
+  },
+  "expected_error": null
+}

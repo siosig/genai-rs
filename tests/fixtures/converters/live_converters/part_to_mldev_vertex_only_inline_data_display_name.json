@@ -1,0 +1,12 @@
+{
+  "converter": "_Part_to_mldev",
+  "input": {
+    "inline_data": {
+      "data": "aGVsbG8=",
+      "mime_type": "image/png",
+      "display_name": "x"
+    }
+  },
+  "expected": null,
+  "expected_error": "field `display_name` is only supported by the Vertex AI backend"
+}

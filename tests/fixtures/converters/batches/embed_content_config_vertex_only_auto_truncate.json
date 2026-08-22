@@ -1,0 +1,8 @@
+{
+  "converter": "_EmbedContentConfig_to_mldev",
+  "input": {
+    "auto_truncate": true
+  },
+  "expected": null,
+  "expected_error": "field `auto_truncate` is only supported by the Vertex AI backend"
+}

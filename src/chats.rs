@@ -64,6 +64,35 @@ impl Chat {
     /// [`crate::types::Tool::from_function`], the AFC loop runs and only
     /// the final, post-tool-call response is recorded into history.
     ///
+    /// # Divergence from Python: AFC turns are absent from the history
+    ///
+    /// Python's `Chat.send_message` disables `generate_content`'s own AFC
+    /// and re-implements the loop inside `chats.py`, calling
+    /// `record_history` once per remote call. Its history therefore
+    /// interleaves every intermediate turn:
+    ///
+    /// ```text
+    /// [user "..."], [model functionCall], [user functionResponse], [model "final text"]
+    /// ```
+    ///
+    /// This crate keeps the loop in one place ([`crate::afc`]) and delegates
+    /// to it, so after an AFC round-trip [`Self::get_history`] holds only
+    /// the two ends of the exchange:
+    ///
+    /// ```text
+    /// [user "..."], [model "final text"]
+    /// ```
+    ///
+    /// Nothing is lost: the intermediate `functionCall`/`functionResponse`
+    /// turns are returned on the response itself, as
+    /// `GenerateContentResponse.automatic_function_calling_history` (which
+    /// Python populates too), and they were still sent to the model within
+    /// the AFC loop, so the model saw the same conversation on the wire.
+    /// The difference is only in what a *subsequent* `send_message` replays
+    /// as history, and in what `get_history` returns. Pinned by
+    /// `send_message_with_afc_records_only_the_final_turn` in this module's
+    /// tests.
+    ///
     /// # Errors
     /// See [`crate::models::Models::generate_content`].
     pub async fn send_message(
@@ -467,6 +496,129 @@ mod tests {
         assert_eq!(chat.get_history(true).len(), 0);
         assert_eq!(chat.get_history(false)[1].role.as_deref(), Some("model"));
         assert_eq!(chat.get_history(false)[1].parts, Some(vec![]));
+        server.verify().await;
+    }
+
+    /// Pins a **deliberate divergence from Python** (documented on
+    /// [`Chat::send_message`]): after an automatic-function-calling
+    /// round-trip, only the user's message and the final model answer land
+    /// in the chat history.
+    ///
+    /// Python's `chats.py` disables `generate_content`'s AFC and runs its
+    /// own loop, calling `record_history` once per remote call, so its
+    /// history would be four turns here:
+    ///
+    /// ```text
+    /// [user text], [model functionCall], [user functionResponse], [model text]
+    /// ```
+    ///
+    /// This crate delegates to `crate::afc`'s loop instead and records one
+    /// exchange, so the history is two turns; the intermediate turns are
+    /// returned on the response as `automatic_function_calling_history`
+    /// (asserted below), and were still sent to the model inside the loop.
+    /// This is a design decision, not an oversight -- if it ever changes,
+    /// change the doc comment on [`Chat::send_message`] with it.
+    #[tokio::test]
+    async fn send_message_with_afc_records_only_the_final_turn() {
+        /// Arguments of the demo tool registered by this test.
+        #[derive(serde::Deserialize, schemars::JsonSchema)]
+        struct WeatherArgs {
+            location: String,
+        }
+
+        let server = MockServer::start().await;
+        // First request: the model asks for the tool. Mounted first and
+        // capped at one match, so the second mock answers the AFC follow-up.
+        Mock::given(method("POST"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "candidates": [{
+                    "content": {"role": "model", "parts": [{"functionCall": {
+                        "name": "chats_afc_history_get_weather",
+                        "args": {"location": "NYC"}
+                    }}]},
+                    "finishReason": "STOP"
+                }]
+            })))
+            .up_to_n_times(1)
+            .expect(1)
+            .mount(&server)
+            .await;
+        // Second request: the post-tool-call answer.
+        Mock::given(method("POST"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "candidates": [{
+                    "content": {"role": "model", "parts": [{"text": "It's sunny in NYC."}]},
+                    "finishReason": "STOP"
+                }]
+            })))
+            .up_to_n_times(1)
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        let tool = crate::afc::function_tool::<WeatherArgs, _, _, _>(
+            "chats_afc_history_get_weather",
+            "Gets the weather for a location.",
+            |args: WeatherArgs| async move {
+                Ok(serde_json::json!({"conditions": "sunny", "location": args.location}))
+            },
+        );
+        let config = crate::types::GenerateContentConfig {
+            tools: Some(vec![crate::types::Tool::from_function(tool)]),
+            ..Default::default()
+        };
+
+        let mut chat = chats(&server).create("gemini-2.5-flash", Some(config), None);
+        let response = chat
+            .send_message("what's the weather in NYC?", None)
+            .await
+            .unwrap();
+        assert_eq!(response.text().as_deref(), Some("It's sunny in NYC."));
+
+        // The intermediate turns are on the response, not in the history.
+        let afc_history = response
+            .automatic_function_calling_history
+            .as_ref()
+            .expect("the AFC loop records its own history");
+        assert_eq!(afc_history.len(), 2);
+        assert_eq!(afc_history[0].role.as_deref(), Some("model"));
+        assert!(
+            afc_history[0].parts.as_ref().unwrap()[0]
+                .function_call
+                .is_some()
+        );
+        assert_eq!(afc_history[1].role.as_deref(), Some("user"));
+        assert!(
+            afc_history[1].parts.as_ref().unwrap()[0]
+                .function_response
+                .is_some()
+        );
+
+        // The chat history holds exactly the two ends of the exchange --
+        // Python would hold four turns here.
+        let comprehensive = chat.get_history(false);
+        assert_eq!(comprehensive.len(), 2);
+        assert_eq!(comprehensive[0].role.as_deref(), Some("user"));
+        assert_eq!(
+            comprehensive[0].parts.as_ref().unwrap()[0].text.as_deref(),
+            Some("what's the weather in NYC?")
+        );
+        assert_eq!(comprehensive[1].role.as_deref(), Some("model"));
+        assert_eq!(
+            comprehensive[1].parts.as_ref().unwrap()[0].text.as_deref(),
+            Some("It's sunny in NYC.")
+        );
+        // No functionCall/functionResponse part survives anywhere in it.
+        assert!(comprehensive.iter().all(|content| {
+            content
+                .parts
+                .iter()
+                .flatten()
+                .all(|part| part.function_call.is_none() && part.function_response.is_none())
+        }));
+        // The final response is valid, so the curated history matches.
+        assert_eq!(chat.get_history(true), comprehensive);
+
         server.verify().await;
     }
 }

@@ -1,0 +1,24 @@
+{
+  "converter": "_ListModelsResponse_from_mldev",
+  "input": {
+    "tunedModels": [
+      {
+        "name": "tunedModels/abc",
+        "displayName": "mine"
+      }
+    ]
+  },
+  "expected": {
+    "models": [
+      {
+        "name": "tunedModels/abc",
+        "display_name": "mine",
+        "tuned_model_info": {
+          "name": "tunedModels/abc",
+          "displayName": "mine"
+        }
+      }
+    ]
+  },
+  "expected_error": null
+}

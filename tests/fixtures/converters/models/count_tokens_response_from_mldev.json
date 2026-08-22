@@ -1,0 +1,22 @@
+{
+  "converter": "_CountTokensResponse_from_mldev",
+  "input": {
+    "sdkHttpResponse": {
+      "headers": {
+        "x": "y"
+      }
+    },
+    "totalTokens": 31,
+    "cachedContentTokenCount": 7
+  },
+  "expected": {
+    "sdk_http_response": {
+      "headers": {
+        "x": "y"
+      }
+    },
+    "total_tokens": 31,
+    "cached_content_token_count": 7
+  },
+  "expected_error": null
+}

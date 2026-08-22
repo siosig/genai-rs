@@ -1,0 +1,9 @@
+{
+  "converter": "_FunctionCall_to_mldev",
+  "input": {
+    "name": "lookup",
+    "will_continue": true
+  },
+  "expected": null,
+  "expected_error": "field `will_continue` is only supported by the Vertex AI backend"
+}

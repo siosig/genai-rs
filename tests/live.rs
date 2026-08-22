@@ -10,31 +10,15 @@
 
 mod common;
 
+use common::test_client_with_api_key;
 use common::ws_server::start_mock_ws_server;
 use futures_util::{SinkExt, StreamExt};
+use google_genai::Error;
 use google_genai::live::RealtimeInput;
-use google_genai::types::{
-    Content, FunctionResponse, HttpOptions, LiveConnectConfig, Modality, Part,
-};
-use google_genai::{Client, Error};
+use google_genai::types::{Content, FunctionResponse, LiveConnectConfig, Modality, Part};
 use serde_json::{Value, json};
 use tokio_tungstenite::WebSocketStream;
 use tokio_tungstenite::tungstenite::Message;
-
-#[expect(
-    clippy::unwrap_used,
-    reason = "test helper: a broken Client::builder() here is a test-setup bug, not a runtime condition"
-)]
-fn test_client(base_url: String, api_key: &str) -> Client {
-    Client::builder()
-        .api_key(api_key)
-        .http_options(HttpOptions {
-            base_url: Some(base_url),
-            ..Default::default()
-        })
-        .build()
-        .unwrap()
-}
 
 #[expect(
     clippy::unwrap_used,
@@ -101,7 +85,7 @@ async fn connect_uses_query_key_and_sends_setup_first() {
     })
     .await;
 
-    let client = test_client(base_url, "test-key");
+    let client = test_client_with_api_key(base_url, "test-key");
     let config = LiveConnectConfig {
         response_modalities: Some(vec![Modality::Text]),
         system_instruction: Some(Content {
@@ -131,7 +115,7 @@ async fn connect_rejects_vertex_only_config_field() {
     })
     .await;
 
-    let client = test_client(base_url, "test-key");
+    let client = test_client_with_api_key(base_url, "test-key");
     let config = LiveConnectConfig {
         explicit_vad_signal: Some(true),
         ..Default::default()
@@ -181,7 +165,7 @@ async fn ephemeral_token_uses_constrained_method_and_authorization_header() {
     })
     .await;
 
-    let client = test_client(base_url, "auth_tokens/abc123");
+    let client = test_client_with_api_key(base_url, "auth_tokens/abc123");
     let session = client
         .live()
         .connect("gemini-2.0-flash-live-001", None)
@@ -230,7 +214,7 @@ async fn session_sends_client_content_realtime_input_and_tool_response() {
     })
     .await;
 
-    let client = test_client(base_url, "test-key");
+    let client = test_client_with_api_key(base_url, "test-key");
     let mut session = client
         .live()
         .connect("gemini-2.0-flash-live-001", None)
@@ -284,7 +268,7 @@ async fn send_tool_response_without_id_is_a_validation_error() {
     })
     .await;
 
-    let client = test_client(base_url, "test-key");
+    let client = test_client_with_api_key(base_url, "test-key");
     let mut session = client
         .live()
         .connect("gemini-2.0-flash-live-001", None)
@@ -324,7 +308,7 @@ async fn receive_yields_server_messages_in_order_and_ends_on_server_close() {
     })
     .await;
 
-    let client = test_client(base_url, "test-key");
+    let client = test_client_with_api_key(base_url, "test-key");
     let mut session = client
         .live()
         .connect("gemini-2.0-flash-live-001", None)
@@ -367,7 +351,7 @@ async fn sending_after_the_server_closes_the_connection_fails() {
     })
     .await;
 
-    let client = test_client(base_url, "test-key");
+    let client = test_client_with_api_key(base_url, "test-key");
     let mut session = client
         .live()
         .connect("gemini-2.0-flash-live-001", None)

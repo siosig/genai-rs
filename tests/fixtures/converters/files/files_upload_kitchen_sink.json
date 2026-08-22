@@ -1,0 +1,20 @@
+{
+  "converter": "_CreateFileParameters_to_mldev",
+  "input": {
+    "file": {
+      "name": "files/abc123",
+      "display_name": "my file",
+      "mime_type": "text/plain",
+      "size_bytes": 12
+    }
+  },
+  "expected": {
+    "file": {
+      "name": "files/abc123",
+      "display_name": "my file",
+      "mime_type": "text/plain",
+      "size_bytes": 12
+    }
+  },
+  "expected_error": null
+}

@@ -1,0 +1,22 @@
+{
+  "converter": "_CitationMetadata_from_mldev",
+  "input": {
+    "citationSources": [
+      {
+        "startIndex": 1,
+        "endIndex": 4,
+        "uri": "https://example.com"
+      }
+    ]
+  },
+  "expected": {
+    "citations": [
+      {
+        "startIndex": 1,
+        "endIndex": 4,
+        "uri": "https://example.com"
+      }
+    ]
+  },
+  "expected_error": null
+}

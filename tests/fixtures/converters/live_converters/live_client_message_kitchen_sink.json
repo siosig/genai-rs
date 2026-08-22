@@ -1,0 +1,56 @@
+{
+  "converter": "_LiveClientMessage_to_mldev",
+  "input": {
+    "client_content": {
+      "turns": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "hi"
+            }
+          ]
+        }
+      ],
+      "turn_complete": true
+    },
+    "tool_response": {
+      "function_responses": [
+        {
+          "id": "call-1",
+          "name": "lookup",
+          "response": {
+            "result": "ok"
+          }
+        }
+      ]
+    }
+  },
+  "expected": {
+    "clientContent": {
+      "turns": [
+        {
+          "parts": [
+            {
+              "text": "hi"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "turnComplete": true
+    },
+    "toolResponse": {
+      "function_responses": [
+        {
+          "id": "call-1",
+          "name": "lookup",
+          "response": {
+            "result": "ok"
+          }
+        }
+      ]
+    }
+  },
+  "expected_error": null
+}

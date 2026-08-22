@@ -1,0 +1,18 @@
+{
+  "converter": "_CreateFileResponse_from_mldev",
+  "input": {
+    "sdkHttpResponse": {
+      "headers": {
+        "x": "y"
+      }
+    }
+  },
+  "expected": {
+    "sdk_http_response": {
+      "headers": {
+        "x": "y"
+      }
+    }
+  },
+  "expected_error": null
+}

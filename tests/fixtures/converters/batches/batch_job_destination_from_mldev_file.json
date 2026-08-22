@@ -1,0 +1,10 @@
+{
+  "converter": "_BatchJobDestination_from_mldev",
+  "input": {
+    "responsesFile": "files/batch-output"
+  },
+  "expected": {
+    "file_name": "files/batch-output"
+  },
+  "expected_error": null
+}

@@ -1,0 +1,14 @@
+{
+  "converter": "_LiveServerMessage_from_mldev",
+  "input": {
+    "serverContent": {
+      "turnComplete": true
+    }
+  },
+  "expected": {
+    "server_content": {
+      "turnComplete": true
+    }
+  },
+  "expected_error": null
+}

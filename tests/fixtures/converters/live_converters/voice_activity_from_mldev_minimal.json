@@ -1,0 +1,12 @@
+{
+  "converter": "_VoiceActivity_from_mldev",
+  "input": {
+    "type": "ACTIVITY_END",
+    "audioOffset": "2s"
+  },
+  "expected": {
+    "voice_activity_type": "ACTIVITY_END",
+    "audio_offset": "2s"
+  },
+  "expected_error": null
+}

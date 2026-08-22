@@ -4,8 +4,8 @@
 //! Unlike most types in [`crate::types`], these are **hand-written, not
 //! generated**: they configure the transport layer itself (base URL, retry
 //! policy, timeouts) rather than describing a Gemini API request/response
-//! body, so `gen_types.py` excludes them (see
-//! `tools/codegen/types_overrides.toml`).
+//! body, so `gen_types.py` excludes them (see its `EXCLUDED_CLASSES`
+//! constant).
 
 use std::collections::HashMap;
 

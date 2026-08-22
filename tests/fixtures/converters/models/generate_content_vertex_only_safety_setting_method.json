@@ -1,0 +1,27 @@
+{
+  "converter": "_GenerateContentParameters_to_mldev",
+  "input": {
+    "model": "gemini-2.0-flash",
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "hi"
+          }
+        ]
+      }
+    ],
+    "config": {
+      "safety_settings": [
+        {
+          "category": "HARM_CATEGORY_HARASSMENT",
+          "threshold": "BLOCK_ONLY_HIGH",
+          "method": "SEVERITY"
+        }
+      ]
+    }
+  },
+  "expected": null,
+  "expected_error": "field `method` is only supported by the Vertex AI backend"
+}

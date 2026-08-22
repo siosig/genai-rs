@@ -1,0 +1,10 @@
+{
+  "converter": "_GoogleMaps_to_mldev",
+  "input": {
+    "grounding_types": [
+      "PLACE_ID"
+    ]
+  },
+  "expected": null,
+  "expected_error": "field `grounding_types` is only supported by the Vertex AI backend"
+}

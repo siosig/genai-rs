@@ -9,6 +9,9 @@ repository = "https://github.com/siosig/genai-rs"
 readme = "README.md"
 keywords = ["gemini", "genai", "google", "llm", "ai"]
 categories = ["api-bindings", "asynchronous"]
+# Development tooling; regenerating requires a Python interpreter and the
+# google-genai package, neither of which a consumer of the crate has.
+exclude = ["tools/", "specs/", ".github/"]
 
 # The upstream Python SDK release this port is generated from and verified
 # against. `google-genai` ships frequently; every generated file stamps this
@@ -31,7 +34,6 @@ native-tls = ["reqwest/native-tls", "tokio-tungstenite/native-tls"]
 live = ["dep:tokio-tungstenite"]
 blocking = ["dep:once_cell"]
 mcp = ["dep:rmcp"]
-live-tests = []
 
 [dependencies]
 reqwest = { version = "0.13", default-features = false, features = ["json", "stream", "multipart"] }
@@ -67,8 +69,9 @@ rmcp = { version = "3", optional = true, features = ["client"] }
 [dev-dependencies]
 wiremock = "0.6"
 rstest = "0.26"
-insta = { version = "1.48", features = ["json"] }
-tokio-test = "0.4"
+# Lets tests read tools/codegen/methods.toml, so the async/blocking API
+# symmetry check is driven by the same ledger the generator uses.
+toml = "0.9"
 
 [lints.rust]
 missing_docs = "deny"

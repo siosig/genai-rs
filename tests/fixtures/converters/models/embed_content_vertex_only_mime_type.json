@@ -1,0 +1,21 @@
+{
+  "converter": "_EmbedContentParametersPrivate_to_mldev",
+  "input": {
+    "model": "text-embedding-004",
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "hi"
+          }
+        ]
+      }
+    ],
+    "config": {
+      "mime_type": "text/plain"
+    }
+  },
+  "expected": null,
+  "expected_error": "field `mime_type` is only supported by the Vertex AI backend"
+}

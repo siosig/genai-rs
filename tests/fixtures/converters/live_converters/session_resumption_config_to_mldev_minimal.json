@@ -1,0 +1,10 @@
+{
+  "converter": "_SessionResumptionConfig_to_mldev",
+  "input": {
+    "handle": "h1"
+  },
+  "expected": {
+    "handle": "h1"
+  },
+  "expected_error": null
+}

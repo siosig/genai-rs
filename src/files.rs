@@ -85,9 +85,11 @@ impl Files {
         source: impl Into<UploadSource>,
         config: Option<UploadFileConfig>,
     ) -> Result<File> {
+        // A `Path` source is opened and streamed rather than read into a
+        // `Vec`, so uploading a multi-gigabyte file costs one 8 MiB chunk of
+        // memory instead of the whole file.
         let (data, mime_type) = match source.into() {
             UploadSource::Path(path) => {
-                let data = tokio::fs::read(&path).await?;
                 let mime_type = config
                     .as_ref()
                     .and_then(|c| c.mime_type.clone())
@@ -96,14 +98,20 @@ impl Files {
                             .first_or_octet_stream()
                             .to_string()
                     });
-                (data, mime_type)
+                (
+                    crate::http::upload::UploadSourceData::open(&path).await?,
+                    mime_type,
+                )
             }
             UploadSource::Bytes { data, mime_type } => {
                 let mime_type = config
                     .as_ref()
                     .and_then(|c| c.mime_type.clone())
                     .unwrap_or(mime_type);
-                (data, mime_type)
+                (
+                    crate::http::upload::UploadSourceData::Bytes(data),
+                    mime_type,
+                )
             }
         };
 
@@ -133,7 +141,7 @@ impl Files {
             "upload/v1beta/files",
             start_body,
             &mime_type,
-            &data,
+            data,
         )
         .await?;
 

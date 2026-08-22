@@ -1,0 +1,14 @@
+{
+  "converter": "_Video_from_mldev",
+  "input": {
+    "uri": "https://example.com/out.mp4",
+    "encodedVideo": "aGVsbG8=",
+    "encoding": "video/mp4"
+  },
+  "expected": {
+    "uri": "https://example.com/out.mp4",
+    "video_bytes": "aGVsbG8=",
+    "mime_type": "video/mp4"
+  },
+  "expected_error": null
+}

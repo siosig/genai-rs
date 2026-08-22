@@ -1,0 +1,12 @@
+{
+  "converter": "_GetFileSearchStoreParameters_to_mldev",
+  "input": {
+    "name": "fileSearchStores/store-1"
+  },
+  "expected": {
+    "_url": {
+      "name": "fileSearchStores/store-1"
+    }
+  },
+  "expected_error": null
+}

@@ -1,0 +1,10 @@
+{
+  "converter": "_FunctionCallingConfig_to_mldev",
+  "input": {
+    "mode": "AUTO"
+  },
+  "expected": {
+    "mode": "AUTO"
+  },
+  "expected_error": null
+}

@@ -1,0 +1,8 @@
+{
+  "converter": "_Image_to_mldev",
+  "input": {
+    "gcs_uri": "gs://bucket/in.png"
+  },
+  "expected": null,
+  "expected_error": "field `gcs_uri` is only supported by the Vertex AI backend"
+}

@@ -69,6 +69,46 @@ def header(doc: str) -> str:
 FUNC_NAME_RE = re.compile(r"^_[A-Za-z0-9]+_(to|from)_mldev$")
 
 
+ENUM_VALIDATE_RE = re.compile(r"^_[A-Za-z0-9]+_to_mldev_enum_validate$")
+
+
+def collect_enum_validators(tree: ast.Module) -> dict[str, list[str]]:
+    """Maps each `_X_to_mldev_enum_validate` function to the enum values it
+    rejects.
+
+    These validators are *not* about unrecognized values -- they reject a
+    specific, known set that only the Vertex AI backend accepts, e.g.
+    `_SafetyFilterLevel_to_mldev_enum_validate` raises on `BLOCK_NONE`.
+    Dropping them (as this script used to) let the Rust port silently send
+    values the Python SDK refuses.
+
+    Shape matched:
+
+        def _X_to_mldev_enum_validate(enum_value):
+          if enum_value in set(['A', 'B']):
+            raise ValueError(...)
+    """
+    validators: dict[str, list[str]] = {}
+    for node in tree.body:
+        if not isinstance(node, ast.FunctionDef) or not ENUM_VALIDATE_RE.match(node.name):
+            continue
+        values: list[str] = []
+        for stmt in node.body:
+            if not isinstance(stmt, ast.If) or not isinstance(stmt.test, ast.Compare):
+                continue
+            comparator = stmt.test.comparators[0] if stmt.test.comparators else None
+            if isinstance(comparator, ast.Call) and isinstance(comparator.func, ast.Name) and comparator.func.id == "set":
+                comparator = comparator.args[0] if comparator.args else None
+            if not isinstance(comparator, ast.List):
+                continue
+            for elt in comparator.elts:
+                if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                    values.append(elt.value)
+        if values:
+            validators[node.name] = values
+    return validators
+
+
 class Unsupported(Exception):
     def __init__(self, func_name: str, node: ast.AST, reason: str) -> None:
         line = getattr(node, "lineno", "?")
@@ -129,10 +169,11 @@ def drop_leading_api_client(args: list[ast.expr]) -> list[ast.expr]:
 
 
 class FunctionTranspiler:
-    def __init__(self, func_name: str, has_root_param: bool, known_functions: dict[str, str]) -> None:
+    def __init__(self, func_name: str, has_root_param: bool, known_functions: dict[str, str], enum_validators: dict[str, list[str]] | None = None) -> None:
         self.func_name = func_name
         self.has_root_param = has_root_param
         self.known_functions = known_functions
+        self.enum_validators = enum_validators or {}
 
     def qualified_callee(self, python_name: str, node: ast.AST) -> str:
         rust_name = to_snake(python_name)
@@ -367,12 +408,32 @@ class FunctionTranspiler:
         guard = f"getv({guard_data}, {rust_key_slice(guard_keys)}).is_some()"
 
         body = node.body
+        prelude: list[str] = []
         if len(body) == 2 and self.is_enum_validate_call(body[0]):
-            # `_XEnum_to_mldev_enum_validate(getv(...))` followed by the
-            # real statement: the validator only raises on an unrecognized
-            # enum value, which this crate's generated enums already
-            # tolerate via their `Unknown(String)` fallback variant, so the
-            # validation call itself is dropped.
+            # `_XEnum_to_mldev_enum_validate(getv(...))` guarding the real
+            # statement. It rejects a specific set of enum values that only
+            # the Vertex AI backend accepts (e.g. `BLOCK_NONE`), so it has
+            # to be ported -- dropping it would let this crate send values
+            # the Python SDK refuses.
+            validate_stmt = body[0]
+            assert isinstance(validate_stmt, ast.Expr)
+            call = validate_stmt.value
+            assert isinstance(call, ast.Call) and isinstance(call.func, ast.Name)
+            rejected = self.enum_validators.get(call.func.id)
+            if rejected is None:
+                raise Unsupported(
+                    self.func_name,
+                    node,
+                    f"enum validator `{call.func.id}` has an unrecognized body; "
+                    "expected `if enum_value in set([...]): raise ValueError(...)`",
+                )
+            field = ".".join(guard_keys)
+            arms = " | ".join(f'Some("{value}")' for value in rejected)
+            prelude.append(
+                f"if matches!(getv({guard_data}, {rust_key_slice(guard_keys)})"
+                f".as_ref().and_then(Value::as_str), {arms}) "
+                f'{{ return Err(vertex_only_error("{field}")); }}'
+            )
             body = body[1:]
         if len(body) != 1:
             raise Unsupported(self.func_name, node, "if-body must be a single statement")
@@ -380,7 +441,7 @@ class FunctionTranspiler:
 
         if isinstance(inner, ast.Raise):
             field = ".".join(guard_keys)
-            return [f'if {guard} {{ return Err(vertex_only_error("{field}")); }}']
+            return prelude + [f'if {guard} {{ return Err(vertex_only_error("{field}")); }}']
 
         if isinstance(inner, ast.Expr) and is_call_to(inner.value, "setv"):
             call = inner.value
@@ -394,12 +455,12 @@ class FunctionTranspiler:
             # See the matching comment in `transpile_stmt`'s unconditional
             # setv case: binding first avoids a double mutable borrow when
             # `value_expr` itself borrows `to_object`/`parent_object`.
-            return [f"if {guard} {{ let __v = {value_expr}; setv({target}, {rust_key_slice(keys)}, __v)?; }}"]
+            return prelude + [f"if {guard} {{ let __v = {value_expr}; setv({target}, {rust_key_slice(keys)}, __v)?; }}"]
 
         if isinstance(inner, ast.Expr) and is_nested_converter_call(inner.value):
             assert isinstance(inner.value, ast.Call)
             stmt = self.transpile_bare_nested_call_stmt(inner.value)
-            return [f"if {guard} {{ {stmt} }}"]
+            return prelude + [f"if {guard} {{ {stmt} }}"]
 
         raise Unsupported(self.func_name, node, f"unsupported if-body: {ast.dump(inner)}")
 
@@ -454,6 +515,7 @@ def transpile_module(
 ) -> tuple[str, int, list[str], list[tuple[str, str]]]:
     tree = ast.parse(source_path.read_text(encoding="utf-8"), filename=str(source_path))
     functions = find_target_functions(tree)
+    enum_validators = collect_enum_validators(tree)
 
     rendered: list[str] = []
     failures: list[str] = []
@@ -466,7 +528,9 @@ def transpile_module(
             entries.append((func.name, rust_name))
             continue
         try:
-            transpiler = FunctionTranspiler(func.name, function_has_root_param(func), known_functions)
+            transpiler = FunctionTranspiler(
+                func.name, function_has_root_param(func), known_functions, enum_validators
+            )
             rendered.append(transpiler.transpile(func))
             entries.append((func.name, rust_name))
         except Unsupported as exc:

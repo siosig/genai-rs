@@ -1,0 +1,8 @@
+{
+  "converter": "_FetchPredictOperationParameters_to_mldev",
+  "input": {
+    "resource_name": "projects/p/locations/l/publishers/google/models/m"
+  },
+  "expected": null,
+  "expected_error": "field `resource_name` is only supported by the Vertex AI backend"
+}

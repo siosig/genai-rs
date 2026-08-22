@@ -1,0 +1,82 @@
+{
+  "converter": "_Part_to_mldev",
+  "input": {
+    "text": "hello",
+    "thought": true,
+    "thought_signature": "c2ln",
+    "inline_data": {
+      "data": "aGVsbG8=",
+      "mime_type": "image/png"
+    },
+    "file_data": {
+      "file_uri": "files/abc",
+      "mime_type": "image/png"
+    },
+    "function_call": {
+      "id": "c1",
+      "name": "lookup",
+      "args": {
+        "q": "x"
+      }
+    },
+    "function_response": {
+      "id": "c1",
+      "name": "lookup",
+      "response": {
+        "ok": true
+      }
+    },
+    "executable_code": {
+      "code": "print(1)",
+      "language": "PYTHON"
+    },
+    "code_execution_result": {
+      "outcome": "OUTCOME_OK",
+      "output": "1"
+    },
+    "video_metadata": {
+      "start_offset": "0s",
+      "end_offset": "5s"
+    }
+  },
+  "expected": {
+    "codeExecutionResult": {
+      "outcome": "OUTCOME_OK",
+      "output": "1"
+    },
+    "executableCode": {
+      "code": "print(1)",
+      "language": "PYTHON"
+    },
+    "fileData": {
+      "fileUri": "files/abc",
+      "mimeType": "image/png"
+    },
+    "functionCall": {
+      "id": "c1",
+      "args": {
+        "q": "x"
+      },
+      "name": "lookup"
+    },
+    "functionResponse": {
+      "id": "c1",
+      "name": "lookup",
+      "response": {
+        "ok": true
+      }
+    },
+    "inlineData": {
+      "data": "aGVsbG8=",
+      "mimeType": "image/png"
+    },
+    "text": "hello",
+    "thought": true,
+    "thoughtSignature": "c2ln",
+    "videoMetadata": {
+      "start_offset": "0s",
+      "end_offset": "5s"
+    }
+  },
+  "expected_error": null
+}

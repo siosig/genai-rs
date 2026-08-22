@@ -24,106 +24,6 @@ use serde_json::{Map, Value};
 
 use crate::error::{Error, Result};
 
-/// Converts a `snake_case` identifier to `camelCase`, matching pydantic's
-/// `alias_generator=to_camel` (used by every generated type; see
-/// `tools/codegen/gen_types.py`'s `#[serde(alias = ...)]` output).
-fn snake_to_camel(s: &str) -> String {
-    let mut out = String::with_capacity(s.len());
-    let mut upper_next = false;
-    for ch in s.chars() {
-        if ch == '_' {
-            upper_next = true;
-        } else if upper_next {
-            out.extend(ch.to_uppercase());
-            upper_next = false;
-        } else {
-            out.push(ch);
-        }
-    }
-    out
-}
-
-/// Recursively renames every object key in `value` from `snake_case` to
-/// `camelCase`. Only safe for objects whose keys are *all* known field
-/// names (e.g. `SpeechConfig`/`VoiceConfig`) -- **not** for `Schema`,
-/// where `properties`/`$defs` map keys are arbitrary user-chosen field
-/// names that must be preserved verbatim (see [`camelize_schema`]).
-fn camelize_keys_recursive(value: Value) -> Value {
-    match value {
-        Value::Object(map) => Value::Object(
-            map.into_iter()
-                .map(|(k, v)| (snake_to_camel(&k), camelize_keys_recursive(v)))
-                .collect(),
-        ),
-        Value::Array(items) => {
-            Value::Array(items.into_iter().map(camelize_keys_recursive).collect())
-        }
-        other => other,
-    }
-}
-
-/// The subset of `Schema`'s own field names that differ between their
-/// Rust (`snake_case`) and wire (`camelCase`) spelling; every other field
-/// (`type`, `format`, `items`, `properties`, `enum`, ...) is already a
-/// single word and spelled identically in both. Mirrors the 4-entry
-/// rename table in Python's `_transformers.process_schema`, extended
-/// with the `min_*`/`max_*` fields it (and pydantic's `by_alias=True`
-/// serialization, which this crate has no equivalent step for) also
-/// renames.
-const SCHEMA_FIELD_RENAMES: &[(&str, &str)] = &[
-    ("additional_properties", "additionalProperties"),
-    ("any_of", "anyOf"),
-    ("max_items", "maxItems"),
-    ("max_length", "maxLength"),
-    ("max_properties", "maxProperties"),
-    ("min_items", "minItems"),
-    ("min_length", "minLength"),
-    ("min_properties", "minProperties"),
-    ("property_ordering", "propertyOrdering"),
-];
-
-/// Recursively renames a [`crate::types::Schema`] value's own field names
-/// to their wire (camelCase) spelling, without touching the arbitrary
-/// user-chosen keys inside `properties`/`defs` maps (those are recursed
-/// into as *values*, not renamed as keys). See `SCHEMA_FIELD_RENAMES`.
-fn camelize_schema(value: Value) -> Value {
-    let Value::Object(map) = value else {
-        return value;
-    };
-    let renames: std::collections::HashMap<&str, &str> =
-        SCHEMA_FIELD_RENAMES.iter().copied().collect();
-    let mut out = Map::new();
-    for (key, val) in map {
-        let wire_key = renames
-            .get(key.as_str())
-            .copied()
-            .unwrap_or(key.as_str())
-            .to_owned();
-        let converted = match key.as_str() {
-            "any_of" => Value::Array(
-                val.as_array()
-                    .cloned()
-                    .unwrap_or_default()
-                    .into_iter()
-                    .map(camelize_schema)
-                    .collect(),
-            ),
-            "items" | "additional_properties" => camelize_schema(val),
-            "properties" | "defs" => Value::Object(
-                val.as_object()
-                    .cloned()
-                    .unwrap_or_default()
-                    .into_iter()
-                    .map(|(k, v)| (k, camelize_schema(v)))
-                    .collect(),
-            ),
-            _ => val,
-        };
-        out.insert(wire_key, converted);
-    }
-    Value::Object(out)
-}
-
 fn as_str<'a>(value: &'a Value, what: &str) -> Result<&'a str> {
     value
         .as_str()
@@ -194,8 +94,19 @@ pub(crate) fn t_blobs(value: Value) -> Result<Value> {
 }
 
 fn check_mime_prefix(value: Value, prefix: &str) -> Result<Value> {
-    let mime_type = as_object(&value, "blob")?
-        .get("mimeType")
+    // Python reads the pydantic *attribute* `blob.mime_type`, so it always
+    // sees the snake_case spelling. This runs one step earlier in the same
+    // pipeline, on `crate::types::Blob`'s JSON form -- and `Blob`'s
+    // `#[serde(alias = "mimeType")]` is deserialize-only, so serializing a
+    // `Blob` always yields `mime_type`. Reading only `mimeType` here made
+    // every `t_audio_blob`/`t_image_blob` call fail with "unsupported mime
+    // type: None", which broke `LiveSession::send_realtime_input` for all
+    // audio and video chunks. Both spellings are accepted so a value that
+    // arrived in wire casing still validates.
+    let blob = as_object(&value, "blob")?;
+    let mime_type = blob
+        .get("mime_type")
+        .or_else(|| blob.get("mimeType"))
         .and_then(Value::as_str);
     match mime_type {
         Some(m) if m.starts_with(prefix) => Ok(value),
@@ -259,13 +170,14 @@ pub(crate) fn t_contents_for_embed(value: Value) -> Result<Value> {
         Value::Array(items) => items,
         other => vec![other],
     };
-    let converted = items
-        .into_iter()
-        .map(|item| {
-            crate::converters::generated::live_converters::content_to_mldev(&item, None, None)
-        })
-        .collect::<Result<Vec<_>>>()?;
-    Ok(Value::Array(converted))
+    // Python's `_EmbedContentParametersPrivate_to_mldev` is a bare
+    // `[item for item in t.t_contents_for_embed(...)]`: the `Content`
+    // objects are passed through untouched, and `_common.convert_to_dict`
+    // later dumps them *without* `by_alias`, so parts keep their
+    // snake_case spelling (`inline_data`, `mime_type`) on the wire. An
+    // earlier version of this function camelized here; that was a
+    // divergence, not a fix -- verified against google-genai 2.19.0.
+    Ok(Value::Array(items))
 }
 
 /// Prepends a resource-name collection prefix if missing and doing so
@@ -433,9 +345,9 @@ pub(crate) fn t_speech_config(value: Value) -> Result<Value> {
     match value {
         Value::Null => Ok(Value::Null),
         Value::String(voice_name) => Ok(serde_json::json!({
-            "voiceConfig": { "prebuiltVoiceConfig": { "voiceName": voice_name } }
+            "voice_config": { "prebuilt_voice_config": { "voice_name": voice_name } }
         })),
-        object => Ok(camelize_keys_recursive(object)),
+        object => Ok(object),
     }
 }
 
@@ -452,7 +364,7 @@ pub(crate) fn t_live_speech_config(value: Value) -> Result<Value> {
             "multi_speaker_voice_config is not supported in the live API".to_owned(),
         ));
     }
-    Ok(camelize_keys_recursive(value))
+    Ok(value)
 }
 
 /// Passes an already-typed `Tool` value through. Mirrors the
@@ -592,7 +504,7 @@ pub(crate) fn t_schema(value: Value) -> Result<Value> {
         Ok(Value::Null)
     } else {
         reject_unsupported_mldev_properties(&value)?;
-        Ok(camelize_schema(value))
+        Ok(value)
     }
 }
 
@@ -611,11 +523,23 @@ mod tests {
 
     use super::*;
 
+    /// A `Schema` goes out exactly as its Rust fields serialize --
+    /// `snake_case`, unrenamed.
+    ///
+    /// Python's `t_schema` does dump a `types.Schema`, run `process_schema`
+    /// (which renames `additional_properties`/`any_of`/`prefix_items`/
+    /// `property_ordering` to camelCase), and then **re-validate the result
+    /// back into a `types.Schema`** -- where those camelCase spellings are
+    /// just aliases. `_common.convert_to_dict` then dumps without
+    /// `by_alias`, so the rename round-trips away and the wire sees
+    /// `snake_case`. Verified field-by-field against google-genai 2.19.0, and
+    /// confirmed accepted by the live API. An earlier version of this
+    /// transformer camelized here, which was a divergence rather than a fix.
     #[test]
-    fn camelize_schema_renames_known_fields_but_preserves_user_property_names() {
+    fn t_schema_leaves_field_names_in_snake_case_like_python() {
         let schema = json!({
             "type": "OBJECT",
-            "min_length": 1,
+            "min_properties": 1,
             "any_of": [{"type": "STRING", "max_length": 5}],
             "properties": {
                 "user_id": {"type": "STRING", "min_length": 2},
@@ -623,24 +547,8 @@ mod tests {
             },
             "property_ordering": ["user_id", "another_field"]
         });
-        let result = camelize_schema(schema);
-        assert_eq!(result["minLength"], 1);
-        assert_eq!(result["anyOf"][0]["maxLength"], 5);
-        assert_eq!(
-            result["propertyOrdering"],
-            json!(["user_id", "another_field"])
-        );
-        // Property *names* (arbitrary user data) must never be renamed.
-        assert!(result["properties"].get("user_id").is_some());
-        assert!(result["properties"].get("userId").is_none());
-        assert_eq!(result["properties"]["user_id"]["minLength"], 2);
-    }
-
-    #[test]
-    fn t_schema_camelizes_a_schema_object() {
-        let schema = json!({"type": "OBJECT", "min_properties": 1});
-        let result = t_schema(schema).unwrap();
-        assert_eq!(result["minProperties"], 1);
+        let result = t_schema(schema.clone()).unwrap();
+        assert_eq!(result, schema);
     }
 
     #[test]
@@ -701,25 +609,29 @@ mod tests {
         assert!(t_schema(schema).is_err());
     }
 
+    /// The bare-voice-name shorthand expands to the same `snake_case`
+    /// shape Python produces -- verified by running google-genai 2.19.0's
+    /// `_GenerateContentParameters_to_mldev` with `speech_config="Kore"`,
+    /// which yields
+    /// `{"voice_config": {"prebuilt_voice_config": {"voice_name": "Kore"}}}`.
     #[test]
-    fn t_speech_config_wraps_a_bare_voice_name_with_camel_keys() {
+    fn t_speech_config_wraps_a_bare_voice_name_in_pythons_snake_case_shape() {
         let result = t_speech_config(json!("Kore")).unwrap();
         assert_eq!(
-            result["voiceConfig"]["prebuiltVoiceConfig"]["voiceName"],
+            result["voice_config"]["prebuilt_voice_config"]["voice_name"],
             "Kore"
         );
     }
 
+    /// An already-structured config is passed through untouched. Python
+    /// dumps it without `by_alias`, so its field names stay `snake_case` on
+    /// the wire; an earlier version of this transformer camelized here,
+    /// which was a divergence rather than a fix.
     #[test]
-    fn t_speech_config_camelizes_an_object_input() {
-        let result = t_speech_config(
-            json!({"voice_config": {"prebuilt_voice_config": {"voice_name": "Puck"}}}),
-        )
-        .unwrap();
-        assert_eq!(
-            result["voiceConfig"]["prebuiltVoiceConfig"]["voiceName"],
-            "Puck"
-        );
+    fn t_speech_config_passes_an_object_through_unchanged() {
+        let input = json!({"voice_config": {"prebuilt_voice_config": {"voice_name": "Puck"}}});
+        let result = t_speech_config(input.clone()).unwrap();
+        assert_eq!(result, input);
     }
 
     #[test]
@@ -870,5 +782,60 @@ mod tests {
             json!({"inlinedResponses": {"inlinedResponses": [{"response": {"text": "hi"}}]}});
         let result = t_recv_batch_job_destination(dest.clone()).unwrap();
         assert_eq!(result, dest);
+    }
+}
+
+#[cfg(test)]
+mod blob_mime_tests {
+    use serde_json::json;
+
+    use super::{t_audio_blob, t_image_blob};
+
+    /// Regression test for a bug that broke every realtime audio and video
+    /// chunk: `check_mime_prefix` read `mimeType`, but `crate::types::Blob`
+    /// serializes its MIME field as `mime_type` (the `mimeType` serde
+    /// attribute is a deserialize-only alias). Every call therefore saw
+    /// `None` and rejected the blob, so `LiveSession::send_realtime_input`
+    /// could never send audio or video.
+    #[test]
+    fn audio_blob_accepts_the_snake_case_spelling_serde_actually_emits() {
+        let blob = serde_json::to_value(crate::types::Blob {
+            data: Some(b"pcm".to_vec()),
+            mime_type: Some("audio/pcm;rate=16000".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        assert!(
+            blob.get("mime_type").is_some(),
+            "Blob must still serialize as `mime_type`; if this changes, revisit check_mime_prefix"
+        );
+        assert!(t_audio_blob(blob).is_ok());
+    }
+
+    #[test]
+    fn audio_blob_also_accepts_the_wire_spelling() {
+        let blob = json!({"data": "cGNt", "mimeType": "audio/pcm;rate=16000"});
+        assert!(t_audio_blob(blob).is_ok());
+    }
+
+    #[test]
+    fn image_blob_accepts_the_snake_case_spelling() {
+        let blob = serde_json::to_value(crate::types::Blob {
+            data: Some(b"png".to_vec()),
+            mime_type: Some("image/png".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        assert!(t_image_blob(blob).is_ok());
+    }
+
+    #[test]
+    fn a_mismatched_prefix_is_still_rejected() {
+        let blob = json!({"data": "cGNt", "mime_type": "image/png"});
+        let err = t_audio_blob(blob).unwrap_err();
+        assert!(
+            err.to_string().contains("unsupported mime type"),
+            "unexpected error: {err}"
+        );
     }
 }

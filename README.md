@@ -109,7 +109,6 @@ let client = Client::builder()
 | `live` | ✅ | `client.live()`: the bidirectional realtime (WebSocket) API, plus `client.live().music()`. |
 | `blocking` | — | `google_genai::blocking`: a synchronous (`fn`, not `async fn`) mirror of the whole API, minus Live. |
 | `mcp` | — | `google_genai::mcp::mcp_tools`: exposes an MCP server's tools to the model as function-calling tools. |
-| `live-tests` | — | Opt-in flag for this repository's own network-dependent tests. No effect on library code. |
 
 To use `native-tls` instead of the default `rustls`:
 

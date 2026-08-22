@@ -1,0 +1,12 @@
+{
+  "converter": "_DeleteModelParameters_to_mldev",
+  "input": {
+    "model": "tunedModels/abc123"
+  },
+  "expected": {
+    "_url": {
+      "name": "tunedModels/abc123"
+    }
+  },
+  "expected_error": null
+}

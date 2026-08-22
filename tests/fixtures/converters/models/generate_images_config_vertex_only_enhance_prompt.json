@@ -1,0 +1,8 @@
+{
+  "converter": "_GenerateImagesConfig_to_mldev",
+  "input": {
+    "enhance_prompt": true
+  },
+  "expected": null,
+  "expected_error": "field `enhance_prompt` is only supported by the Vertex AI backend"
+}

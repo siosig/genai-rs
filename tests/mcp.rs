@@ -11,10 +11,12 @@
 //! `inputSchema -> parameters_json_schema` mapping in isolation.
 #![cfg(feature = "mcp")]
 
-use google_genai::Client;
+mod common;
+
+use common::test_client;
 use google_genai::afc::function_tool;
 use google_genai::mcp::mcp_tools;
-use google_genai::types::{GenerateContentConfig, HttpOptions, Tool};
+use google_genai::types::{GenerateContentConfig, Tool};
 use rmcp::ErrorData as McpError;
 use rmcp::ServiceExt;
 use rmcp::handler::server::ServerHandler;
@@ -27,21 +29,6 @@ use schemars::JsonSchema;
 use serde::Deserialize;
 use wiremock::matchers::method;
 use wiremock::{Mock, MockServer, ResponseTemplate};
-
-#[expect(
-    clippy::unwrap_used,
-    reason = "test helper: a broken Client::builder() here is a test-setup bug, not a runtime condition"
-)]
-fn test_client(base_url: String) -> Client {
-    Client::builder()
-        .api_key("test-key")
-        .http_options(HttpOptions {
-            base_url: Some(base_url),
-            ..Default::default()
-        })
-        .build()
-        .unwrap()
-}
 
 fn model_reply(text: &str) -> serde_json::Value {
     serde_json::json!({

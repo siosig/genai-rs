@@ -1,0 +1,20 @@
+{
+  "converter": "_ListDocumentsParameters_to_mldev",
+  "input": {
+    "parent": "ragStores/store-1",
+    "config": {
+      "page_size": 25,
+      "page_token": "tok"
+    }
+  },
+  "expected": {
+    "_url": {
+      "parent": "ragStores/store-1"
+    },
+    "_query": {
+      "pageSize": 25,
+      "pageToken": "tok"
+    }
+  },
+  "expected_error": null
+}

@@ -504,7 +504,8 @@ mod tests {
 
     use super::Models;
     use crate::client::Client;
-    use crate::types::HttpOptions;
+    use crate::error::{Backend, Error};
+    use crate::types::{GenerateImagesConfig, HttpOptions};
 
     fn test_client(base_url: String) -> Client {
         Client::builder()
@@ -866,6 +867,107 @@ mod tests {
             .unwrap();
         assert_eq!(response.generated_images.unwrap().len(), 1);
         server.verify().await;
+    }
+
+    /// `GenerateImagesConfig` models the union of both backends' knobs, so
+    /// six of its fields are Vertex-AI-only. On this Gemini-Developer-API
+    /// client the generated converter (`generate_images_config_to_mldev`)
+    /// must reject each of them with
+    /// [`crate::Error::UnsupportedByBackend`] *before* anything is sent,
+    /// mirroring Python's `_GenerateImagesConfig_to_mldev`, which raises
+    /// `ValueError('... parameter is not supported in Gemini API.')` for
+    /// exactly this set (verified against google-genai 2.19.0).
+    ///
+    /// The remaining fields (`number_of_images`, `aspect_ratio`,
+    /// `guidance_scale`, `safety_filter_level`, `person_generation`,
+    /// `include_safety_attributes`, `include_rai_reason`, `language`,
+    /// `output_mime_type`, `output_compression_quality`, `image_size`) are
+    /// supported and already covered by the happy-path test above.
+    #[tokio::test]
+    #[expect(
+        deprecated,
+        reason = "testing the deprecated generate_images method itself"
+    )]
+    async fn generate_images_rejects_every_vertex_only_config_field() {
+        let server = MockServer::start().await;
+
+        let cases: Vec<(&'static str, GenerateImagesConfig)> = vec![
+            (
+                "output_gcs_uri",
+                GenerateImagesConfig {
+                    output_gcs_uri: Some("gs://bucket/prefix".to_owned()),
+                    ..Default::default()
+                },
+            ),
+            (
+                "negative_prompt",
+                GenerateImagesConfig {
+                    negative_prompt: Some("blurry".to_owned()),
+                    ..Default::default()
+                },
+            ),
+            (
+                "seed",
+                GenerateImagesConfig {
+                    seed: Some(42),
+                    ..Default::default()
+                },
+            ),
+            (
+                "add_watermark",
+                GenerateImagesConfig {
+                    add_watermark: Some(true),
+                    ..Default::default()
+                },
+            ),
+            (
+                "labels",
+                GenerateImagesConfig {
+                    labels: Some(std::collections::HashMap::from([(
+                        "team".to_owned(),
+                        "research".to_owned(),
+                    )])),
+                    ..Default::default()
+                },
+            ),
+            (
+                "enhance_prompt",
+                GenerateImagesConfig {
+                    enhance_prompt: Some(true),
+                    ..Default::default()
+                },
+            ),
+        ];
+
+        for (field, config) in cases {
+            let err = models(&server)
+                .generate_images("imagen-3.0-generate-002", "a cat", Some(config))
+                .await
+                .expect_err("a Vertex-only field must be rejected");
+            let Error::UnsupportedByBackend {
+                field: reported,
+                backend,
+            } = &err
+            else {
+                panic!("`{field}` should be rejected as Vertex-only, got {err:?}");
+            };
+            assert_eq!(*reported, field);
+            assert_eq!(*backend, Backend::VertexAi);
+            assert_eq!(
+                err.to_string(),
+                format!("field `{field}` is only supported by the Vertex AI backend")
+            );
+        }
+
+        // The rejection happens while converting the request, so no HTTP
+        // call is ever made (the mock server has no mocks mounted at all).
+        assert!(
+            server
+                .received_requests()
+                .await
+                .expect("wiremock records requests")
+                .is_empty()
+        );
     }
 
     #[tokio::test]

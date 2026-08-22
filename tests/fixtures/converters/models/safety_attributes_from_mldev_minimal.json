@@ -1,0 +1,24 @@
+{
+  "converter": "_SafetyAttributes_from_mldev",
+  "input": {
+    "safetyAttributes": {
+      "categories": [
+        "Violence"
+      ],
+      "scores": [
+        0.3
+      ]
+    },
+    "contentType": "Positive Prompt"
+  },
+  "expected": {
+    "categories": [
+      "Violence"
+    ],
+    "scores": [
+      0.3
+    ],
+    "content_type": "Positive Prompt"
+  },
+  "expected_error": null
+}

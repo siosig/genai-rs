@@ -1,0 +1,60 @@
+{
+  "converter": "_CreateAuthTokenParameters_to_mldev",
+  "input": {
+    "config": {
+      "uses": 3,
+      "expire_time": "2026-01-01T00:00:00Z",
+      "new_session_expire_time": "2026-01-01T00:30:00Z",
+      "lock_additional_fields": [
+        "temperature"
+      ],
+      "live_connect_constraints": {
+        "model": "gemini-2.0-flash-live-001",
+        "config": {
+          "response_modalities": [
+            "AUDIO"
+          ],
+          "temperature": 0.5,
+          "system_instruction": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "be brief"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "expireTime": "2026-01-01T00:00:00Z",
+    "newSessionExpireTime": "2026-01-01T00:30:00Z",
+    "uses": 3,
+    "bidiGenerateContentSetup": {
+      "setup": {
+        "model": "models/gemini-2.0-flash-live-001",
+        "generationConfig": {
+          "responseModalities": [
+            "AUDIO"
+          ],
+          "temperature": 0.5
+        },
+        "systemInstruction": {
+          "parts": [
+            {
+              "text": "be brief"
+            }
+          ],
+          "role": "user"
+        }
+      },
+      "config": {}
+    },
+    "fieldMask": [
+      "temperature"
+    ],
+    "config": {}
+  },
+  "expected_error": null
+}

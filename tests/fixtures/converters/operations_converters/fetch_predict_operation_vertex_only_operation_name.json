@@ -1,0 +1,8 @@
+{
+  "converter": "_FetchPredictOperationParameters_to_mldev",
+  "input": {
+    "operation_name": "operations/abc123"
+  },
+  "expected": null,
+  "expected_error": "field `operation_name` is only supported by the Vertex AI backend"
+}

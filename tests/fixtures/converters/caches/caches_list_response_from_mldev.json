@@ -1,0 +1,22 @@
+{
+  "converter": "_ListCachedContentsResponse_from_mldev",
+  "input": {
+    "nextPageToken": "tok",
+    "cachedContents": [
+      {
+        "name": "cachedContents/abc123",
+        "displayName": "my-cache"
+      }
+    ]
+  },
+  "expected": {
+    "next_page_token": "tok",
+    "cached_contents": [
+      {
+        "name": "cachedContents/abc123",
+        "displayName": "my-cache"
+      }
+    ]
+  },
+  "expected_error": null
+}

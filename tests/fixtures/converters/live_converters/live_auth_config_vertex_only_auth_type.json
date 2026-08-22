@@ -1,0 +1,8 @@
+{
+  "converter": "_AuthConfig_to_mldev",
+  "input": {
+    "auth_type": "API_KEY_AUTH"
+  },
+  "expected": null,
+  "expected_error": "field `auth_type` is only supported by the Vertex AI backend"
+}

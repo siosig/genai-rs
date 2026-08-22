@@ -75,7 +75,6 @@ Cargo features:
 | `live` | ✅ | the bidirectional realtime (WebSocket) API |
 | `blocking` | — | `google_genai::blocking`: a synchronous mirror of the API (minus Live), streams as `Iterator`, its own current-thread runtime |
 | `mcp` | — | `google_genai::mcp::mcp_tools`: bridges an MCP server's tools into automatic function calling |
-| `live-tests` | — | opts this repository's network-dependent tests in; no effect on library code |
 
 ### Known limitations
 
@@ -86,10 +85,15 @@ Cargo features:
   under one name collide — the later wins for both. Python rebuilds its
   `function_map` per call and has no such coupling. Use unique names, and prefer
   registering tools once at startup.
-- **`files().upload()` buffers in memory.** A `Path` source is read fully before
-  upload; there is no streaming-from-disk path yet.
 - **`Chat::record_history` is private.** History is maintained by `send_message`
   / `send_message_stream`; Python exposes the method publicly.
+- **Chat history omits AFC's intermediate turns.** `Chat::send_message`
+  delegates to `models().generate_content`, so automatic function calling runs
+  there and only the final, post-tool-call response is recorded. Python instead
+  disables `generate_content`'s AFC and drives the loop inside `chats.py`,
+  recording each intermediate `functionCall` / `functionResponse` turn. After a
+  tool round-trip the two SDKs' `get_history()` therefore differ; the response's
+  `automatic_function_calling_history` still carries the full exchange.
 - **`Client::http_options()` is not exposed.** The contract reserved a public
   accessor; 0.1.0 keeps the effective options internal.
 - **`models().generate_videos` takes one `GenerateVideosSource`** instead of

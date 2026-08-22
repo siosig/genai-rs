@@ -1,0 +1,8 @@
+{
+  "converter": "_Tool_to_mldev",
+  "input": {
+    "enterprise_web_search": {}
+  },
+  "expected": null,
+  "expected_error": "field `enterprise_web_search` is only supported by the Vertex AI backend"
+}

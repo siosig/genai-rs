@@ -291,7 +291,7 @@ impl FileSearchStores {
             &start_path,
             request,
             mime_type,
-            data,
+            crate::http::upload::UploadSourceData::Bytes(data.to_vec()),
         )
         .await?;
         let wire = parse_body(&body)?;

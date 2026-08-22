@@ -1,0 +1,72 @@
+{
+  "converter": "_GenerateVideosParameters_to_mldev",
+  "input": {
+    "model": "veo-3.0-generate-001",
+    "prompt": "a drone shot of a canyon",
+    "config": {
+      "number_of_videos": 2,
+      "duration_seconds": 8,
+      "aspect_ratio": "16:9",
+      "resolution": "1080p",
+      "person_generation": "allow_adult",
+      "negative_prompt": "blurry",
+      "enhance_prompt": true,
+      "last_frame": {
+        "image_bytes": "aGVsbG8=",
+        "mime_type": "image/png"
+      },
+      "reference_images": [
+        {
+          "image": {
+            "image_bytes": "aGVsbG8=",
+            "mime_type": "image/png"
+          },
+          "reference_type": "ASSET"
+        }
+      ],
+      "webhook_config": {
+        "uris": [
+          "https://example.com/hook"
+        ]
+      }
+    }
+  },
+  "expected": {
+    "_url": {
+      "model": "models/veo-3.0-generate-001"
+    },
+    "instances": [
+      {
+        "prompt": "a drone shot of a canyon",
+        "lastFrame": {
+          "bytesBase64Encoded": "aGVsbG8=",
+          "mimeType": "image/png"
+        },
+        "referenceImages": [
+          {
+            "image": {
+              "bytesBase64Encoded": "aGVsbG8=",
+              "mimeType": "image/png"
+            },
+            "referenceType": "ASSET"
+          }
+        ]
+      }
+    ],
+    "parameters": {
+      "sampleCount": 2,
+      "durationSeconds": 8,
+      "aspectRatio": "16:9",
+      "resolution": "1080p",
+      "personGeneration": "allow_adult",
+      "negativePrompt": "blurry",
+      "enhancePrompt": true
+    },
+    "webhookConfig": {
+      "uris": [
+        "https://example.com/hook"
+      ]
+    }
+  },
+  "expected_error": null
+}

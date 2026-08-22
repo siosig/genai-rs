@@ -1,0 +1,12 @@
+{
+  "converter": "_CancelBatchJobParameters_to_mldev",
+  "input": {
+    "name": "batches/abc123"
+  },
+  "expected": {
+    "_url": {
+      "name": "abc123"
+    }
+  },
+  "expected_error": null
+}

@@ -1,0 +1,12 @@
+{
+  "converter": "_GenerateImagesParameters_to_mldev",
+  "input": {
+    "model": "imagen-3.0-generate-002",
+    "prompt": "a cat",
+    "config": {
+      "negative_prompt": "dogs"
+    }
+  },
+  "expected": null,
+  "expected_error": "field `negative_prompt` is only supported by the Vertex AI backend"
+}

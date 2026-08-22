@@ -1,0 +1,30 @@
+{
+  "converter": "_RegisterFilesResponse_from_mldev",
+  "input": {
+    "sdkHttpResponse": {
+      "headers": {
+        "x": "y"
+      }
+    },
+    "files": [
+      {
+        "name": "files/abc123",
+        "displayName": "a.txt"
+      }
+    ]
+  },
+  "expected": {
+    "sdk_http_response": {
+      "headers": {
+        "x": "y"
+      }
+    },
+    "files": [
+      {
+        "name": "files/abc123",
+        "displayName": "a.txt"
+      }
+    ]
+  },
+  "expected_error": null
+}

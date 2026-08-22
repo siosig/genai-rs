@@ -1,0 +1,16 @@
+{
+  "converter": "_GeneratedVideo_from_mldev",
+  "input": {
+    "video": {
+      "uri": "https://example.com/out.mp4",
+      "encoding": "video/mp4"
+    }
+  },
+  "expected": {
+    "video": {
+      "uri": "https://example.com/out.mp4",
+      "mime_type": "video/mp4"
+    }
+  },
+  "expected_error": null
+}

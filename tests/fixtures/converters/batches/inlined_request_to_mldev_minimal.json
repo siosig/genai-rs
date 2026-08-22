@@ -1,0 +1,38 @@
+{
+  "converter": "_InlinedRequest_to_mldev",
+  "input": {
+    "model": "gemini-2.0-flash",
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "hi"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "k": "v"
+    }
+  },
+  "expected": {
+    "request": {
+      "model": "models/gemini-2.0-flash",
+      "contents": [
+        {
+          "parts": [
+            {
+              "text": "hi"
+            }
+          ],
+          "role": "user"
+        }
+      ]
+    },
+    "metadata": {
+      "k": "v"
+    }
+  },
+  "expected_error": null
+}

@@ -1,0 +1,12 @@
+{
+  "converter": "_GetFileParameters_to_mldev",
+  "input": {
+    "name": "https://generativelanguage.googleapis.com/v1beta/files/abc123"
+  },
+  "expected": {
+    "_url": {
+      "file": "abc123"
+    }
+  },
+  "expected_error": null
+}

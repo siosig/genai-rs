@@ -1,0 +1,76 @@
+{
+  "converter": "_LiveClientSetup_to_mldev",
+  "input": {
+    "model": "models/gemini-2.0-flash-live-001",
+    "generation_config": {
+      "temperature": 0.2
+    },
+    "system_instruction": {
+      "role": "user",
+      "parts": [
+        {
+          "text": "be brief"
+        }
+      ]
+    },
+    "tools": [
+      {
+        "google_search": {}
+      }
+    ],
+    "session_resumption": {
+      "handle": "h1"
+    },
+    "context_window_compression": {
+      "trigger_tokens": 1000
+    },
+    "input_audio_transcription": {},
+    "output_audio_transcription": {},
+    "proactivity": {
+      "proactive_audio": false
+    },
+    "safety_settings": [
+      {
+        "category": "HARM_CATEGORY_HATE_SPEECH",
+        "threshold": "BLOCK_NONE"
+      }
+    ]
+  },
+  "expected": {
+    "model": "models/gemini-2.0-flash-live-001",
+    "generationConfig": {
+      "temperature": 0.2
+    },
+    "systemInstruction": {
+      "parts": [
+        {
+          "text": "be brief"
+        }
+      ],
+      "role": "user"
+    },
+    "tools": [
+      {
+        "googleSearch": {}
+      }
+    ],
+    "sessionResumption": {
+      "handle": "h1"
+    },
+    "contextWindowCompression": {
+      "trigger_tokens": 1000
+    },
+    "inputAudioTranscription": {},
+    "outputAudioTranscription": {},
+    "proactivity": {
+      "proactive_audio": false
+    },
+    "safetySettings": [
+      {
+        "category": "HARM_CATEGORY_HATE_SPEECH",
+        "threshold": "BLOCK_NONE"
+      }
+    ]
+  },
+  "expected_error": null
+}

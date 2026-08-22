@@ -4,25 +4,12 @@
 //! `tests/chats.rs`'s conventions (`test_client`/`model_reply` helpers,
 //! inspecting the raw request body via `server.received_requests()`).
 
-use google_genai::Client;
-use google_genai::types::{Content, GenerateContentConfig, HttpOptions, Part, Schema, Type};
+mod common;
+
+use common::test_client;
+use google_genai::types::{Content, GenerateContentConfig, Part, Schema, Type};
 use wiremock::matchers::method;
 use wiremock::{Mock, MockServer, ResponseTemplate};
-
-#[expect(
-    clippy::unwrap_used,
-    reason = "test helper: a broken Client::builder() here is a test-setup bug, not a runtime condition"
-)]
-fn test_client(base_url: String) -> Client {
-    Client::builder()
-        .api_key("test-key")
-        .http_options(HttpOptions {
-            base_url: Some(base_url),
-            ..Default::default()
-        })
-        .build()
-        .unwrap()
-}
 
 fn model_reply(text: &str) -> serde_json::Value {
     serde_json::json!({
@@ -208,8 +195,24 @@ mod structured_output {
         population: u64,
     }
 
+    /// A hand-built [`Schema`] reaches the wire with its field names left
+    /// in `snake_case`.
+    ///
+    /// This is not an oversight: Python's `t_schema` renames only
+    /// `additional_properties`/`any_of`/`prefix_items`/`property_ordering`
+    /// via `process_schema`, then re-validates the result back into a
+    /// `types.Schema` where those spellings are merely aliases, and
+    /// `_common.convert_to_dict` finally dumps *without* `by_alias` --- so
+    /// the rename round-trips away and google-genai 2.19.0 emits
+    /// `snake_case`. proto3 JSON accepts either spelling on input
+    /// (<https://protobuf.dev/programming-guides/json/>), and the live API
+    /// was confirmed to answer normally for this exact body.
+    ///
+    /// The enclosing keys (`generationConfig`, `responseSchema`,
+    /// `responseMimeType`) stay camelCase: those are written by the
+    /// generated converters through `setv`, not by `t_schema`.
     #[tokio::test]
-    async fn a_hand_built_response_schema_is_camelcase_normalized() {
+    async fn a_hand_built_response_schema_keeps_snake_case_field_names() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
             .respond_with(ResponseTemplate::new(200).set_body_json(model_reply("{}")))
@@ -246,7 +249,12 @@ mod structured_output {
         let response_schema = &body["generationConfig"]["responseSchema"];
         assert_eq!(response_schema["type"], "OBJECT");
         assert_eq!(response_schema["properties"]["name"]["type"], "STRING");
-        assert_eq!(response_schema["properties"]["name"]["minLength"], 1);
+        assert_eq!(response_schema["properties"]["name"]["min_length"], 1);
+        assert_eq!(
+            response_schema["properties"]["name"]["minLength"],
+            serde_json::Value::Null,
+            "t_schema must not camelCase Schema field names"
+        );
 
         server.verify().await;
     }

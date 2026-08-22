@@ -1,0 +1,9 @@
+{
+  "converter": "_FunctionCallingConfig_to_mldev",
+  "input": {
+    "mode": "AUTO",
+    "stream_function_call_arguments": true
+  },
+  "expected": null,
+  "expected_error": "field `stream_function_call_arguments` is only supported by the Vertex AI backend"
+}

@@ -1,0 +1,32 @@
+{
+  "converter": "_EmbedContentBatch_to_mldev",
+  "input": {
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "hello"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "requests": [
+      {
+        "request": {
+          "content": {
+            "parts": [
+              {
+                "text": "hello"
+              }
+            ],
+            "role": "user"
+          }
+        }
+      }
+    ]
+  },
+  "expected_error": null
+}

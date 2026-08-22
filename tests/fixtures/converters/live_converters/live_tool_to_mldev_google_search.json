@@ -1,0 +1,10 @@
+{
+  "converter": "_Tool_to_mldev",
+  "input": {
+    "google_search": {}
+  },
+  "expected": {
+    "googleSearch": {}
+  },
+  "expected_error": null
+}

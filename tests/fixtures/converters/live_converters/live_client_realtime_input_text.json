@@ -1,0 +1,12 @@
+{
+  "converter": "_LiveClientRealtimeInput_to_mldev",
+  "input": {
+    "text": "hello",
+    "audio_stream_end": true
+  },
+  "expected": {
+    "audioStreamEnd": true,
+    "text": "hello"
+  },
+  "expected_error": null
+}

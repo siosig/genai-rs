@@ -1,0 +1,32 @@
+{
+  "converter": "_GenerateContentResponse_from_mldev",
+  "input": {
+    "candidates": [
+      {
+        "content": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "hi"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "candidates": [
+      {
+        "content": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "hi"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected_error": null
+}

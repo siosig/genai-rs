@@ -1,0 +1,21 @@
+{
+  "converter": "_GenerateContentParameters_to_mldev",
+  "input": {
+    "model": "gemini-2.0-flash",
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "hi"
+          }
+        ]
+      }
+    ],
+    "config": {
+      "audio_timestamp": true
+    }
+  },
+  "expected": null,
+  "expected_error": "field `audio_timestamp` is only supported by the Vertex AI backend"
+}

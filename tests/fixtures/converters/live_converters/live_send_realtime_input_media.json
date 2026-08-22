@@ -1,0 +1,28 @@
+{
+  "converter": "_LiveSendRealtimeInputParameters_to_mldev",
+  "input": {
+    "media": [
+      {
+        "data": "aGVsbG8=",
+        "mime_type": "audio/pcm;rate=16000"
+      },
+      {
+        "data": "aGVsbG8=",
+        "mime_type": "image/jpeg"
+      }
+    ]
+  },
+  "expected": {
+    "mediaChunks": [
+      {
+        "data": "aGVsbG8=",
+        "mimeType": "audio/pcm;rate=16000"
+      },
+      {
+        "data": "aGVsbG8=",
+        "mimeType": "image/jpeg"
+      }
+    ]
+  },
+  "expected_error": null
+}

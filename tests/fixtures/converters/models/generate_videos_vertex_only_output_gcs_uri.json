@@ -1,0 +1,12 @@
+{
+  "converter": "_GenerateVideosParameters_to_mldev",
+  "input": {
+    "model": "veo-3.0-generate-001",
+    "prompt": "a cat",
+    "config": {
+      "output_gcs_uri": "gs://bucket/out"
+    }
+  },
+  "expected": null,
+  "expected_error": "field `output_gcs_uri` is only supported by the Vertex AI backend"
+}
