@@ -3,6 +3,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [0.2.2](#022)
 - [0.2.1](#021)
 - [0.2.0](#020)
 - [0.1.0](#010)
@@ -18,6 +19,19 @@ with struct literals plus `..Default::default()`. In exchange, **adding a field 
 a generated type is treated as a minor-version change**, matching the upstream
 Python SDK's own policy. Always finish a struct literal with
 `..Default::default()`.
+
+## 0.2.2
+
+### Fixed
+
+- **`rustls-tls` no longer references a nonexistent reqwest feature.** The
+  feature declared `reqwest/webpki-roots`, but reqwest 0.13.4 removed that
+  feature name (its TLS features are now just `rustls` / `rustls-no-provider`).
+  A crate on reqwest >= 0.13.4 that enabled `default-features = false` and
+  `rustls-tls` (but did not separately depend on `reqwest` with `webpki-roots`
+  itself) would fail to build. `reqwest/rustls` still supplies root
+  certificates via `rustls-platform-verifier` (the OS trust store), so this is
+  a pure removal of a broken reference — no loss of TLS functionality.
 
 ## 0.2.1
 
