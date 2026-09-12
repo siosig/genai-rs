@@ -4,6 +4,7 @@
 
 - [Overview](#overview)
 - [0.3.0](#030)
+- [0.2.2](#022)
 - [0.2.1](#021)
 - [0.2.0](#020)
 - [0.1.0](#010)
@@ -75,6 +76,19 @@ Upstream pin raised from `google-genai` 2.19.0 to 2.23.0. See
   this version is pinned to; see
   [docs/upstream-sync.md](docs/upstream-sync.md) for why it was deferred
   and when it will be picked up.
+
+## 0.2.2
+
+### Fixed
+
+- **`rustls-tls` no longer references a nonexistent reqwest feature.** The
+  feature declared `reqwest/webpki-roots`, but reqwest 0.13.4 removed that
+  feature name (its TLS features are now just `rustls` / `rustls-no-provider`).
+  A crate on reqwest >= 0.13.4 that enabled `default-features = false` and
+  `rustls-tls` (but did not separately depend on `reqwest` with `webpki-roots`
+  itself) would fail to build. `reqwest/rustls` still supplies root
+  certificates via `rustls-platform-verifier` (the OS trust store), so this is
+  a pure removal of a broken reference — no loss of TLS functionality.
 
 ## 0.2.1
 
