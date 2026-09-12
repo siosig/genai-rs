@@ -1,6 +1,6 @@
 [package]
 name = "gemini-genai"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2024"
 # Minimum supported Rust version, for every feature combination; the `msrv` CI
 # job checks `--all-features` on exactly this toolchain.
@@ -46,7 +46,13 @@ path = "src/lib.rs"
 
 [features]
 default = ["rustls-tls", "live"]
-rustls-tls = ["reqwest/rustls", "reqwest/webpki-roots", "tokio-tungstenite/rustls-tls-webpki-roots"]
+# `reqwest/webpki-roots` was dropped without a replacement of the same name in
+# reqwest 0.13.4 (the version this workspace resolves to) — reqwest's TLS
+# feature set there is just `rustls` / `rustls-no-provider`. `reqwest/rustls`
+# still supplies root certificates via `rustls-platform-verifier` (the OS trust
+# store), so dropping `webpki-roots` here does not remove TLS, only the
+# previously-broken feature reference. See CHANGELOG 0.2.2.
+rustls-tls = ["reqwest/rustls", "tokio-tungstenite/rustls-tls-webpki-roots"]
 native-tls = ["reqwest/native-tls", "tokio-tungstenite/native-tls"]
 live = ["dep:tokio-tungstenite"]
 blocking = ["dep:once_cell"]
