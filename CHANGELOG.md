@@ -3,6 +3,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [0.3.0](#030)
 - [0.2.1](#021)
 - [0.2.0](#020)
 - [0.1.0](#010)
@@ -18,6 +19,62 @@ with struct literals plus `..Default::default()`. In exchange, **adding a field 
 a generated type is treated as a minor-version change**, matching the upstream
 Python SDK's own policy. Always finish a struct literal with
 `..Default::default()`.
+
+## 0.3.0
+
+Upstream pin raised from `google-genai` 2.19.0 to 2.23.0. See
+[docs/upstream-sync.md](docs/upstream-sync.md) for the full sync ledger
+(current pin, deferred changes, permanent exclusions).
+
+### Added
+
+- `MediaProcessing` (`Part::media_processing`) and
+  `AudioTranscriptionConfigMode` (`AudioTranscriptionConfig::mode`) types,
+  plus the corresponding `ToolType::MediaProcessing` variant.
+- `Files::download_stream` and `Files::download_to_path`: stream a file's
+  bytes without buffering the whole body in memory, or write it straight to
+  a local path. `Files::download` (the existing full-buffer method) is
+  unchanged. See the doc comments on the new methods for how they differ
+  from Python's single `destination`-parameterized `download`.
+- `FileSource` (`src/files.rs`): what the new download methods accept —
+  a bare identifier, or a `File`/`Video`/`GeneratedVideo` (which additionally
+  gets checked for a `download_uri` before anything is sent).
+- `LiveSession::receive_turn`: reads one turn's worth of server messages,
+  ending the stream when the turn completes, instead of `receive`'s
+  connection-lifetime stream. Turn completion follows upstream's new
+  `interaction_status`-aware rule when the server sends one, falling back
+  to `turn_complete` otherwise.
+
+### Fixed
+
+- Live API: `translation_config`'s fields (`echo_target_language`,
+  `target_language_code`) are now converted to their wire (camelCase) names
+  before being sent, matching every other config field. Previously they
+  were passed through as-is, so the server received the wrong field names.
+
+### Changed (minor, per this crate's own field-addition policy)
+
+- Generated types are not `#[non_exhaustive]`, so — per the policy stated at
+  the top of this changelog — the two field additions above are a
+  minor-version change: a struct literal that lists every field of `Part`
+  or `AudioTranscriptionConfig` without `..Default::default()` no longer
+  compiles.
+- `Models::generate_images` now always returns
+  `Error::UnsupportedByBackend`, matching the already-established
+  `Models::compute_tokens` / `Tunings::list` stub pattern. Upstream removed
+  the Gemini Developer API path for this method between 2.19.0 and 2.23.0
+  (Vertex AI only as of 2.23.0); this crate had implemented that Gemini
+  Developer API path, so this is a behavior change, not the removal of a
+  stub. The method stays `#[deprecated]`, as upstream has it.
+
+### Known limitation
+
+- Automatic function calling still runs the caller's function one time too
+  many when the remote-call budget is exhausted (the request to send its
+  result to no longer exists). Upstream fixed this after the 2.23.0 release
+  this version is pinned to; see
+  [docs/upstream-sync.md](docs/upstream-sync.md) for why it was deferred
+  and when it will be picked up.
 
 ## 0.2.1
 

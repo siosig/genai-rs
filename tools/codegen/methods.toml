@@ -215,8 +215,12 @@ args = ["model: &str", "prompt: &str", "config: Option<crate::types::GenerateIma
 ret = "crate::types::GenerateImagesResponse"
 kind = "unary"
 deprecated = true
-path = "{model}:predict"
-http = "POST"
+# Vertex AI only as of google-genai 2.23.0 (commit 43ef621, "Disable
+# GenerateImages for Gemini API"): the mldev path and its converters were
+# removed upstream, so this method always errors -- see the
+# `compute_tokens` / `tunings.list` stub pattern. No HTTP call is made.
+path = ""
+http = ""
 
 [[method]]
 module = "models"
@@ -349,6 +353,35 @@ name = "download"
 python = "files.download"
 args = ["file: &str", "config: Option<crate::types::DownloadFileConfig>"]
 ret = "bytes::Bytes"
+kind = "unary"
+path = "{file}:download"
+http = "GET"
+
+[[method]]
+module = "files"
+owner = "crate::files::Files"
+name = "download_stream"
+python = "files.download"
+args = [
+  "file: impl Into<crate::files::FileSource>",
+  "config: Option<crate::types::DownloadFileConfig>",
+]
+ret = "bytes::Bytes"
+kind = "stream"
+path = "{file}:download"
+http = "GET"
+
+[[method]]
+module = "files"
+owner = "crate::files::Files"
+name = "download_to_path"
+python = "files.download"
+args = [
+  "file: impl Into<crate::files::FileSource>",
+  "destination: &std::path::Path",
+  "config: Option<crate::types::DownloadFileConfig>",
+]
+ret = "()"
 kind = "unary"
 path = "{file}:download"
 http = "GET"
@@ -762,6 +795,17 @@ http = "WS"
 module = "live"
 owner = "crate::live::LiveSession"
 name = "receive"
+python = "live.AsyncSession.receive"
+args = []
+ret = "crate::types::LiveServerMessage"
+kind = "session"
+path = ""
+http = "WS"
+
+[[method]]
+module = "live"
+owner = "crate::live::LiveSession"
+name = "receive_turn"
 python = "live.AsyncSession.receive"
 args = []
 ret = "crate::types::LiveServerMessage"

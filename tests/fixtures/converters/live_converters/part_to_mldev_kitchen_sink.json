@@ -37,7 +37,8 @@
     "video_metadata": {
       "start_offset": "0s",
       "end_offset": "5s"
-    }
+    },
+    "media_processing": "AGENTIC"
   },
   "expected": {
     "codeExecutionResult": {
@@ -76,7 +77,8 @@
     "videoMetadata": {
       "start_offset": "0s",
       "end_offset": "5s"
-    }
+    },
+    "mediaProcessing": "AGENTIC"
   },
   "expected_error": null
 }

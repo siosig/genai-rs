@@ -5,7 +5,7 @@
      SPDX-FileCopyrightText: 2026 Daisuke ITO
      SPDX-License-Identifier: Apache-2.0
 
-     Derived from the Google Gen AI Python SDK (google-genai 2.19.0),
+     Derived from the Google Gen AI Python SDK (google-genai 2.23.0),
      https://github.com/googleapis/python-genai
      Copyright 2025 Google LLC, licensed under the Apache License, Version 2.0.
 
@@ -19,7 +19,7 @@
 
 # Python → Rust parity table
 
-**Baseline**: google-genai 2.19.0 | **Crate**: `gemini-genai` (`gemini_genai`) | **Source of truth**: `tools/codegen/parity-matrix.ja.md`
+**Baseline**: google-genai 2.23.0 | **Crate**: `gemini-genai` (`gemini_genai`) | **Source of truth**: `tools/codegen/parity-matrix.ja.md`
 
 Japanese version: [parity.ja.md](parity.ja.md)
 
@@ -48,7 +48,7 @@ Japanese version: [parity.ja.md](parity.ja.md)
 
 ## Overview
 
-Coverage of the **71** public methods that google-genai 2.19.0 (Python) exposes for the Gemini Developer API, plus the Rust-specific accessors. **64** are implemented, **2** are Vertex AI-only and ship as stubs returning `UnsupportedByBackend`, and **5** are Vertex AI-only and not ported at all. A test function was found automatically for **66** of them.
+Coverage of the **74** public methods that google-genai 2.23.0 (Python) exposes for the Gemini Developer API, plus the Rust-specific accessors. **66** are implemented, **3** are Vertex AI-only and ship as stubs returning `UnsupportedByBackend`, and **5** are Vertex AI-only and not ported at all. A test function was found automatically for **69** of them.
 
 This table is generated from `tools/codegen/methods.toml` (the method ledger) and `tools/codegen/parity-matrix.ja.md` (the agreed source of truth). If an entry the parity matrix marks ✅ is missing from the ledger, `gen_parity.py` exits non-zero and CI's `codegen-check` fails.
 
@@ -78,9 +78,9 @@ The "Test(s)" column comes from scanning `tests/**.rs` and the `#[cfg(test)]` mo
 
 | Module | Methods | Implemented | `UnsupportedByBackend` | Not ported | Tests found |
 |---|---:|---:|---:|---:|---:|
-| [models](#models) | 15 | 10 | 1 | 4 | 11 |
+| [models](#models) | 15 | 9 | 2 | 4 | 11 |
 | [chats](#chats) | 5 | 5 | 0 | 0 | 5 |
-| [files](#files) | 6 | 6 | 0 | 0 | 6 |
+| [files](#files) | 8 | 8 | 0 | 0 | 8 |
 | [caches](#caches) | 5 | 5 | 0 | 0 | 5 |
 | [tunings](#tunings) | 5 | 3 | 1 | 1 | 4 |
 | [batches](#batches) | 6 | 6 | 0 | 0 | 6 |
@@ -88,9 +88,9 @@ The "Test(s)" column comes from scanning `tests/**.rs` and the `#[cfg(test)]` mo
 | [file_search_stores](#file_search_stores) | 8 | 8 | 0 | 0 | 8 |
 | [documents](#documents) | 3 | 3 | 0 | 0 | 3 |
 | [auth_tokens](#auth_tokens) | 1 | 1 | 0 | 0 | 1 |
-| [live](#live) | 6 | 6 | 0 | 0 | 6 |
+| [live](#live) | 7 | 7 | 0 | 0 | 7 |
 | [live_music](#live_music) | 10 | 10 | 0 | 0 | 10 |
-| **Total** | **71** | **64** | **2** | **5** | **66** |
+| **Total** | **74** | **66** | **3** | **5** | **69** |
 
 ## Method mapping
 
@@ -107,7 +107,7 @@ The "Test(s)" column comes from scanning `tests/**.rs` and the `#[cfg(test)]` mo
 | `models.list` | `models::Models::list` | ✅ Implemented | `src/models.rs::list_defaults_query_base_to_true_and_pages`<br>`src/models.rs::list_uses_tuned_models_collection_when_query_base_is_false`<br>`tests/blocking_parity.rs::list_paginates_via_the_blocking_pager`<br>and 2 more |
 | `models.update` | `models::Models::update` | ✅ Implemented | `src/models.rs::update_patches_a_tuned_model` |
 | `models.delete` | `models::Models::delete` | ✅ Implemented | `src/models.rs::delete_removes_a_tuned_model`<br>`tests/e2e_expensive.rs::test_e2e_tuning_create_get_and_delete_tuned_model` |
-| `models.generate_images` | `models::Models::generate_images` | ✅ Implemented (`#[deprecated]`) | `src/models.rs::generate_images_posts_prompt_to_predict`<br>`src/models.rs::generate_images_rejects_every_vertex_only_config_field` |
+| `models.generate_images` | `models::Models::generate_images` | ⚠️ `UnsupportedByBackend` (Vertex AI only) | `src/models.rs::generate_images_is_unsupported_by_the_gemini_developer_api_backend` |
 | `models.generate_videos` | `models::Models::generate_videos` | ✅ Implemented | `src/models.rs::generate_videos_posts_to_predict_long_running_and_parses_operation`<br>`tests/e2e_expensive.rs::test_e2e_generate_videos_and_poll_operation`<br>`tests/operations.rs::generate_videos_then_operations_get_returns_the_completed_operation` |
 | `models.edit_image` | — | ⏭ Not ported (Vertex AI only) | — |
 | `models.recontext_image` | — | ⏭ Not ported (Vertex AI only) | — |
@@ -133,6 +133,8 @@ The "Test(s)" column comes from scanning `tests/**.rs` and the `#[cfg(test)]` mo
 | `files.list` | `files::Files::list` | ✅ Implemented | `tests/files.rs::list_returns_a_pager_that_fetches_the_next_page` |
 | `files.delete` | `files::Files::delete` | ✅ Implemented | `tests/files.rs::delete_sends_a_delete_request_to_the_files_name_path`<br>`tests/e2e.rs::test_e2e_files_upload_get_delete` |
 | `files.download` | `files::Files::download` | ✅ Implemented | `tests/files.rs::download_requests_alt_media_and_returns_raw_bytes` |
+| `files.download` | `files::Files::download_stream` | ✅ Implemented | `tests/files.rs::download_stream_accepts_a_downloadable_file_object`<br>`tests/files.rs::download_stream_does_not_pre_validate_a_bare_name`<br>`tests/files.rs::download_stream_rejects_a_file_with_no_download_uri_before_sending_anything`<br>and 5 more |
+| `files.download` | `files::Files::download_to_path` | ✅ Implemented | `tests/files.rs::download_to_path_creates_no_file_when_the_connection_fails_up_front`<br>`tests/files.rs::download_to_path_writes_the_same_bytes_the_server_sent` |
 | `files._register_files` | `files::Files::register_files` | ✅ Implemented | `tests/files.rs::register_files_posts_the_uris_and_parses_the_returned_files` |
 
 ### caches
@@ -203,12 +205,13 @@ The "Test(s)" column comes from scanning `tests/**.rs` and the `#[cfg(test)]` mo
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `live.connect` | `live::Live::connect` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::connect_rejects_vertex_only_config_field`<br>`tests/live.rs::connect_uses_query_key_and_sends_setup_first`<br>`tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>and 6 more |
+| `live.connect` | `live::Live::connect` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::connect_rejects_vertex_only_config_field`<br>`tests/live.rs::connect_uses_query_key_and_sends_setup_first`<br>`tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>and 10 more |
 | `live.AsyncSession.send_client_content` | `live::LiveSession::send_client_content` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>`tests/live.rs::session_sends_client_content_realtime_input_and_tool_response`<br>`tests/e2e_expensive.rs::test_e2e_live_session_audio_turn` |
 | `live.AsyncSession.send_realtime_input` | `live::LiveSession::send_realtime_input` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::session_sends_client_content_realtime_input_and_tool_response` |
 | `live.AsyncSession.send_tool_response` | `live::LiveSession::send_tool_response` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::send_tool_response_without_id_is_a_validation_error`<br>`tests/live.rs::session_sends_client_content_realtime_input_and_tool_response` |
-| `live.AsyncSession.receive` | `live::LiveSession::receive` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::receive_yields_server_messages_in_order_and_ends_on_server_close`<br>`tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>`tests/e2e_expensive.rs::test_e2e_live_session_audio_turn` |
-| `live.AsyncSession.close` | `live::LiveSession::close` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::receive_yields_server_messages_in_order_and_ends_on_server_close`<br>`tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>`tests/live.rs::connect_uses_query_key_and_sends_setup_first`<br>and 5 more |
+| `live.AsyncSession.receive` | `live::LiveSession::receive` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::receive_turn_can_be_called_repeatedly_for_consecutive_turns`<br>`tests/live.rs::receive_turn_ends_on_idle_interaction_status_even_without_turn_complete`<br>`tests/live.rs::receive_turn_falls_back_to_turn_complete_when_interaction_status_is_absent`<br>and 4 more |
+| `live.AsyncSession.receive` | `live::LiveSession::receive_turn` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::receive_turn_can_be_called_repeatedly_for_consecutive_turns`<br>`tests/live.rs::receive_turn_ends_on_idle_interaction_status_even_without_turn_complete`<br>`tests/live.rs::receive_turn_falls_back_to_turn_complete_when_interaction_status_is_absent`<br>and 1 more |
+| `live.AsyncSession.close` | `live::LiveSession::close` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::receive_yields_server_messages_in_order_and_ends_on_server_close`<br>`tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>`tests/live.rs::connect_uses_query_key_and_sends_setup_first`<br>and 9 more |
 
 ### live_music
 
@@ -242,7 +245,7 @@ Building a `Client` and picking a backend are not individual methods, so they fa
 
 ## Types
 
-`tools/codegen/gen_types.py` turns `google.genai.types` into **412 structs / 79 enums** (`src/types/generated/structs.rs`, `src/types/generated/enums.rs`). Type and field names match Python one for one (snake_case), so the mapping is 1:1 and is not listed here.
+`tools/codegen/gen_types.py` turns `google.genai.types` into **412 structs / 81 enums** (`src/types/generated/structs.rs`, `src/types/generated/enums.rs`). Type and field names match Python one for one (snake_case), so the mapping is 1:1 and is not listed here.
 
 Parity on the type side is `gen_types.py`'s own job: the moment it meets an annotation missing from its mapping table it prints the class and field name and exits non-zero, so anything overlooked surfaces in CI's `codegen-check` (see "gen_types.py" in `specs/001-port-genai-rust/contracts/codegen.md`).
 
@@ -258,6 +261,7 @@ Parity on the type side is `gen_types.py`'s own job: the moment it meets an anno
 | `errors` (row in the source of truth) | The `APIError` family are types, not methods. Rust implements them as the `crate::error::Error` enum (`Api` / `Function*` / `UnknownApiResponse` and friends), verified by the `#[cfg(test)]` tests in `src/error.rs`. |
 | `pagers` (row in the source of truth) | `Pager` / `AsyncPager` are types, not methods. Rust implements them as `crate::pager::Pager<T>` (`page()` / `name()` / `page_size()` / `config()` / `next_page()`), verified by the `#[cfg(test)]` tests in `src/pager.rs` and by the tests for each `list` method. |
 | `models.compute_tokens` | ⚠️ stub (always errors) (per the source of truth) |
+| `models.generate_images` | ⚠️ stub (always errors) (per the source of truth) |
 | `models.edit_image` | ⏭ later (Vertex AI) (per the source of truth) |
 | `models.upscale_image` | ⏭ later (Vertex AI) (per the source of truth) |
 | `models.recontext_image` | ⏭ later (Vertex AI) (per the source of truth) |

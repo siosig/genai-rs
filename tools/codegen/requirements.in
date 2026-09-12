@@ -11,6 +11,6 @@
 # The google-genai pin must match PINNED_VERSION in upstream.py: the generators
 # stamp that version into every generated header, and assert_supported_version()
 # refuses to run if the installed package disagrees.
-google-genai==2.19.0
+google-genai==2.23.0
 pydantic
 tomli; python_version < "3.11"

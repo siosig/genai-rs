@@ -2,7 +2,8 @@ gemini-genai
 Copyright 2026 Daisuke ITO
 
 This product includes software derived from the Google Gen AI Python SDK
-("google-genai"), version 2.19.0.
+("google-genai"), version 2.23.0. See docs/upstream-sync.md for the sync
+history and any upstream changes deliberately not yet taken.
 
     https://github.com/googleapis/python-genai
     Copyright 2025 Google LLC

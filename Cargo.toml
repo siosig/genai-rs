@@ -1,6 +1,6 @@
 [package]
 name = "gemini-genai"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2024"
 # Minimum supported Rust version, for every feature combination; the `msrv` CI
 # job checks `--all-features` on exactly this toolchain.
@@ -37,7 +37,7 @@ all-features = true
 # matching install. See `tools/codegen/upstream.py` for the upgrade procedure.
 [package.metadata.upstream]
 python-sdk = "google-genai"
-version = "2.19.0"
+version = "2.23.0"
 backend = "gemini-developer-api"
 
 [lib]

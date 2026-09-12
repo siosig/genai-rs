@@ -15,8 +15,10 @@ Coverage follows spec task T030's shape: for each covered converter, a
 "minimal" case (only what is required), and -- where the converter has
 one -- a Vertex-AI-only field case that must be rejected. Every
 `_to_mldev`/`_from_mldev` converter reachable from an implemented method
-across models (generate_content/embed_content/count_tokens/generate_images/
-generate_videos/get/list/update/delete), chats, files, caches, tunings,
+across models (generate_content/embed_content/count_tokens/
+generate_videos/get/list/update/delete -- generate_images is excluded: it
+is Vertex-AI only as of google-genai 2.23.0, see the note below), chats,
+files, caches, tunings,
 batches (including create_embeddings), operations, documents,
 file_search_stores, the Live API and auth_tokens is exercised at least
 once, prioritising the ones that call a hand-written `t_*` transformer
@@ -668,161 +670,15 @@ CASES: list[dict] = [
         "input": {"sdkHttpResponse": {"headers": {"x": "y"}}},
     },
     # ================================================================
-    # models.generate_images (previously zero coverage)
+    # models.generate_images: REMOVED upstream (commit 43ef621, "Disable
+    # GenerateImages for Gemini API", between v2.19.0 and v2.23.0). The
+    # method is now Vertex-AI only; `_GenerateImages*_to_mldev`/
+    # `_from_mldev`, `_GeneratedImage_from_mldev`, `_Image_from_mldev` and
+    # `_SafetyAttributes_from_mldev` no longer exist in google-genai, so
+    # there is nothing left to exercise here. `_Image_to_mldev` and
+    # `_ImageConfig_to_mldev` (below) remain -- generate_videos still uses
+    # them for `last_frame`/`reference_images`.
     # ================================================================
-    {
-        # This case uses accepted values; the rejected ones
-        # (`BLOCK_NONE`/`ALLOW_ALL`) get their own cases below, now that
-        # `gen_converters.py` transpiles the `_X_to_mldev_enum_validate`
-        # guards.
-        "name": "generate_images_kitchen_sink",
-        "converter": "_GenerateImagesParameters_to_mldev",
-        "input": {
-            "model": "imagen-3.0-generate-002",
-            "prompt": "a red bicycle",
-            "config": {
-                "number_of_images": 2,
-                "aspect_ratio": "16:9",
-                "guidance_scale": 7.5,
-                "safety_filter_level": "BLOCK_ONLY_HIGH",
-                "person_generation": "ALLOW_ADULT",
-                "include_safety_attributes": True,
-                "include_rai_reason": True,
-                "language": "en",
-                "output_mime_type": "image/jpeg",
-                "output_compression_quality": 80,
-                "image_size": "2K",
-            },
-        },
-    },
-    {
-        # Python: `_SafetyFilterLevel_to_mldev_enum_validate` raises for
-        # `BLOCK_NONE`, which only the Vertex AI backend accepts.
-        "name": "generate_images_vertex_only_safety_filter_level_value",
-        "converter": "_GenerateImagesParameters_to_mldev",
-        "input": {
-            "model": "imagen-3.0-generate-002",
-            "prompt": "a red bicycle",
-            "config": {"safety_filter_level": "BLOCK_NONE"},
-        },
-        "expected_error": "field `safety_filter_level` is only supported by the Vertex AI backend",
-    },
-    {
-        # Python: `_PersonGeneration_to_mldev_enum_validate` raises for
-        # `ALLOW_ALL`.
-        "name": "generate_images_vertex_only_person_generation_value",
-        "converter": "_GenerateImagesParameters_to_mldev",
-        "input": {
-            "model": "imagen-3.0-generate-002",
-            "prompt": "a red bicycle",
-            "config": {"person_generation": "ALLOW_ALL"},
-        },
-        "expected_error": "field `person_generation` is only supported by the Vertex AI backend",
-    },
-    {
-        "name": "generate_images_minimal",
-        "converter": "_GenerateImagesParameters_to_mldev",
-        "input": {"model": "imagen-3.0-generate-002", "prompt": "a cat"},
-    },
-    {
-        "name": "generate_images_vertex_only_seed",
-        "converter": "_GenerateImagesParameters_to_mldev",
-        "input": {
-            "model": "imagen-3.0-generate-002",
-            "prompt": "a cat",
-            "config": {"seed": 42},
-        },
-        "expected_error": "field `seed` is only supported by the Vertex AI backend",
-    },
-    {
-        "name": "generate_images_vertex_only_negative_prompt",
-        "converter": "_GenerateImagesParameters_to_mldev",
-        "input": {
-            "model": "imagen-3.0-generate-002",
-            "prompt": "a cat",
-            "config": {"negative_prompt": "dogs"},
-        },
-        "expected_error": "field `negative_prompt` is only supported by the Vertex AI backend",
-    },
-    {
-        "name": "generate_images_vertex_only_add_watermark",
-        "converter": "_GenerateImagesParameters_to_mldev",
-        "input": {
-            "model": "imagen-3.0-generate-002",
-            "prompt": "a cat",
-            "config": {"add_watermark": True},
-        },
-        "expected_error": "field `add_watermark` is only supported by the Vertex AI backend",
-    },
-    {
-        # `_GenerateImagesConfig_to_mldev` writes everything it accepts into
-        # its *parent* object and returns `{}`, so calling it directly (as
-        # the dispatcher does, with `parent_object = None`) can only
-        # meaningfully assert its rejection paths, which raise before any
-        # parent write happens.
-        "name": "generate_images_config_vertex_only_output_gcs_uri",
-        "converter": "_GenerateImagesConfig_to_mldev",
-        "input": {"output_gcs_uri": "gs://bucket/out"},
-        "expected_error": "field `output_gcs_uri` is only supported by the Vertex AI backend",
-    },
-    {
-        "name": "generate_images_config_vertex_only_enhance_prompt",
-        "converter": "_GenerateImagesConfig_to_mldev",
-        "input": {"enhance_prompt": True},
-        "expected_error": "field `enhance_prompt` is only supported by the Vertex AI backend",
-    },
-    {
-        "name": "generate_images_response_kitchen_sink",
-        "converter": "_GenerateImagesResponse_from_mldev",
-        "input": {
-            "sdkHttpResponse": {"headers": {"content-type": "application/json"}},
-            "predictions": [
-                {
-                    "bytesBase64Encoded": "aGVsbG8=",
-                    "mimeType": "image/png",
-                    "raiFilteredReason": "blocked",
-                    "safetyAttributes": {
-                        "categories": ["Violence"],
-                        "scores": [0.1],
-                    },
-                    "contentType": "Positive Prompt",
-                }
-            ],
-            "positivePromptSafetyAttributes": {
-                "safetyAttributes": {"categories": ["Death"], "scores": [0.2]},
-                "contentType": "Positive Prompt",
-            },
-        },
-    },
-    {
-        "name": "generate_images_response_minimal",
-        "converter": "_GenerateImagesResponse_from_mldev",
-        "input": {"predictions": [{"bytesBase64Encoded": "aGVsbG8=", "mimeType": "image/png"}]},
-    },
-    {
-        "name": "generated_image_from_mldev_kitchen_sink",
-        "converter": "_GeneratedImage_from_mldev",
-        "input": {
-            "bytesBase64Encoded": "aGVsbG8=",
-            "mimeType": "image/png",
-            "raiFilteredReason": "blocked",
-            "safetyAttributes": {"categories": ["Violence"], "scores": [0.3]},
-            "contentType": "Positive Prompt",
-        },
-    },
-    {
-        "name": "safety_attributes_from_mldev_minimal",
-        "converter": "_SafetyAttributes_from_mldev",
-        "input": {
-            "safetyAttributes": {"categories": ["Violence"], "scores": [0.3]},
-            "contentType": "Positive Prompt",
-        },
-    },
-    {
-        "name": "image_from_mldev_minimal",
-        "converter": "_Image_from_mldev",
-        "input": {"bytesBase64Encoded": "aGVsbG8=", "mimeType": "image/png"},
-    },
     {
         "name": "image_to_mldev_minimal",
         "converter": "_Image_to_mldev",
@@ -1041,7 +897,14 @@ CASES: list[dict] = [
                 "system_instruction": {"role": "user", "parts": [{"text": "be brief"}]},
                 "tools": [{"google_search": {}}],
                 "session_resumption": {"handle": "handle-1"},
-                "input_audio_transcription": {"language_codes": ["en-US"]},
+                # `mode` is new in google-genai 2.23.0 (spec
+                # 003-upstream-2-23-sync, U5). `SMART` is incompatible
+                # with timestamps/diarization per upstream's docstring,
+                # neither of which this case sets.
+                "input_audio_transcription": {
+                    "language_codes": ["en-US"],
+                    "mode": "SMART",
+                },
                 "output_audio_transcription": {},
                 "realtime_input_config": {
                     "automatic_activity_detection": {
@@ -1064,6 +927,12 @@ CASES: list[dict] = [
                         "threshold": "BLOCK_ONLY_HIGH",
                     }
                 ],
+                # In google-genai < 2.23.0 this was passed through
+                # verbatim (snake_case leaked into the wire JSON, a
+                # latent bug); as of 2.23.0 upstream routes it through
+                # `_TranslationConfig_to_mldev`, camelizing both fields
+                # (spec 003-upstream-2-23-sync, U7). This case is the one
+                # that pins that fix.
                 "translation_config": {
                     "echo_target_language": True,
                     "target_language_code": "ja-JP",
@@ -1328,6 +1197,26 @@ CASES: list[dict] = [
         "input": {
             "model": "gemini-2.0-flash-live-001",
             "config": {"response_modalities": ["AUDIO"], "temperature": 0.3},
+        },
+    },
+    {
+        # tokens_converters has its own copy of `_LiveConnectConfig_to_mldev`
+        # / `_TranslationConfig_to_mldev` (spec 003-upstream-2-23-sync, U7);
+        # `live_connect_kitchen_sink` above pins the live_converters copy,
+        # this one pins the tokens_converters copy so both of the two
+        # modules that gained the fix are actually exercised, not just
+        # assumed identical.
+        "name": "live_connect_constraints_to_mldev_translation_config",
+        "converter": "_LiveConnectConstraints_to_mldev",
+        "input": {
+            "model": "gemini-2.0-flash-live-001",
+            "config": {
+                "response_modalities": ["AUDIO"],
+                "translation_config": {
+                    "echo_target_language": True,
+                    "target_language_code": "ja-JP",
+                },
+            },
         },
     },
     # ================================================================
@@ -1899,8 +1788,8 @@ CASES: list[dict] = [
     # Vertex-only rejection paths. They are covered indirectly, through the
     # `Parameters`-level converter that calls them (which every one of them
     # has a case for above), and directly wherever they do have a rejection
-    # path worth pinning (`_GenerateImagesConfig_to_mldev`,
-    # `_EmbedContentConfig_to_mldev`, `_ImageConfig_to_mldev`).
+    # path worth pinning (`_EmbedContentConfig_to_mldev`,
+    # `_ImageConfig_to_mldev`).
     # ================================================================
     {
         "name": "part_to_mldev_kitchen_sink",
@@ -1916,6 +1805,15 @@ CASES: list[dict] = [
             "executable_code": {"code": "print(1)", "language": "PYTHON"},
             "code_execution_result": {"outcome": "OUTCOME_OK", "output": "1"},
             "video_metadata": {"start_offset": "0s", "end_offset": "5s"},
+            # New in google-genai 2.23.0 (spec 003-upstream-2-23-sync, U4):
+            # dispatch() resolves "_Part_to_mldev" to live_converters'
+            # copy only, but gen_converters.py mechanically transpiles the
+            # same upstream AST into all five modules that define it
+            # (models/caches/batches/live_converters/tokens_converters),
+            # so this one case is representative of all five (verified
+            # byte-identical for this field across all five generated
+            # files during implementation).
+            "media_processing": "AGENTIC",
         },
     },
     {

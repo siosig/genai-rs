@@ -5,7 +5,7 @@
      SPDX-FileCopyrightText: 2026 Daisuke ITO
      SPDX-License-Identifier: Apache-2.0
 
-     Derived from the Google Gen AI Python SDK (google-genai 2.19.0),
+     Derived from the Google Gen AI Python SDK (google-genai 2.23.0),
      https://github.com/googleapis/python-genai
      Copyright 2025 Google LLC, licensed under the Apache License, Version 2.0.
 
@@ -19,7 +19,7 @@
 
 # Python → Rust 対応表
 
-**基準**: google-genai 2.19.0 | **クレート**: `gemini-genai`（`gemini_genai`） | **真実の源**: `tools/codegen/parity-matrix.ja.md`
+**基準**: google-genai 2.23.0 | **クレート**: `gemini-genai`（`gemini_genai`） | **真実の源**: `tools/codegen/parity-matrix.ja.md`
 
 English version: [parity.md](parity.md)
 
@@ -48,7 +48,7 @@ English version: [parity.md](parity.md)
 
 ## 概要
 
-google-genai 2.19.0（Python）が Gemini Developer API 向けに公開している **71** 個の公開メソッド（＋ Rust 固有のアクセサ）のカバレッジ。**64** 個が実装済み、**2** 個は Vertex AI 専用のため `UnsupportedByBackend` を返すスタブ、**5** 個は Vertex AI 専用で移植していない。うち **66** 個についてはテスト関数を自動検出できた。
+google-genai 2.23.0（Python）が Gemini Developer API 向けに公開している **74** 個の公開メソッド（＋ Rust 固有のアクセサ）のカバレッジ。**66** 個が実装済み、**3** 個は Vertex AI 専用のため `UnsupportedByBackend` を返すスタブ、**5** 個は Vertex AI 専用で移植していない。うち **69** 個についてはテスト関数を自動検出できた。
 
 この表は `tools/codegen/methods.toml`（メソッド台帳）と `tools/codegen/parity-matrix.ja.md`（合意済みの真実の源）から生成している。対応表が ✅ と記した項目が台帳から欠けていれば `gen_parity.py` は非ゼロ終了し、CI の `codegen-check` が落ちる。
 
@@ -78,9 +78,9 @@ flowchart LR
 
 | モジュール | メソッド数 | 実装済み | `UnsupportedByBackend` | 未移植 | テスト検出数 |
 |---|---:|---:|---:|---:|---:|
-| [models](#models) | 15 | 10 | 1 | 4 | 11 |
+| [models](#models) | 15 | 9 | 2 | 4 | 11 |
 | [chats](#chats) | 5 | 5 | 0 | 0 | 5 |
-| [files](#files) | 6 | 6 | 0 | 0 | 6 |
+| [files](#files) | 8 | 8 | 0 | 0 | 8 |
 | [caches](#caches) | 5 | 5 | 0 | 0 | 5 |
 | [tunings](#tunings) | 5 | 3 | 1 | 1 | 4 |
 | [batches](#batches) | 6 | 6 | 0 | 0 | 6 |
@@ -88,9 +88,9 @@ flowchart LR
 | [file_search_stores](#file_search_stores) | 8 | 8 | 0 | 0 | 8 |
 | [documents](#documents) | 3 | 3 | 0 | 0 | 3 |
 | [auth_tokens](#auth_tokens) | 1 | 1 | 0 | 0 | 1 |
-| [live](#live) | 6 | 6 | 0 | 0 | 6 |
+| [live](#live) | 7 | 7 | 0 | 0 | 7 |
 | [live_music](#live_music) | 10 | 10 | 0 | 0 | 10 |
-| **合計** | **71** | **64** | **2** | **5** | **66** |
+| **合計** | **74** | **66** | **3** | **5** | **69** |
 
 ## メソッド対応
 
@@ -107,7 +107,7 @@ flowchart LR
 | `models.list` | `models::Models::list` | ✅ 実装済み | `src/models.rs::list_defaults_query_base_to_true_and_pages`<br>`src/models.rs::list_uses_tuned_models_collection_when_query_base_is_false`<br>`tests/blocking_parity.rs::list_paginates_via_the_blocking_pager`<br>ほか 2 件 |
 | `models.update` | `models::Models::update` | ✅ 実装済み | `src/models.rs::update_patches_a_tuned_model` |
 | `models.delete` | `models::Models::delete` | ✅ 実装済み | `src/models.rs::delete_removes_a_tuned_model`<br>`tests/e2e_expensive.rs::test_e2e_tuning_create_get_and_delete_tuned_model` |
-| `models.generate_images` | `models::Models::generate_images` | ✅ 実装済み（`#[deprecated]`） | `src/models.rs::generate_images_posts_prompt_to_predict`<br>`src/models.rs::generate_images_rejects_every_vertex_only_config_field` |
+| `models.generate_images` | `models::Models::generate_images` | ⚠️ `UnsupportedByBackend`（Vertex AI 専用） | `src/models.rs::generate_images_is_unsupported_by_the_gemini_developer_api_backend` |
 | `models.generate_videos` | `models::Models::generate_videos` | ✅ 実装済み | `src/models.rs::generate_videos_posts_to_predict_long_running_and_parses_operation`<br>`tests/e2e_expensive.rs::test_e2e_generate_videos_and_poll_operation`<br>`tests/operations.rs::generate_videos_then_operations_get_returns_the_completed_operation` |
 | `models.edit_image` | — | ⏭ 未移植（Vertex AI 専用） | — |
 | `models.recontext_image` | — | ⏭ 未移植（Vertex AI 専用） | — |
@@ -133,6 +133,8 @@ flowchart LR
 | `files.list` | `files::Files::list` | ✅ 実装済み | `tests/files.rs::list_returns_a_pager_that_fetches_the_next_page` |
 | `files.delete` | `files::Files::delete` | ✅ 実装済み | `tests/files.rs::delete_sends_a_delete_request_to_the_files_name_path`<br>`tests/e2e.rs::test_e2e_files_upload_get_delete` |
 | `files.download` | `files::Files::download` | ✅ 実装済み | `tests/files.rs::download_requests_alt_media_and_returns_raw_bytes` |
+| `files.download` | `files::Files::download_stream` | ✅ 実装済み | `tests/files.rs::download_stream_accepts_a_downloadable_file_object`<br>`tests/files.rs::download_stream_does_not_pre_validate_a_bare_name`<br>`tests/files.rs::download_stream_rejects_a_file_with_no_download_uri_before_sending_anything`<br>ほか 5 件 |
+| `files.download` | `files::Files::download_to_path` | ✅ 実装済み | `tests/files.rs::download_to_path_creates_no_file_when_the_connection_fails_up_front`<br>`tests/files.rs::download_to_path_writes_the_same_bytes_the_server_sent` |
 | `files._register_files` | `files::Files::register_files` | ✅ 実装済み | `tests/files.rs::register_files_posts_the_uris_and_parses_the_returned_files` |
 
 ### caches
@@ -203,12 +205,13 @@ flowchart LR
 
 | Python | Rust | ステータス | テスト |
 |---|---|---|---|
-| `live.connect` | `live::Live::connect` | ✅ 実装済み（非同期のみ、同期版なし） | `tests/live.rs::connect_rejects_vertex_only_config_field`<br>`tests/live.rs::connect_uses_query_key_and_sends_setup_first`<br>`tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>ほか 6 件 |
+| `live.connect` | `live::Live::connect` | ✅ 実装済み（非同期のみ、同期版なし） | `tests/live.rs::connect_rejects_vertex_only_config_field`<br>`tests/live.rs::connect_uses_query_key_and_sends_setup_first`<br>`tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>ほか 10 件 |
 | `live.AsyncSession.send_client_content` | `live::LiveSession::send_client_content` | ✅ 実装済み（非同期のみ、同期版なし） | `tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>`tests/live.rs::session_sends_client_content_realtime_input_and_tool_response`<br>`tests/e2e_expensive.rs::test_e2e_live_session_audio_turn` |
 | `live.AsyncSession.send_realtime_input` | `live::LiveSession::send_realtime_input` | ✅ 実装済み（非同期のみ、同期版なし） | `tests/live.rs::session_sends_client_content_realtime_input_and_tool_response` |
 | `live.AsyncSession.send_tool_response` | `live::LiveSession::send_tool_response` | ✅ 実装済み（非同期のみ、同期版なし） | `tests/live.rs::send_tool_response_without_id_is_a_validation_error`<br>`tests/live.rs::session_sends_client_content_realtime_input_and_tool_response` |
-| `live.AsyncSession.receive` | `live::LiveSession::receive` | ✅ 実装済み（非同期のみ、同期版なし） | `tests/live.rs::receive_yields_server_messages_in_order_and_ends_on_server_close`<br>`tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>`tests/e2e_expensive.rs::test_e2e_live_session_audio_turn` |
-| `live.AsyncSession.close` | `live::LiveSession::close` | ✅ 実装済み（非同期のみ、同期版なし） | `tests/live.rs::receive_yields_server_messages_in_order_and_ends_on_server_close`<br>`tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>`tests/live.rs::connect_uses_query_key_and_sends_setup_first`<br>ほか 5 件 |
+| `live.AsyncSession.receive` | `live::LiveSession::receive` | ✅ 実装済み（非同期のみ、同期版なし） | `tests/live.rs::receive_turn_can_be_called_repeatedly_for_consecutive_turns`<br>`tests/live.rs::receive_turn_ends_on_idle_interaction_status_even_without_turn_complete`<br>`tests/live.rs::receive_turn_falls_back_to_turn_complete_when_interaction_status_is_absent`<br>ほか 4 件 |
+| `live.AsyncSession.receive` | `live::LiveSession::receive_turn` | ✅ 実装済み（非同期のみ、同期版なし） | `tests/live.rs::receive_turn_can_be_called_repeatedly_for_consecutive_turns`<br>`tests/live.rs::receive_turn_ends_on_idle_interaction_status_even_without_turn_complete`<br>`tests/live.rs::receive_turn_falls_back_to_turn_complete_when_interaction_status_is_absent`<br>ほか 1 件 |
+| `live.AsyncSession.close` | `live::LiveSession::close` | ✅ 実装済み（非同期のみ、同期版なし） | `tests/live.rs::receive_yields_server_messages_in_order_and_ends_on_server_close`<br>`tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>`tests/live.rs::connect_uses_query_key_and_sends_setup_first`<br>ほか 9 件 |
 
 ### live_music
 
@@ -242,7 +245,7 @@ flowchart LR
 
 ## 型
 
-`tools/codegen/gen_types.py` は `google.genai.types` を **412 個の構造体 / 79 個の enum** に変換する（`src/types/generated/structs.rs`、`src/types/generated/enums.rs`）。型名・フィールド名は Python と 1 対 1（snake_case）で一致するので、ここには列挙しない。
+`tools/codegen/gen_types.py` は `google.genai.types` を **412 個の構造体 / 81 個の enum** に変換する（`src/types/generated/structs.rs`、`src/types/generated/enums.rs`）。型名・フィールド名は Python と 1 対 1（snake_case）で一致するので、ここには列挙しない。
 
 型側の整合性は `gen_types.py` 自身の仕事。マッピング表にないアノテーションに出会った瞬間、クラス名とフィールド名を表示して非ゼロ終了するため、漏れは CI の `codegen-check` で表面化する（`specs/001-port-genai-rust/contracts/codegen.md` の「gen_types.py」を参照）。
 
@@ -258,6 +261,7 @@ flowchart LR
 | `errors`（真実の源側の行） | `APIError` 系はメソッドではなく型。Rust では `crate::error::Error` enum（`Api` / `Function*` / `UnknownApiResponse` など）として実装しており、`src/error.rs` の `#[cfg(test)]` テストで担保している。 |
 | `pagers`（真実の源側の行） | `Pager` / `AsyncPager` はメソッドではなく型。Rust では `crate::pager::Pager<T>`（`page()` / `name()` / `page_size()` / `config()` / `next_page()`）として実装しており、`src/pager.rs` の `#[cfg(test)]` テストと各 `list` メソッドのテストで担保している。 |
 | `models.compute_tokens` | ⚠️ stub (always errors)（真実の源に準拠） |
+| `models.generate_images` | ⚠️ stub (always errors)（真実の源に準拠） |
 | `models.edit_image` | ⏭ 後続（Vertex AI）（真実の源に準拠） |
 | `models.upscale_image` | ⏭ 後続（Vertex AI）（真実の源に準拠） |
 | `models.recontext_image` | ⏭ 後続（Vertex AI）（真実の源に準拠） |

@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2026 Daisuke ITO
 // SPDX-License-Identifier: Apache-2.0
 //
-// Derived from the Google Gen AI Python SDK (google-genai 2.19.0),
+// Derived from the Google Gen AI Python SDK (google-genai 2.23.0),
 // https://github.com/googleapis/python-genai
 // Copyright 2025 Google LLC, licensed under the Apache License, Version 2.0.
 //
@@ -18,7 +18,7 @@
 // re-run `python tools/codegen/generate.py --only blocking` instead.
 //! Blocking (`feature = "blocking"`) wrappers for every `Client`-accessor
 //! module's async methods, generated from `tools/codegen/methods.toml`
-//! against google-genai 2.19.0's method inventory. `Chat` (returned by
+//! against google-genai 2.23.0's method inventory. `Chat` (returned by
 //! `Chats::create`), `Operations::get<T>`, and `FileSearchStores::documents()`
 //! are hand-written in `src/blocking/mod.rs` instead -- see that file and
 //! `methods.toml`'s header comment.
@@ -309,6 +309,40 @@ impl Files {
         config: Option<crate::types::DownloadFileConfig>,
     ) -> crate::error::Result<bytes::Bytes> {
         self.runtime.block_on(self.inner.download(file, config))?
+    }
+
+    /// Blocking wrapper for [`crate::files::Files::download_stream`] (Python `files.download`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn download_stream(
+        &self,
+        file: impl Into<crate::files::FileSource>,
+        config: Option<crate::types::DownloadFileConfig>,
+    ) -> crate::error::Result<crate::blocking::BlockingStream<bytes::Bytes>> {
+        let stream = self
+            .runtime
+            .block_on(self.inner.download_stream(file, config))??;
+        Ok(crate::blocking::BlockingStream::new(
+            std::sync::Arc::clone(&self.runtime),
+            stream,
+        ))
+    }
+
+    /// Blocking wrapper for [`crate::files::Files::download_to_path`] (Python `files.download`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn download_to_path(
+        &self,
+        file: impl Into<crate::files::FileSource>,
+        destination: &std::path::Path,
+        config: Option<crate::types::DownloadFileConfig>,
+    ) -> crate::error::Result<()> {
+        self.runtime
+            .block_on(self.inner.download_to_path(file, destination, config))?
     }
 
     /// Blocking wrapper for [`crate::files::Files::register_files`] (Python `files._register_files`).

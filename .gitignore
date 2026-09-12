@@ -11,6 +11,7 @@
 __pycache__/
 *.pyc
 /tools/codegen/.venv/
+/.venv-codegen/
 
 # secretlint local-only denylist (company/personal terms — never committed)
 .secretlintrc.local.json

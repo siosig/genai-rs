@@ -1,6 +1,6 @@
 //! **Unofficial.** An independent Rust port of the
 //! [Google Gen AI Python SDK](https://github.com/googleapis/python-genai)
-//! (`google-genai` 2.19.0) for the **Gemini Developer API**. Not affiliated
+//! (`google-genai` 2.23.0) for the **Gemini Developer API**. Not affiliated
 //! with, endorsed by, or sponsored by Google. Portions of this crate are
 //! derived from `google-genai`, Copyright 2025 Google LLC, licensed under the
 //! Apache License, Version 2.0; see the `NOTICE` file at the repository root
@@ -230,7 +230,7 @@ pub mod blocking;
 /// `[package.metadata.upstream]` in `Cargo.toml`;
 /// `tools/codegen/upstream.py` is the single source of truth that keeps
 /// them in sync and documents the upgrade procedure.
-pub const UPSTREAM_GENAI_VERSION: &str = "2.19.0";
+pub const UPSTREAM_GENAI_VERSION: &str = "2.23.0";
 
 pub use client::{Backend, Client, ClientBuilder};
 pub use error::{ApiError, Error, Result};

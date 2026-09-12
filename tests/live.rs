@@ -368,3 +368,225 @@ async fn sending_after_the_server_closes_the_connection_fails() {
         .expect_err("sending on a closed connection should fail");
     assert!(matches!(err, Error::WebSocket(_)));
 }
+
+// ============================================================================
+// receive_turn (spec 003-upstream-2-23-sync, US3)
+// ============================================================================
+
+#[tokio::test]
+async fn receive_turn_ends_on_idle_interaction_status_even_without_turn_complete() {
+    // C-1/C-2 combined: an InProgress status with turn_complete=true does
+    // NOT end the turn (interaction_status, when meaningful, overrides
+    // turn_complete entirely); Idle does end it, with turn_complete unset.
+    let (base_url, server) = start_mock_ws_server(|mut ws, _req| async move {
+        recv_json(&mut ws).await; // setup
+        send_setup_complete(&mut ws).await;
+
+        send_json(
+            &mut ws,
+            json!({
+                "serverContent": {
+                    "modelTurn": { "parts": [{"text": "still working"}] },
+                    "interactionStatus": "IN_PROGRESS",
+                    "turnComplete": true
+                }
+            }),
+        )
+        .await;
+        send_json(
+            &mut ws,
+            json!({
+                "serverContent": {
+                    "modelTurn": { "parts": [{"text": "done"}] },
+                    "interactionStatus": "IDLE"
+                }
+            }),
+        )
+        .await;
+        ws.close(None).await.ok();
+    })
+    .await;
+
+    let client = test_client_with_api_key(base_url, "test-key");
+    let mut session = client
+        .live()
+        .connect("gemini-2.0-flash-live-001", None)
+        .await
+        .unwrap();
+
+    let messages: Vec<_> = session.receive_turn().collect().await;
+    assert_eq!(
+        messages.len(),
+        2,
+        "both messages belong to this turn: IN_PROGRESS doesn't end it, IDLE does"
+    );
+    assert_eq!(
+        messages[0]
+            .as_ref()
+            .unwrap()
+            .server_content
+            .as_ref()
+            .unwrap()
+            .model_turn
+            .as_ref()
+            .unwrap()
+            .parts
+            .as_ref()
+            .unwrap()[0]
+            .text
+            .as_deref(),
+        Some("still working")
+    );
+    assert_eq!(
+        messages[1]
+            .as_ref()
+            .unwrap()
+            .server_content
+            .as_ref()
+            .unwrap()
+            .model_turn
+            .as_ref()
+            .unwrap()
+            .parts
+            .as_ref()
+            .unwrap()[0]
+            .text
+            .as_deref(),
+        Some("done"),
+        "the message that completes the turn must still be yielded, not dropped"
+    );
+
+    server.await.unwrap();
+}
+
+#[tokio::test]
+async fn receive_turn_falls_back_to_turn_complete_when_interaction_status_is_absent() {
+    // C-3: no interaction_status at all -- same behaviour as pre-2.23.0.
+    let (base_url, server) = start_mock_ws_server(|mut ws, _req| async move {
+        recv_json(&mut ws).await;
+        send_setup_complete(&mut ws).await;
+        send_json(
+            &mut ws,
+            json!({ "serverContent": { "modelTurn": { "parts": [{"text": "hi"}] }, "turnComplete": true } }),
+        )
+        .await;
+        ws.close(None).await.ok();
+    })
+    .await;
+
+    let client = test_client_with_api_key(base_url, "test-key");
+    let mut session = client
+        .live()
+        .connect("gemini-2.0-flash-live-001", None)
+        .await
+        .unwrap();
+
+    let messages: Vec<_> = session.receive_turn().collect().await;
+    assert_eq!(messages.len(), 1);
+    server.await.unwrap();
+}
+
+#[tokio::test]
+async fn receive_turn_falls_back_to_turn_complete_when_interaction_status_is_unspecified() {
+    // C-4: an explicit but Unspecified interaction_status is treated as
+    // "no information" -- falls back to turn_complete, same as C-3.
+    let (base_url, server) = start_mock_ws_server(|mut ws, _req| async move {
+        recv_json(&mut ws).await;
+        send_setup_complete(&mut ws).await;
+        send_json(
+            &mut ws,
+            json!({
+                "serverContent": {
+                    "modelTurn": { "parts": [{"text": "hi"}] },
+                    "interactionStatus": "INTERACTION_STATUS_UNSPECIFIED",
+                    "turnComplete": true
+                }
+            }),
+        )
+        .await;
+        ws.close(None).await.ok();
+    })
+    .await;
+
+    let client = test_client_with_api_key(base_url, "test-key");
+    let mut session = client
+        .live()
+        .connect("gemini-2.0-flash-live-001", None)
+        .await
+        .unwrap();
+
+    let messages: Vec<_> = session.receive_turn().collect().await;
+    assert_eq!(messages.len(), 1);
+    server.await.unwrap();
+}
+
+#[tokio::test]
+async fn receive_turn_can_be_called_repeatedly_for_consecutive_turns() {
+    // C-5/C-6 combined: two turns, read via two separate `receive_turn()`
+    // calls on the same session, each stopping at its own boundary.
+    let (base_url, server) = start_mock_ws_server(|mut ws, _req| async move {
+        recv_json(&mut ws).await;
+        send_setup_complete(&mut ws).await;
+        send_json(
+            &mut ws,
+            json!({ "serverContent": { "modelTurn": { "parts": [{"text": "turn one"}] }, "turnComplete": true } }),
+        )
+        .await;
+        send_json(
+            &mut ws,
+            json!({ "serverContent": { "modelTurn": { "parts": [{"text": "turn two"}] }, "turnComplete": true } }),
+        )
+        .await;
+        ws.close(None).await.ok();
+    })
+    .await;
+
+    let client = test_client_with_api_key(base_url, "test-key");
+    let mut session = client
+        .live()
+        .connect("gemini-2.0-flash-live-001", None)
+        .await
+        .unwrap();
+
+    let first_turn: Vec<_> = session.receive_turn().collect().await;
+    assert_eq!(first_turn.len(), 1);
+    assert_eq!(
+        first_turn[0]
+            .as_ref()
+            .unwrap()
+            .server_content
+            .as_ref()
+            .unwrap()
+            .model_turn
+            .as_ref()
+            .unwrap()
+            .parts
+            .as_ref()
+            .unwrap()[0]
+            .text
+            .as_deref(),
+        Some("turn one")
+    );
+
+    let second_turn: Vec<_> = session.receive_turn().collect().await;
+    assert_eq!(second_turn.len(), 1);
+    assert_eq!(
+        second_turn[0]
+            .as_ref()
+            .unwrap()
+            .server_content
+            .as_ref()
+            .unwrap()
+            .model_turn
+            .as_ref()
+            .unwrap()
+            .parts
+            .as_ref()
+            .unwrap()[0]
+            .text
+            .as_deref(),
+        Some("turn two")
+    );
+
+    server.await.unwrap();
+}

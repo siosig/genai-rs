@@ -1,7 +1,8 @@
 # gemini-genai
 
 > **非公式。** [Google Gen AI Python SDK](https://github.com/googleapis/python-genai)
-> （`google-genai` 2.19.0）を **Gemini Developer API** 向けに Rust へ移植した
+> （`google-genai` 2.23.0 — 追従状況は [docs/upstream-sync.ja.md](docs/upstream-sync.ja.md)
+> を参照）を **Gemini Developer API** 向けに Rust へ移植した
 > 独立プロジェクトであり、Google とは無関係で、Google による承認も後援も受けていない。
 > 一部は `google-genai`（Copyright 2025 Google LLC、Apache License 2.0）に由来する
 > — [NOTICE](NOTICE) を参照。
@@ -536,9 +537,13 @@ fn retryable(error: &Error) -> bool {
   対応物、そして意図的に移植していないものの一覧。
 - [`docs/migrating-from-python.ja.md`](docs/migrating-from-python.ja.md) — イディオムの違い（設定
   構造体、`Contents` の変換、ストリーム、ページャ、エラー）についてのガイド。
+- [`docs/upstream-sync.ja.md`](docs/upstream-sync.ja.md) — 本クレートがどの
+  `google-genai` リリースにピンしているか、意図的にまだ取り込んでいない上流の
+  変更があればその理由と再開条件。
 
-0.2.0 で未実装なもの: Vertex AI バックエンド、および Vertex 専用・Python 固有の API 面。
-`models.compute_tokens` と `tunings.list` は存在するけれど常にエラーを返す。
+未実装なもの: Vertex AI バックエンド、および Vertex 専用・Python 固有の API 面。
+`models.compute_tokens`・`models.generate_images`・`tunings.list` は存在するけれど
+常にエラーを返す。
 `models.edit_image` / `upscale_image` / `recontext_image` / `segment_image` と
 `tunings.validate_reward` は存在しない（Python でも Vertex AI 以外では `ValueError` になる）。
 `local_tokenizer`、NextGen の `interactions` / `agents` / `webhooks` / `triggers` /
@@ -613,7 +618,7 @@ GEMINI_API_KEY=... GENAI_E2E_EXPENSIVE=1 \
 
 Apache-2.0 — 全文は [LICENSE](LICENSE) を参照。
 
-本クレートの一部は Google Gen AI Python SDK（`google-genai` 2.19.0、
+本クレートの一部は Google Gen AI Python SDK（`google-genai` 2.23.0、
 Copyright 2025 Google LLC、同じく Apache-2.0）に由来する。どのパスが該当し
 何を改変したかは [NOTICE](NOTICE) に記載している。
 

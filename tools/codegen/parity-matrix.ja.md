@@ -47,7 +47,7 @@ SC-002（Gemini Developer API で使える公開メソッド 100%）/ SC-003（�
 | models | count_tokens | ✅ | ✅ |
 | models | compute_tokens | `Models::compute_tokens`（シグネチャのみ。常に `Error::UnsupportedBackend`。`src/models.rs:237`） | ⚠️ stub (always errors) |
 | models | get / list / update / delete | ✅ | ✅ |
-| models | generate_images | `#[deprecated]` | ✅ |
+| models | generate_images | `Models::generate_images`（`#[deprecated]`。google-genai 2.23.0 で Gemini Developer API 向け mldev 経路が上流で削除され Vertex AI 専用化（コミット `43ef621`）。シグネチャのみ。常に `Error::UnsupportedByBackend`。`src/models.rs:385`） | ⚠️ stub (always errors) |
 | models | edit_image | —（未移植。上流はソフト非推奨かつ Vertex AI 専用） | ⏭ 後続（Vertex AI） |
 | models | upscale_image / recontext_image / segment_image | —（未移植） | ⏭ 後続（Vertex AI） |
 | models | generate_videos | `Models::generate_videos`（`source: GenerateVideosSource` 単一引数に集約） | ✅ |

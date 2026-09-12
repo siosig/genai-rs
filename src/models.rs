@@ -354,42 +354,44 @@ impl Models {
         Ok(serde_json::from_value(mldev)?)
     }
 
-    /// Generates images from a text prompt. Mirrors Python's
-    /// `Models.generate_images` (`POST {model}:predict`).
+    /// **Not supported by the Gemini Developer API** (Vertex AI only, per
+    /// Python's `Models._generate_images`, which as of google-genai 2.23.0
+    /// raises unconditionally on a non-Vertex client:
+    /// `ValueError('This method is only supported in Gemini Enterprise
+    /// Agent Platform mode, not in Gemini Developer API mode.')`).
+    ///
+    /// Up to google-genai 2.19.0 this method worked against the Gemini
+    /// Developer API (`POST {model}:predict`); upstream removed that mldev
+    /// path (commit `43ef621`, "Disable `GenerateImages` for Gemini API")
+    /// between v2.19.0 and v2.23.0, deleting the corresponding
+    /// `_GenerateImages*_to_mldev`/`_from_mldev` converters entirely. This
+    /// crate mirrors that: the signature is kept (matching
+    /// [`Self::compute_tokens`]'s already-established stub pattern) but the
+    /// call always fails before sending anything.
     ///
     /// # Deprecated
     /// Matches the Python SDK: superseded by `generate_content` with an
     /// image-capable model. Not removed before 2027-01-01.
     ///
     /// # Errors
-    /// See [`Self::generate_content`].
+    /// Always returns [`crate::Error::UnsupportedByBackend`].
     #[deprecated(
         note = "use generate_content with an image-capable model instead; see https://ai.google.dev/gemini-api/docs/deprecations#imagen-models"
     )]
+    #[expect(
+        clippy::unused_async,
+        reason = "kept async for signature parity with this resource's other methods, even though the Gemini Developer API doesn't support this operation and this method never awaits"
+    )]
     pub async fn generate_images(
         &self,
-        model: &str,
-        prompt: &str,
-        config: Option<crate::types::GenerateImagesConfig>,
+        _model: &str,
+        _prompt: &str,
+        _config: Option<crate::types::GenerateImagesConfig>,
     ) -> Result<crate::types::GenerateImagesResponse> {
-        let params = serde_json::json!({ "model": model, "prompt": prompt, "config": config });
-        let mut request = conv::generate_images_parameters_to_mldev(&params, None, None)?;
-        let request_obj = crate::converters::as_object_mut(&mut request);
-        let model_url = extract_url_model(request_obj, "generate_images_parameters_to_mldev");
-        let response = self
-            .client
-            .http()
-            .request(
-                Method::POST,
-                &format!("{model_url}:predict"),
-                None,
-                Some(request),
-                None,
-            )
-            .await?;
-        let wire: Value = serde_json::from_slice(&response.body)?;
-        let mldev = conv::generate_images_response_from_mldev(&wire, None, None)?;
-        Ok(serde_json::from_value(mldev)?)
+        Err(crate::error::Error::UnsupportedByBackend {
+            field: "models().generate_images",
+            backend: crate::error::Backend::VertexAi,
+        })
     }
 
     /// Starts generating videos from a prompt/image/video source,
@@ -510,7 +512,7 @@ mod tests {
     use crate::{
         client::Client,
         error::{Backend, Error},
-        types::{GenerateImagesConfig, HttpOptions},
+        types::HttpOptions,
     };
 
     fn test_client(base_url: String) -> Client {
@@ -848,125 +850,32 @@ mod tests {
         server.verify().await;
     }
 
+    /// Upstream disabled `generate_images` for the Gemini Developer API
+    /// between v2.19.0 and v2.23.0 (commit `43ef621`); it is now Vertex-AI
+    /// only, mirroring the already-established [`Models::compute_tokens`] /
+    /// [`crate::tunings::Tunings::list`] stub pattern. No HTTP call is ever
+    /// made (the mock server has no mocks mounted at all).
     #[tokio::test]
     #[allow(
         deprecated,
         reason = "testing the deprecated generate_images method itself"
     )]
-    async fn generate_images_posts_prompt_to_predict() {
+    async fn generate_images_is_unsupported_by_the_gemini_developer_api_backend() {
         let server = MockServer::start().await;
-        Mock::given(method("POST"))
-            .and(path("/v1beta/models/imagen-3.0-generate-002:predict"))
-            .and(body_json(
-                serde_json::json!({"instances": [{"prompt": "a cat"}]}),
-            ))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-                "predictions": [{"bytesBase64Encoded": "aGVsbG8=", "mimeType": "image/png"}]
-            })))
-            .expect(1)
-            .mount(&server)
-            .await;
 
-        let response = models(&server)
+        let err = models(&server)
             .generate_images("imagen-3.0-generate-002", "a cat", None)
             .await
-            .unwrap();
-        assert_eq!(response.generated_images.unwrap().len(), 1);
-        server.verify().await;
-    }
+            .unwrap_err();
 
-    /// `GenerateImagesConfig` models the union of both backends' knobs, so
-    /// six of its fields are Vertex-AI-only. On this Gemini-Developer-API
-    /// client the generated converter (`generate_images_config_to_mldev`)
-    /// must reject each of them with
-    /// [`crate::Error::UnsupportedByBackend`] *before* anything is sent,
-    /// mirroring Python's `_GenerateImagesConfig_to_mldev`, which raises
-    /// `ValueError('... parameter is not supported in Gemini API.')` for
-    /// exactly this set (verified against google-genai 2.19.0).
-    ///
-    /// The remaining fields (`number_of_images`, `aspect_ratio`,
-    /// `guidance_scale`, `safety_filter_level`, `person_generation`,
-    /// `include_safety_attributes`, `include_rai_reason`, `language`,
-    /// `output_mime_type`, `output_compression_quality`, `image_size`) are
-    /// supported and already covered by the happy-path test above.
-    #[tokio::test]
-    #[expect(
-        deprecated,
-        reason = "testing the deprecated generate_images method itself"
-    )]
-    async fn generate_images_rejects_every_vertex_only_config_field() {
-        let server = MockServer::start().await;
-
-        let cases: Vec<(&'static str, GenerateImagesConfig)> = vec![
-            (
-                "output_gcs_uri",
-                GenerateImagesConfig {
-                    output_gcs_uri: Some("gs://bucket/prefix".to_owned()),
-                    ..Default::default()
-                },
-            ),
-            (
-                "negative_prompt",
-                GenerateImagesConfig {
-                    negative_prompt: Some("blurry".to_owned()),
-                    ..Default::default()
-                },
-            ),
-            (
-                "seed",
-                GenerateImagesConfig {
-                    seed: Some(42),
-                    ..Default::default()
-                },
-            ),
-            (
-                "add_watermark",
-                GenerateImagesConfig {
-                    add_watermark: Some(true),
-                    ..Default::default()
-                },
-            ),
-            (
-                "labels",
-                GenerateImagesConfig {
-                    labels: Some(std::collections::HashMap::from([(
-                        "team".to_owned(),
-                        "research".to_owned(),
-                    )])),
-                    ..Default::default()
-                },
-            ),
-            (
-                "enhance_prompt",
-                GenerateImagesConfig {
-                    enhance_prompt: Some(true),
-                    ..Default::default()
-                },
-            ),
-        ];
-
-        for (field, config) in cases {
-            let err = models(&server)
-                .generate_images("imagen-3.0-generate-002", "a cat", Some(config))
-                .await
-                .expect_err("a Vertex-only field must be rejected");
-            let Error::UnsupportedByBackend {
-                field: reported,
-                backend,
-            } = &err
-            else {
-                panic!("`{field}` should be rejected as Vertex-only, got {err:?}");
-            };
-            assert_eq!(*reported, field);
-            assert_eq!(*backend, Backend::VertexAi);
-            assert_eq!(
-                err.to_string(),
-                format!("field `{field}` is only supported by the Vertex AI backend")
-            );
+        match err {
+            Error::UnsupportedByBackend { field, backend } => {
+                assert_eq!(field, "models().generate_images");
+                assert_eq!(backend, Backend::VertexAi);
+            }
+            other => panic!("expected Error::UnsupportedByBackend, got {other:?}"),
         }
 
-        // The rejection happens while converting the request, so no HTTP
-        // call is ever made (the mock server has no mocks mounted at all).
         assert!(
             server
                 .received_requests()

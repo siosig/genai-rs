@@ -1,0 +1,31 @@
+{
+  "converter": "_LiveConnectConstraints_to_mldev",
+  "input": {
+    "model": "gemini-2.0-flash-live-001",
+    "config": {
+      "response_modalities": [
+        "AUDIO"
+      ],
+      "translation_config": {
+        "echo_target_language": true,
+        "target_language_code": "ja-JP"
+      }
+    }
+  },
+  "expected": {
+    "setup": {
+      "model": "models/gemini-2.0-flash-live-001",
+      "generationConfig": {
+        "responseModalities": [
+          "AUDIO"
+        ],
+        "translationConfig": {
+          "echoTargetLanguage": true,
+          "targetLanguageCode": "ja-JP"
+        }
+      }
+    },
+    "config": {}
+  },
+  "expected_error": null
+}

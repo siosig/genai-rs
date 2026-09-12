@@ -24,7 +24,8 @@ use crate::{
     converters::generated::live_converters as conv,
     error::{Error, Result},
     types::{
-        Content, FunctionResponse, LiveConnectConfig, LiveServerMessage, LiveServerSetupComplete,
+        Content, FunctionResponse, InteractionStatus, LiveConnectConfig, LiveServerContent,
+        LiveServerMessage, LiveServerSetupComplete,
     },
 };
 
@@ -199,6 +200,53 @@ impl LiveSession {
         }
     }
 
+    /// Yields server messages one turn at a time, ending the stream (not
+    /// the session) after the message that completes the current turn --
+    /// unlike [`Self::receive`], which keeps yielding messages across
+    /// turns until the connection closes. Call this again to read the
+    /// next turn. Mirrors Python's `AsyncSession.receive` (this crate's
+    /// [`Self::receive`] corresponds to Python's private, non-turn-aware
+    /// `_receive` instead -- a deliberate naming difference from feature
+    /// 001, since `receive` already meant "raw stream" here before this
+    /// method existed; see spec 003-upstream-2-23-sync's Clarifications
+    /// Q7).
+    ///
+    /// Turn completion is [`is_interaction_complete`]: if the server sends
+    /// a meaningful `interaction_status` (added upstream in google-genai
+    /// 2.23.0), that decides it (`IDLE` = complete); otherwise this falls
+    /// back to `turn_complete`, matching pre-2.23.0 behaviour. The message
+    /// that completes the turn is yielded before the stream ends -- it is
+    /// never dropped.
+    ///
+    /// # Errors
+    /// Same as [`Self::receive`].
+    pub fn receive_turn(&mut self) -> impl Stream<Item = Result<LiveServerMessage>> + '_ {
+        async_stream::try_stream! {
+            loop {
+                match recv_decoded(&mut self.stream).await {
+                    Ok(Some(raw)) => {
+                        let mldev = conv::live_server_message_from_mldev(&raw, None, None)?;
+                        let message: LiveServerMessage = serde_json::from_value(mldev)?;
+                        let done = is_interaction_complete(message.server_content.as_ref());
+                        yield message;
+                        if done {
+                            break;
+                        }
+                    }
+                    Ok(None) => {
+                        tracing::debug!("Live API session closed by the server");
+                        break;
+                    }
+                    Err(err) => {
+                        tracing::debug!(error = %err, "Live API websocket error; ending stream");
+                        Err(err)?;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     /// Closes the session, sending a WebSocket close frame. Mirrors
     /// Python's `AsyncSession.close`.
     ///
@@ -340,6 +388,28 @@ where
     sink.send(Message::text(text)).await.map_err(ws_err)
 }
 
+/// Decides whether `server_content` marks the end of the current turn, for
+/// [`LiveSession::receive_turn`]. Mirrors Python's `live._is_interaction_complete`
+/// (added in google-genai 2.23.0): a present, meaningful `interaction_status`
+/// takes priority (`IDLE` = complete); with no `server_content`, no
+/// `interaction_status`, or an `InteractionStatusUnspecified` one, this
+/// falls back to `turn_complete`. `InteractionStatus::Unknown` (a value
+/// this crate didn't know about at generation time) counts as "present and
+/// meaningful", same as any other non-`Unspecified` variant -- Python's own
+/// string comparison against `'IDLE'` would treat an unrecognized value the
+/// same way.
+fn is_interaction_complete(server_content: Option<&LiveServerContent>) -> bool {
+    let Some(server_content) = server_content else {
+        return false;
+    };
+    match &server_content.interaction_status {
+        Some(status) if *status != InteractionStatus::InteractionStatusUnspecified => {
+            *status == InteractionStatus::Idle
+        }
+        _ => server_content.turn_complete.unwrap_or(false),
+    }
+}
+
 /// Reads and JSON-decodes the next text/binary frame from `stream`,
 /// transparently skipping ping/pong/raw frames. Returns `Ok(None)` when
 /// the peer closes the connection (cleanly or abruptly) rather than
@@ -417,8 +487,14 @@ mod tests {
     use secrecy::SecretString;
     use serde_json::json;
 
-    use super::{camelize_function_response, snake_to_camel, websocket_endpoint};
-    use crate::{client::Client, http::HttpClient, types::HttpOptions};
+    use super::{
+        camelize_function_response, is_interaction_complete, snake_to_camel, websocket_endpoint,
+    };
+    use crate::{
+        client::Client,
+        http::HttpClient,
+        types::{HttpOptions, InteractionStatus, LiveServerContent},
+    };
 
     fn client_with(api_key: &str, base_url: &str) -> Client {
         Client::builder()
@@ -429,6 +505,70 @@ mod tests {
             })
             .build()
             .unwrap()
+    }
+
+    /// Every row of `is_interaction_complete`'s decision table (spec
+    /// 003-upstream-2-23-sync, contracts/live-turn.md), covering
+    /// acceptance scenarios C-1..C-4 plus the `Unknown`-variant and
+    /// no-`server_content` edge cases.
+    #[test]
+    fn is_interaction_complete_follows_the_full_decision_table() {
+        fn content(
+            status: Option<InteractionStatus>,
+            turn_complete: Option<bool>,
+        ) -> LiveServerContent {
+            LiveServerContent {
+                interaction_status: status,
+                turn_complete,
+                ..Default::default()
+            }
+        }
+
+        // No server_content at all: never complete.
+        assert!(!is_interaction_complete(None));
+
+        // interaction_status present and meaningful (not Unspecified):
+        // it alone decides, turn_complete is ignored.
+        assert!(is_interaction_complete(Some(&content(
+            Some(InteractionStatus::Idle),
+            Some(true)
+        ))));
+        assert!(is_interaction_complete(Some(&content(
+            Some(InteractionStatus::Idle),
+            Some(false)
+        ))));
+        assert!(is_interaction_complete(Some(&content(
+            Some(InteractionStatus::Idle),
+            None
+        ))));
+        assert!(!is_interaction_complete(Some(&content(
+            Some(InteractionStatus::InProgress),
+            Some(true)
+        ))));
+        assert!(!is_interaction_complete(Some(&content(
+            Some(InteractionStatus::RequiresAction),
+            Some(true)
+        ))));
+        assert!(!is_interaction_complete(Some(&content(
+            Some(InteractionStatus::Unknown("SOMETHING_NEW".to_owned())),
+            Some(true)
+        ))));
+
+        // No interaction_status: fall back to turn_complete.
+        assert!(is_interaction_complete(Some(&content(None, Some(true)))));
+        assert!(!is_interaction_complete(Some(&content(None, Some(false)))));
+        assert!(!is_interaction_complete(Some(&content(None, None))));
+
+        // interaction_status == Unspecified: treated as "no information",
+        // same as absent -- falls back to turn_complete.
+        assert!(is_interaction_complete(Some(&content(
+            Some(InteractionStatus::InteractionStatusUnspecified),
+            Some(true)
+        ))));
+        assert!(!is_interaction_complete(Some(&content(
+            Some(InteractionStatus::InteractionStatusUnspecified),
+            Some(false)
+        ))));
     }
 
     #[test]

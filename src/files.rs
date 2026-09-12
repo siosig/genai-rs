@@ -8,18 +8,21 @@ use std::{
 };
 
 use bytes::Bytes;
+use futures_core::Stream;
+use futures_util::StreamExt;
 use reqwest::Method;
 use serde_json::{Map, Value};
+use tokio::io::AsyncWriteExt;
 
 use crate::{
     client::Client,
     converters::generated::files as conv,
-    error::Result,
+    error::{Error, Result},
     pager::{PagedItem, Pager},
     types::{
-        DeleteFileConfig, DeleteFileResponse, DownloadFileConfig, File, GetFileConfig, HttpOptions,
-        ListFilesConfig, ListFilesResponse, RegisterFilesConfig, RegisterFilesResponse,
-        UploadFileConfig,
+        DeleteFileConfig, DeleteFileResponse, DownloadFileConfig, File, GeneratedVideo,
+        GetFileConfig, HttpOptions, ListFilesConfig, ListFilesResponse, RegisterFilesConfig,
+        RegisterFilesResponse, UploadFileConfig, Video,
     },
 };
 
@@ -62,6 +65,140 @@ impl From<&str> for UploadSource {
 impl From<String> for UploadSource {
     fn from(path: String) -> Self {
         UploadSource::Path(PathBuf::from(path))
+    }
+}
+
+/// Default chunk size for [`Files::download_to_path`]'s writes: matches
+/// Python's `download_file`'s `chunk_size` default (1 MiB). See that
+/// method's docs for what this does and does not control.
+const DOWNLOAD_CHUNK_SIZE: usize = 1024 * 1024;
+
+/// A stream of raw byte chunks, returned by [`Files::download_stream`].
+///
+/// A concrete (rather than `impl Stream`-returning) type, matching
+/// [`crate::models::GenerateContentStream`]'s shape: `download_stream`
+/// takes `file: impl Into<FileSource>`, an argument-position `impl Trait`,
+/// and Rust 2024's opaque-type capture rules would otherwise force that
+/// parameter's anonymous type into the returned stream's hidden type --
+/// which then can't be proven `'static`, which
+/// [`crate::blocking::BlockingStream`] (used by the generated blocking
+/// wrapper) requires. Boxing sidesteps that: `dyn Stream + Send` has no
+/// dependency on the caller's argument type at all.
+pub struct FileDownloadStream {
+    inner: Pin<Box<dyn Stream<Item = Result<Bytes>> + Send>>,
+}
+
+impl Stream for FileDownloadStream {
+    type Item = Result<Bytes>;
+
+    fn poll_next(
+        mut self: Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Option<Self::Item>> {
+        self.inner.as_mut().poll_next(cx)
+    }
+}
+
+/// What to download via [`Files::download_stream`]/[`Files::download_to_path`]:
+/// a bare identifier (name, `files/...` path, or download URI -- resolved
+/// the same way [`Files::download`] resolves `file: &str`, with no
+/// up-front validity check) or the file's own metadata, which lets this
+/// crate check *before* sending anything that it actually has a
+/// `download_uri` (uploaded files don't, and can't be downloaded). Mirrors
+/// the `file: str | File | Video | GeneratedVideo` union Python's
+/// `Files.download` accepts.
+pub enum FileSource {
+    /// A bare identifier. Not pre-validated -- an undownloadable file only
+    /// fails once the server responds (spec 003-upstream-2-23-sync FR-022:
+    /// this is a deliberate difference from the `File`/`Video`/
+    /// `GeneratedVideo` variants, not an oversight).
+    Name(String),
+    /// A fetched [`File`]. Rejected up front if `download_uri` is `None`.
+    /// Boxed: `File` is by far the largest of this enum's variants (it has
+    /// every field the resource can return), and boxing it keeps
+    /// [`FileSource`] itself cheap to move.
+    File(Box<File>),
+    /// A [`Video`], identified by its `uri`.
+    Video(Video),
+    /// A [`GeneratedVideo`], identified by its `video.uri`.
+    GeneratedVideo(GeneratedVideo),
+}
+
+impl From<&str> for FileSource {
+    fn from(name: &str) -> Self {
+        FileSource::Name(name.to_owned())
+    }
+}
+
+impl From<String> for FileSource {
+    fn from(name: String) -> Self {
+        FileSource::Name(name)
+    }
+}
+
+impl From<File> for FileSource {
+    fn from(file: File) -> Self {
+        FileSource::File(Box::new(file))
+    }
+}
+
+impl From<&File> for FileSource {
+    fn from(file: &File) -> Self {
+        FileSource::File(Box::new(file.clone()))
+    }
+}
+
+impl From<Video> for FileSource {
+    fn from(video: Video) -> Self {
+        FileSource::Video(video)
+    }
+}
+
+impl From<&Video> for FileSource {
+    fn from(video: &Video) -> Self {
+        FileSource::Video(video.clone())
+    }
+}
+
+impl From<GeneratedVideo> for FileSource {
+    fn from(video: GeneratedVideo) -> Self {
+        FileSource::GeneratedVideo(video)
+    }
+}
+
+impl From<&GeneratedVideo> for FileSource {
+    fn from(video: &GeneratedVideo) -> Self {
+        FileSource::GeneratedVideo(video.clone())
+    }
+}
+
+impl FileSource {
+    /// Resolves to the identifier [`Files::download_stream`] sends to the
+    /// server. Ports the object-handling branches of Python's
+    /// `_transformers.t_file_name` (`File.name`, `Video.uri`,
+    /// `GeneratedVideo.video.uri`) plus, for the file-object case, the
+    /// `download_uri is None` check Python's `Files.download` itself makes
+    /// (see contracts/download-api.md's "Differences from upstream", #3).
+    fn resolve(self) -> Result<String> {
+        let raw = match self {
+            FileSource::Name(name) => Value::String(name),
+            FileSource::File(file) => {
+                if file.download_uri.is_none() {
+                    return Err(Error::Validation(
+                        "only generated files can be downloaded; uploaded files can't be \
+                         downloaded -- check `File::download_uri` (or `source`) first"
+                            .to_owned(),
+                    ));
+                }
+                Value::String(file.name.or(file.uri).unwrap_or_default())
+            }
+            FileSource::Video(video) => Value::String(video.uri.unwrap_or_default()),
+            FileSource::GeneratedVideo(generated) => {
+                Value::String(generated.video.and_then(|v| v.uri).unwrap_or_default())
+            }
+        };
+        let name = crate::transformers::t_file_name(raw)?;
+        Ok(name.as_str().unwrap_or_default().to_owned())
     }
 }
 
@@ -252,6 +389,79 @@ impl Files {
             .await
     }
 
+    /// Downloads a file's data as a stream of chunks, instead of buffering
+    /// the whole body into memory. Mirrors Python's `Files.download(...,
+    /// destination=<writable stream>)`, minus the writable-stream case --
+    /// consume this [`Stream`] with [`futures_util::StreamExt`] to write it
+    /// wherever you like, or use [`Self::download_to_path`] for the common
+    /// case of writing to a local path.
+    ///
+    /// Unlike [`Self::download`], `file` also accepts a [`File`],
+    /// [`crate::types::Video`], or [`crate::types::GeneratedVideo`]
+    /// (anything [`Into<FileSource>`]) -- passing one of those lets this
+    /// method check *before* sending anything that the file actually has a
+    /// `download_uri` (uploaded files don't, and can't be downloaded).
+    /// Passing a bare name/URI string skips that check, same as
+    /// [`Self::download`] does today: a string carries no `download_uri` to
+    /// check.
+    ///
+    /// This crate never sets `video_bytes` on a passed-in `Video`/
+    /// `GeneratedVideo` the way Python's in-memory `download` does --
+    /// there's no single buffer here to hang it on.
+    ///
+    /// # Errors
+    /// Returns [`crate::Error::Validation`] if `file` resolves to an empty
+    /// identifier, or a [`FileSource::File`] has no `download_uri`;
+    /// [`crate::Error::Api`] for a non-2xx response; or
+    /// [`crate::Error::Http`]/[`crate::Error::Stream`] if the connection
+    /// fails partway through.
+    pub async fn download_stream(
+        &self,
+        file: impl Into<FileSource>,
+        config: Option<DownloadFileConfig>,
+    ) -> Result<FileDownloadStream> {
+        let file_id = file.into().resolve()?;
+        let path = format!("files/{file_id}:download");
+        let http_options = config.and_then(|c| c.http_options);
+        let inner = self
+            .client
+            .http()
+            .download_stream(&path, Some("alt=media"), http_options.as_ref())
+            .await?;
+        Ok(FileDownloadStream {
+            inner: Box::pin(inner),
+        })
+    }
+
+    /// Downloads a file directly to a local path, streaming it in
+    /// [`DOWNLOAD_CHUNK_SIZE`]-sized writes rather than holding the whole
+    /// file in memory (built on [`Self::download_stream`], which this
+    /// consumes). `DOWNLOAD_CHUNK_SIZE` (1 MiB) matches Python's
+    /// `download_file`'s `chunk_size` default, but governs only how many
+    /// bytes this method batches per write -- unlike Python's
+    /// `iter_content(chunk_size=...)`, it does not control how the
+    /// underlying network stream is split (that follows TCP/TLS framing;
+    /// see [`Self::download_stream`]).
+    ///
+    /// `destination` is created or truncated, matching Python's
+    /// `open(destination, 'wb')`. If the download fails partway through,
+    /// the partial file is removed (best-effort) before the error is
+    /// returned, so callers never see an incomplete file left behind as if
+    /// it had succeeded.
+    ///
+    /// # Errors
+    /// See [`Self::download_stream`], plus [`crate::Error::Io`] if
+    /// `destination` can't be created or written to.
+    pub async fn download_to_path(
+        &self,
+        file: impl Into<FileSource>,
+        destination: impl AsRef<Path>,
+        config: Option<DownloadFileConfig>,
+    ) -> Result<()> {
+        let stream = self.download_stream(file, config).await?;
+        write_stream_to_path(stream, destination.as_ref()).await
+    }
+
     /// Registers Cloud Storage URIs as `File`s with the file service.
     /// Mirrors Python's internal `Files._register_files`.
     ///
@@ -286,6 +496,45 @@ impl Files {
         let mldev = conv::register_files_response_from_mldev(&wire, None, None)?;
         Ok(serde_json::from_value(mldev)?)
     }
+}
+
+/// Writes `stream` to `destination` in [`DOWNLOAD_CHUNK_SIZE`]-sized
+/// writes, creating/truncating the file. If `stream` yields an `Err` (or
+/// the write itself fails) partway through, the partial file is removed
+/// (best-effort) before the error is returned -- see
+/// [`Files::download_to_path`]'s docs. Factored out of that method (rather
+/// than inlined) so its cleanup behaviour can be exercised directly
+/// against a synthetic stream in tests, without needing a real partial-body
+/// HTTP response (which wiremock has no reliable way to produce -- see
+/// `tests/files.rs`'s truncated-body tests for why).
+async fn write_stream_to_path(
+    mut stream: impl Stream<Item = Result<Bytes>> + Unpin,
+    destination: &Path,
+) -> Result<()> {
+    let mut out = tokio::fs::File::create(destination).await?;
+
+    let result: Result<()> = async {
+        let mut buffer = Vec::with_capacity(DOWNLOAD_CHUNK_SIZE);
+        while let Some(chunk) = stream.next().await {
+            buffer.extend_from_slice(&chunk?);
+            if buffer.len() >= DOWNLOAD_CHUNK_SIZE {
+                out.write_all(&buffer).await?;
+                buffer.clear();
+            }
+        }
+        if !buffer.is_empty() {
+            out.write_all(&buffer).await?;
+        }
+        out.flush().await?;
+        Ok(())
+    }
+    .await;
+
+    if result.is_err() {
+        drop(out);
+        let _ = tokio::fs::remove_file(destination).await;
+    }
+    result
 }
 
 /// Runs a `*_to_mldev` converter (`get`/`delete`) that only ever sets
@@ -435,5 +684,63 @@ mod tests {
         let file = files(&server).upload(source, None).await.unwrap();
         assert_eq!(file.name.as_deref(), Some("files/xyz"));
         server.verify().await;
+    }
+
+    /// A genuine mid-stream failure (unlike `tests/files.rs`'s
+    /// Content-Length-mismatch tests, which -- as their own comments
+    /// explain -- actually fail at the connection level, before any bytes
+    /// are ever written): the first item succeeds and is written to disk,
+    /// the second is an `Err`. Exercises `write_stream_to_path`'s cleanup
+    /// directly against a synthetic stream, sidestepping wiremock/hyper's
+    /// unwillingness to serve a body shorter than its own Content-Length.
+    #[tokio::test]
+    async fn write_stream_to_path_removes_a_partially_written_file_on_a_later_error() {
+        let synthetic = futures_util::stream::iter(vec![
+            Ok(bytes::Bytes::from_static(
+                b"this much gets written before it fails",
+            )),
+            Err(crate::Error::Validation(
+                "synthetic mid-stream failure".to_owned(),
+            )),
+        ]);
+
+        let mut destination = std::env::temp_dir();
+        destination.push(format!(
+            "gemini-genai-files-unit-truncated-{}",
+            uuid::Uuid::new_v4()
+        ));
+
+        let result = super::write_stream_to_path(synthetic, &destination).await;
+
+        assert!(result.is_err(), "the stream's Err must propagate");
+        assert!(
+            !destination.exists(),
+            "a file that had already been partially written must not survive a later stream error"
+        );
+    }
+
+    /// The success path's counterpart to the test above: multiple `Ok`
+    /// items concatenate correctly.
+    #[tokio::test]
+    async fn write_stream_to_path_concatenates_multiple_items() {
+        let synthetic = futures_util::stream::iter(vec![
+            Ok(bytes::Bytes::from_static(b"first-")),
+            Ok(bytes::Bytes::from_static(b"second-")),
+            Ok(bytes::Bytes::from_static(b"third")),
+        ]);
+
+        let mut destination = std::env::temp_dir();
+        destination.push(format!(
+            "gemini-genai-files-unit-concat-{}",
+            uuid::Uuid::new_v4()
+        ));
+
+        super::write_stream_to_path(synthetic, &destination)
+            .await
+            .unwrap();
+
+        let written = tokio::fs::read(&destination).await.unwrap();
+        assert_eq!(written, b"first-second-third");
+        tokio::fs::remove_file(&destination).await.ok();
     }
 }

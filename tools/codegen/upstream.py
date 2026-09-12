@@ -36,7 +36,7 @@ from __future__ import annotations
 
 # The upstream release this port is generated from and verified against.
 # Keep in sync with the `google-genai==` pin in requirements.txt.
-PINNED_VERSION = "2.19.0"
+PINNED_VERSION = "2.23.0"
 
 # The Python version the generated output is pinned to, as "major.minor".
 #

@@ -12,6 +12,7 @@ use std::{collections::HashMap, time::Duration};
 use backon::Retryable;
 use bytes::Bytes;
 use futures_core::Stream;
+use futures_util::StreamExt;
 use headers::{API_KEY_HEADER, SERVER_TIMEOUT_HEADER};
 use reqwest::{Method, StatusCode};
 use retry::RetryPolicy;
@@ -336,6 +337,55 @@ impl HttpClient {
             .request(Method::GET, path, query, None, per_request)
             .await?;
         Ok(response.body)
+    }
+
+    /// Downloads a resource as a stream of chunks (e.g.
+    /// `GET {file}:download?alt=media`), instead of buffering the whole
+    /// body into memory. [`Files::download_stream`](crate::files::Files::download_stream)
+    /// and [`Files::download_to_path`](crate::files::Files::download_to_path)
+    /// build on this. Mirrors Python's `download_file(..., destination=...)`,
+    /// except chunk boundaries follow the underlying TCP/TLS stream rather
+    /// than a caller-chosen `chunk_size` -- see
+    /// [`Files::download_to_path`](crate::files::Files::download_to_path)'s docs.
+    ///
+    /// Unlike [`Self::request`], this never retries: retrying after the
+    /// body has started arriving would interleave a fresh response with
+    /// whatever the caller already consumed from the first one.
+    pub(crate) async fn download_stream(
+        &self,
+        path: &str,
+        query: Option<&str>,
+        per_request: Option<&HttpOptions>,
+    ) -> Result<impl Stream<Item = Result<Bytes, Error>> + Send + Unpin + use<>, Error> {
+        let url = self.build_url(path, query);
+        let headers = self.merged_headers(per_request);
+        let timeout = self.timeout(per_request);
+
+        let mut request = self.inner.request(Method::GET, &url);
+        for (name, value) in &headers {
+            request = request.header(name, value);
+        }
+        if let Some(timeout) = timeout {
+            request = request.timeout(timeout);
+        }
+        let response = request.send().await?;
+        if !response.status().is_success() {
+            let status = response.status();
+            let resp_headers = HttpResponse::header_map(response.headers());
+            let body = response.bytes().await?;
+            let api_err = ApiError::from_response(
+                status.as_u16(),
+                status.canonical_reason().unwrap_or("Unknown"),
+                resp_headers,
+                &body,
+            );
+            return Err(Error::Api(Box::new(api_err)));
+        }
+        Ok(Box::pin(
+            response
+                .bytes_stream()
+                .map(|chunk| chunk.map_err(Error::from)),
+        ))
     }
 
     pub(crate) fn reqwest_client(&self) -> &reqwest::Client {

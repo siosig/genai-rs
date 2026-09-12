@@ -2,7 +2,8 @@
 
 > **Unofficial.** An independent Rust port of the
 > [Google Gen AI Python SDK](https://github.com/googleapis/python-genai)
-> (`google-genai` 2.19.0) for the **Gemini Developer API**. Not affiliated
+> (`google-genai` 2.23.0 — see [docs/upstream-sync.md](docs/upstream-sync.md)
+> for the sync ledger) for the **Gemini Developer API**. Not affiliated
 > with, endorsed by, or sponsored by Google. Portions are derived from
 > `google-genai`, Copyright 2025 Google LLC, licensed under the Apache
 > License, Version 2.0 — see [NOTICE](NOTICE).
@@ -549,15 +550,18 @@ of the blocking API (`BlockingInsideRuntime`).
 - [`docs/migrating-from-python.md`](docs/migrating-from-python.md) — a guide to
   the idiom differences (config structs, `Contents` conversions, streams, pagers,
   errors).
+- [`docs/upstream-sync.md`](docs/upstream-sync.md) — which `google-genai`
+  release this crate is pinned to, and any upstream change deliberately not
+  taken yet (with why, and when it will be).
 
-Not implemented in 0.2.0: the Vertex AI backend, and the Python surfaces that are
-Vertex-only or Python-specific — `models.compute_tokens` and `tunings.list` are
-present but always error; `models.edit_image` / `upscale_image` /
-`recontext_image` / `segment_image` and `tunings.validate_reward` are absent
-(Python raises `ValueError` for all of them outside Vertex AI); `local_tokenizer`,
-the NextGen `interactions`/`agents`/`webhooks`/`triggers`/`environments` modules,
-and the replay/`DebugConfig` machinery are not ported. See
-[CHANGELOG.md](CHANGELOG.md).
+Not implemented: the Vertex AI backend, and the Python surfaces that are
+Vertex-only or Python-specific — `models.compute_tokens`, `models.generate_images`
+and `tunings.list` are present but always error; `models.edit_image` /
+`upscale_image` / `recontext_image` / `segment_image` and
+`tunings.validate_reward` are absent (Python raises `ValueError` for all of them
+outside Vertex AI); `local_tokenizer`, the NextGen
+`interactions`/`agents`/`webhooks`/`triggers`/`environments` modules, and the
+replay/`DebugConfig` machinery are not ported. See [CHANGELOG.md](CHANGELOG.md).
 
 ## Examples
 
@@ -630,7 +634,7 @@ GEMINI_API_KEY=... GENAI_E2E_EXPENSIVE=1 \
 Apache-2.0 — see [LICENSE](LICENSE) for the full text.
 
 Portions of this crate are derived from the Google Gen AI Python SDK
-(`google-genai` 2.19.0), Copyright 2025 Google LLC, also licensed under
+(`google-genai` 2.23.0), Copyright 2025 Google LLC, also licensed under
 Apache-2.0. [NOTICE](NOTICE) records which paths those are and what was
 changed.
 
