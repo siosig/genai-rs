@@ -434,7 +434,7 @@ impl Files {
     }
 
     /// Downloads a file directly to a local path, streaming it in
-    /// [`DOWNLOAD_CHUNK_SIZE`]-sized writes rather than holding the whole
+    /// `DOWNLOAD_CHUNK_SIZE`-sized writes rather than holding the whole
     /// file in memory (built on [`Self::download_stream`], which this
     /// consumes). `DOWNLOAD_CHUNK_SIZE` (1 MiB) matches Python's
     /// `download_file`'s `chunk_size` default, but governs only how many

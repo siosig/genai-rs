@@ -211,7 +211,7 @@ impl LiveSession {
     /// method existed; see spec 003-upstream-2-23-sync's Clarifications
     /// Q7).
     ///
-    /// Turn completion is [`is_interaction_complete`]: if the server sends
+    /// Turn completion is decided by this crate's `is_interaction_complete`: if the server sends
     /// a meaningful `interaction_status` (added upstream in google-genai
     /// 2.23.0), that decides it (`IDLE` = complete); otherwise this falls
     /// back to `turn_complete`, matching pre-2.23.0 behaviour. The message

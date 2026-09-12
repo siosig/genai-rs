@@ -359,8 +359,10 @@ async fn register_files_posts_the_uris_and_parses_the_returned_files() {
 // would be worse than an honest gap -- see the completion report.
 
 use futures_util::StreamExt as _;
-use gemini_genai::files::FileSource;
-use gemini_genai::types::{File, GeneratedVideo, Video};
+use gemini_genai::{
+    files::FileSource,
+    types::{File, GeneratedVideo, Video},
+};
 
 /// A payload well past typical loopback TCP segment/window sizes, so
 /// `bytes_stream()` reliably yields more than one item -- the same
