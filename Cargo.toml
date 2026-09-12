@@ -91,7 +91,7 @@ rmcp = { version = "3", optional = true, features = ["client"] }
 
 [dev-dependencies]
 wiremock = "0.6"
-rstest = "0.26"
+rstest = "0.27"
 # Lets tests read tools/codegen/methods.toml, so the async/blocking API
 # symmetry check is driven by the same ledger the generator uses.
 toml = "1.1"
