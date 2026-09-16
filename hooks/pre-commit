@@ -81,3 +81,14 @@ SECRETLINT_VERSION="13.0.4"
   done
 ) || exit 1
 # <<< local gates <<<
+
+# >>> public-author-gate >>>
+# Block commits authored under anything but the public identity (bypass: git commit --no-verify)
+(
+  _pa_email="$(git var GIT_AUTHOR_IDENT 2>/dev/null | grep -oP '<\K[^>]+')"
+  if [ "$_pa_email" != "siosig@gmail.com" ]; then
+    echo "pre-commit: commit author must be Daisuke ITO <siosig@gmail.com> (got: ${_pa_email:-unknown}) (bypass: git commit --no-verify)." >&2
+    exit 1
+  fi
+) || exit 1
+# <<< public-author-gate <<<

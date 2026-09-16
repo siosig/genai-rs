@@ -21,3 +21,5 @@ __pycache__/
 # reject every external contribution -- see hooks/local.d/author.sample.
 /hooks/local.d/*
 !/hooks/local.d/*.sample
+/.serena/
+/CLAUDE.md
