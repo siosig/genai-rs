@@ -3,6 +3,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [0.3.1](#031)
 - [0.3.0](#030)
 - [0.2.2](#022)
 - [0.2.1](#021)
@@ -20,6 +21,49 @@ with struct literals plus `..Default::default()`. In exchange, **adding a field 
 a generated type is treated as a minor-version change**, matching the upstream
 Python SDK's own policy. Always finish a struct literal with
 `..Default::default()`.
+
+## 0.3.1
+
+### Fixed
+
+- **`Models::generate_content` (and `generate_content_stream`) sent a spurious
+  empty `generationConfig: {}` on every request when `config` was `None`.**
+  `src/converters/mod.rs`'s `getv` path accessor treated a JSON `null`
+  (what `config: None` becomes when embedded via `serde_json::json!({"config":
+  config})`, as opposed to a derive-based `Serialize` with
+  `skip_serializing_if`, which omits the key) the same as a genuinely present
+  value — so the outer `if getv(..., ["config"]).is_some()` guard in the
+  generated `_GenerateContentParameters_to_mldev` converter always ran,
+  producing an empty object. This is a pure porting bug relative to the
+  Python SDK: Python's `dict.get(key)` makes "key absent" and "key present
+  with value `None`" indistinguishable, so the reference implementation
+  never has this problem. `getv`'s final resolved value now collapses
+  `Value::Null` to "missing", matching Python, without changing the
+  broader intermediate-traversal falsy check (`0`, `false`, `""`, `[]`, `{}`
+  as *terminal* values — e.g. `temperature: Some(0.0)` — are unaffected and
+  still come through as present).
+- This affected every hand-written params builder using the same
+  `json!({"field": optional_value})` pattern with a bare `Option<T>` for a
+  presence-gated field (`Batches::create`, `Caches::create`/`update`,
+  `Tunings::tune`, `Documents::*`, `FileSearchStores::*`, `Live::connect`,
+  and more) wherever the target converter unconditionally writes its output
+  into the request rather than discarding it on an empty result. Most of
+  these were already silently correct by accident (the converter's own
+  return value is unused, or the caller already post-processes the field
+  away). `AuthTokens::create`'s existing `request_dict.pop('config', None)`
+  workaround is unaffected by this fix and is still required — it cleans up
+  a stray empty `"config": {}` left over whenever a *real* `Some(config)`
+  is passed (`CreateAuthTokenConfig`'s fields flatten onto the parent
+  object instead), which this fix does not touch. This fix removes only
+  the extra, now-redundant no-op run of that same branch for `config: None`.
+- Fixed at the shared path-accessor (`getv`) rather than patching each call
+  site individually, so it self-corrects for future converters using the
+  same pattern. Verified against the full golden-fixture suite (184 cases
+  generated from the real `google-genai` Python SDK's own converter output)
+  with no regressions, plus new targeted unit tests
+  (`getv_null_terminal_value_is_treated_as_missing`,
+  `getv_falsy_but_non_null_terminal_values_are_not_missing`,
+  `getv_null_intermediate_value_still_returns_none`).
 
 ## 0.3.0
 

@@ -43,6 +43,24 @@ fn is_truthy(value: Option<&Value>) -> bool {
 /// and a key ending in `[0]` drills into the array's first element. A
 /// single `["_self"]` path returns `data` itself. Missing/falsy
 /// intermediates return `None`, matching Python's `get_value_by_path`.
+///
+/// **The final, fully-resolved value collapses JSON `null` to `None`
+/// (missing) — but nothing else.** Python's dict/attribute access makes
+/// "key absent" and "key present with value `None`" indistinguishable
+/// (`d.get(key)` returns `None` either way), so a caller-side
+/// `Option<T>::None` serialized into one of these path-accessor inputs via
+/// `serde_json::json!({"field": option_value})` (which keeps the key with
+/// a JSON `null`, unlike a derive-based `Serialize` with
+/// `skip_serializing_if`) must resolve to "absent" here too. This is
+/// deliberately narrower than the full [`is_truthy`] check used for
+/// *intermediate* traversal steps above: a terminal value of `0`, `false`,
+/// `""`, `[]` or `{}` is a real, present value (e.g. `temperature: 0.0`)
+/// and must not be dropped, whereas an intermediate container that is
+/// falsy has nothing left to traverse into either way. Regression: a hand-
+/// written caller (`Models::generate_content`) passing `config: None`
+/// through `json!({"config": config})` produced a spurious empty
+/// `generationConfig: {}` on the wire because `getv(_, ["config"]).is_some()`
+/// was `true` for a `null` value.
 pub(crate) fn getv(data: Option<&Value>, keys: &[&str]) -> Option<Value> {
     if keys == ["_self"] {
         return data.cloned();
@@ -68,7 +86,9 @@ pub(crate) fn getv(data: Option<&Value>, keys: &[&str]) -> Option<Value> {
             return getv(Some(first), &keys[i + 1..]);
         }
         current = cur.get(*key).cloned();
-        current.as_ref()?;
+        if current.as_ref().is_none_or(Value::is_null) {
+            return None;
+        }
     }
     current
 }
@@ -275,6 +295,51 @@ mod tests {
     #[test]
     fn getv_missing_path_returns_none() {
         let data = json!({"a": {}});
+        assert_eq!(getv(Some(&data), &["a", "b"]), None);
+    }
+
+    /// Regression: `serde_json::json!({"field": option_value})` keeps a
+    /// `None` field as JSON `null` (unlike a derive-based `Serialize` with
+    /// `skip_serializing_if`, which omits it). A caller-side `Option::None`
+    /// must resolve the same way either representation gets here, matching
+    /// Python's `dict.get(key)` (`None` for both "absent" and "present but
+    /// `None`"). Before this fix, `Models::generate_content` passing
+    /// `config: None` produced a spurious empty `generationConfig: {}` on
+    /// the wire because this returned `Some(Value::Null)` (`.is_some()` ==
+    /// `true`) instead of `None`.
+    #[test]
+    fn getv_null_terminal_value_is_treated_as_missing() {
+        let data = json!({"config": null});
+        assert_eq!(getv(Some(&data), &["config"]), None);
+    }
+
+    /// The null-collapsing fix must stay narrower than the intermediate
+    /// [`super::is_truthy`] check: a real, present, merely-falsy terminal
+    /// value (`0`, `false`, `""`, `[]`, `{}`) is not "missing" and must
+    /// still come back as `Some(..)` — dropping `temperature: 0.0` would be
+    /// a regression at least as bad as the one this fix addresses.
+    #[test]
+    fn getv_falsy_but_non_null_terminal_values_are_not_missing() {
+        let data = json!({
+            "temperature": 0.0,
+            "flag": false,
+            "text": "",
+            "list": [],
+            "obj": {},
+        });
+        assert_eq!(getv(Some(&data), &["temperature"]), Some(json!(0.0)));
+        assert_eq!(getv(Some(&data), &["flag"]), Some(json!(false)));
+        assert_eq!(getv(Some(&data), &["text"]), Some(json!("")));
+        assert_eq!(getv(Some(&data), &["list"]), Some(json!([])));
+        assert_eq!(getv(Some(&data), &["obj"]), Some(json!({})));
+    }
+
+    /// A `null` in the *middle* of a path was already handled correctly
+    /// (the next iteration's [`super::is_truthy`] check caught it) — this
+    /// pins that this fix doesn't change that existing behavior.
+    #[test]
+    fn getv_null_intermediate_value_still_returns_none() {
+        let data = json!({"a": null});
         assert_eq!(getv(Some(&data), &["a", "b"]), None);
     }
 
