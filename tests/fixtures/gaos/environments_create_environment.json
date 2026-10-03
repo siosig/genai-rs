@@ -1,0 +1,31 @@
+{
+  "created": "sample-created",
+  "file_count": "1",
+  "id": "sample-id",
+  "last_accessed": "sample-last_accessed",
+  "network": {
+    "allowlist": [
+      {
+        "credential": "sample-credential",
+        "domain": "sample-domain",
+        "transform": [
+          {
+            "key": "sample-transform"
+          }
+        ]
+      }
+    ]
+  },
+  "size_bytes": "1",
+  "sources": [
+    {
+      "content": "sample-content",
+      "encoding": "sample-encoding",
+      "source": "sample-source",
+      "target": "sample-target",
+      "type": "gcs"
+    }
+  ],
+  "status": "active",
+  "updated": "sample-updated"
+}

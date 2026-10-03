@@ -19,5 +19,5 @@
     }
   },
   "expected": null,
-  "expected_error": "field `generation_config` is only supported by the Vertex AI backend"
+  "expected_error": "generation_config parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

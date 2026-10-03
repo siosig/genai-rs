@@ -1,0 +1,21 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": "only supported in Gemini Enterprise Agent Platform",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_default",
+      "parameters": {
+        "config": {
+          "pageSize": 1
+        }
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "shared/tunings/test_list.py",
+  "test_method": "tunings.list",
+  "upstream_version": "2.28.0"
+}

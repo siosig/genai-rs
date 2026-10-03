@@ -1,0 +1,87 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/fileSearchStores/5en07ei3kojo-yo8sjqgvx2xf",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_get_success",
+      "parameters": {
+        "config": null,
+        "name": "fileSearchStores/5en07ei3kojo-yo8sjqgvx2xf"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/fileSearchStores/non-existent-file-search-store",
+            "query": []
+          }
+        ],
+        "server_error": "PERMISSION_DENIED"
+      },
+      "name": "test_get_not_found",
+      "parameters": {
+        "config": null,
+        "name": "fileSearchStores/non-existent-file-search-store"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/fileSearchStores/_invalid_file_search_store_name",
+            "query": []
+          }
+        ],
+        "server_error": "INVALID_ARGUMENT"
+      },
+      "name": "test_get_invalid_name",
+      "parameters": {
+        "config": null,
+        "name": "fileSearchStores/_invalid_file_search_store_name"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/genai-test-file-search-store",
+            "query": []
+          }
+        ],
+        "server_error": "Not Found"
+      },
+      "name": "test_get_not_a_file_search_store_name",
+      "parameters": {
+        "config": null,
+        "name": "genai-test-file-search-store"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "file_search_stores/test_get.py",
+  "test_method": "file_search_stores.get",
+  "upstream_version": "2.28.0"
+}

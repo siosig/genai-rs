@@ -7,5 +7,5 @@
     }
   },
   "expected": null,
-  "expected_error": "field `filter` is only supported by the Vertex AI backend"
+  "expected_error": "filter parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

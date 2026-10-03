@@ -51,6 +51,8 @@ except ModuleNotFoundError:  # Python < 3.11
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 TOOLS_DIR = pathlib.Path(__file__).resolve().parent
 METHODS_TOML = TOOLS_DIR / "methods.toml"
+# Written by `gen_gaos.py` (the `_gaos` surface); merged after `methods.toml`.
+METHODS_GAOS_TOML = TOOLS_DIR / "methods_gaos.toml"
 # Lives beside the generator, not under `specs/`: that directory is
 # git-ignored (spec-kit artifacts), so a clean CI checkout does not have it
 # and `codegen-check` could never run. An input to code generation has to be
@@ -298,14 +300,14 @@ LOCALE_EN: dict[str, Any] = {
     "non_method_rows": {
         "pagers": (
             "`Pager` / `AsyncPager` are types, not methods. Rust implements them as "
-            "`crate::pager::Pager<T>` (`page()` / `name()` / `page_size()` / "
+            "`crate::pagers::Pager<T>` (`page()` / `name()` / `page_size()` / "
             "`config()` / `next_page()`), verified by the `#[cfg(test)]` tests in "
-            "`src/pager.rs` and by the tests for each `list` method."
+            "`src/pagers.rs` and by the tests for each `list` method."
         ),
         "errors": (
             "The `APIError` family are types, not methods. Rust implements them as the "
-            "`crate::error::Error` enum (`Api` / `Function*` / `UnknownApiResponse` "
-            "and friends), verified by the `#[cfg(test)]` tests in `src/error.rs`."
+            "`crate::errors::Error` enum (`Api` / `Function*` / `UnknownApiResponse` "
+            "and friends), verified by the `#[cfg(test)]` tests in `src/errors.rs`."
         ),
     },
 }
@@ -377,8 +379,16 @@ MAX_TESTS_SHOWN = 3
 
 
 def load_methods() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    data = tomllib.loads(METHODS_TOML.read_text(encoding="utf-8"))
-    return data.get("client_module", []), data.get("method", [])
+    """The union of `methods.toml` and `methods_gaos.toml` (the latter if present)."""
+    client_modules: list[dict[str, Any]] = []
+    methods: list[dict[str, Any]] = []
+    for path in (METHODS_TOML, METHODS_GAOS_TOML):
+        if not path.exists():
+            continue
+        data = tomllib.loads(path.read_text(encoding="utf-8"))
+        client_modules += data.get("client_module", [])
+        methods += data.get("method", [])
+    return client_modules, methods
 
 
 # ---------------------------------------------------------------------------
@@ -515,8 +525,8 @@ def accessors(module: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
 
 
 def owner_source_paths(owner: str) -> set[str]:
-    """`crate::live::music::LiveMusicSession` -> the files that may hold its
-    own `#[cfg(test)]` module (`src/live/music.rs`, `src/live/music/mod.rs`)."""
+    """`crate::live_music::LiveMusicSession` -> the files that may hold its
+    own `#[cfg(test)]` module (`src/live_music.rs`, `src/live_music/mod.rs`)."""
     parts = owner.removeprefix("crate::").split("::")[:-1]
     stem = "src/" + "/".join(parts)
     return {f"{stem}.rs", f"{stem}/mod.rs"}

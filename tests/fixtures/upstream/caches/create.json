@@ -1,0 +1,582 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "fileData": {
+                        "file_uri": "gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf",
+                        "mime_type": "application/pdf"
+                      }
+                    },
+                    {
+                      "fileData": {
+                        "file_uri": "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
+                        "mime_type": "application/pdf"
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "displayName": "test cache",
+              "model": "models/gemini-2.5-flash",
+              "systemInstruction": {
+                "parts": [
+                  {
+                    "text": "What is the sum of the two pdfs?"
+                  }
+                ],
+                "role": "user"
+              },
+              "ttl": "86400s"
+            },
+            "method": "POST",
+            "path": "/v1beta/cachedContents",
+            "query": []
+          }
+        ],
+        "server_error": "INVALID_ARGUMENT"
+      },
+      "name": "test_caches_create_with_gcs_uri",
+      "parameters": {
+        "config": {
+          "contents": [
+            {
+              "parts": [
+                {
+                  "fileData": {
+                    "fileUri": "gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf",
+                    "mimeType": "application/pdf"
+                  }
+                },
+                {
+                  "fileData": {
+                    "fileUri": "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
+                    "mimeType": "application/pdf"
+                  }
+                }
+              ],
+              "role": "user"
+            }
+          ],
+          "displayName": "test cache",
+          "systemInstruction": {
+            "parts": [
+              {
+                "text": "What is the sum of the two pdfs?"
+              }
+            ],
+            "role": "user"
+          },
+          "ttl": "86400s"
+        },
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_caches_create_with_gcs_uri_cmek",
+      "parameters": {
+        "config": {
+          "contents": [
+            {
+              "parts": [
+                {
+                  "fileData": {
+                    "fileUri": "gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf",
+                    "mimeType": "application/pdf"
+                  }
+                },
+                {
+                  "fileData": {
+                    "fileUri": "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
+                    "mimeType": "application/pdf"
+                  }
+                }
+              ],
+              "role": "user"
+            }
+          ],
+          "displayName": "test cache",
+          "kmsKeyName": "projects/test-project/locations/us-central1/keyRings/test-keyring/cryptoKeys/test-key",
+          "systemInstruction": {
+            "parts": [
+              {
+                "text": "What is the sum of the two pdfs?"
+              }
+            ],
+            "role": "user"
+          },
+          "ttl": "86400s"
+        },
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "fileData": {
+                        "file_uri": "gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf",
+                        "mime_type": "application/pdf"
+                      }
+                    },
+                    {
+                      "fileData": {
+                        "file_uri": "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
+                        "mime_type": "application/pdf"
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "displayName": "test cache",
+              "expireTime": "2025-12-20T00:00:00Z",
+              "model": "models/gemini-2.5-flash",
+              "systemInstruction": {
+                "parts": [
+                  {
+                    "text": "What is the sum of the two pdfs?"
+                  }
+                ],
+                "role": "user"
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/cachedContents",
+            "query": []
+          }
+        ],
+        "server_error": "INVALID_ARGUMENT"
+      },
+      "name": "test_caches_create_with_gcs_uri_expire_time",
+      "parameters": {
+        "config": {
+          "contents": [
+            {
+              "parts": [
+                {
+                  "fileData": {
+                    "fileUri": "gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf",
+                    "mimeType": "application/pdf"
+                  }
+                },
+                {
+                  "fileData": {
+                    "fileUri": "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
+                    "mimeType": "application/pdf"
+                  }
+                }
+              ],
+              "role": "user"
+            }
+          ],
+          "displayName": "test cache",
+          "expireTime": "2025-12-20T00:00:00Z",
+          "systemInstruction": {
+            "parts": [
+              {
+                "text": "What is the sum of the two pdfs?"
+              }
+            ],
+            "role": "user"
+          }
+        },
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "fileData": {
+                        "file_uri": "gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf",
+                        "mime_type": "application/pdf"
+                      }
+                    },
+                    {
+                      "fileData": {
+                        "file_uri": "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
+                        "mime_type": "application/pdf"
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "displayName": "test cache",
+              "model": "models/gemini-2.5-flash",
+              "systemInstruction": {
+                "parts": [
+                  {
+                    "text": "What is the sum of the two pdfs?"
+                  }
+                ],
+                "role": "user"
+              },
+              "ttl": "86400s"
+            },
+            "method": "POST",
+            "path": "/v1beta/cachedContents",
+            "query": []
+          }
+        ],
+        "server_error": "INVALID_ARGUMENT"
+      },
+      "name": "test_caches_create_model_partial_path_1",
+      "parameters": {
+        "config": {
+          "contents": [
+            {
+              "parts": [
+                {
+                  "fileData": {
+                    "fileUri": "gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf",
+                    "mimeType": "application/pdf"
+                  }
+                },
+                {
+                  "fileData": {
+                    "fileUri": "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
+                    "mimeType": "application/pdf"
+                  }
+                }
+              ],
+              "role": "user"
+            }
+          ],
+          "displayName": "test cache",
+          "systemInstruction": {
+            "parts": [
+              {
+                "text": "What is the sum of the two pdfs?"
+              }
+            ],
+            "role": "user"
+          },
+          "ttl": "86400s"
+        },
+        "model": "models/gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "fileData": {
+                        "file_uri": "gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf",
+                        "mime_type": "application/pdf"
+                      }
+                    },
+                    {
+                      "fileData": {
+                        "file_uri": "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
+                        "mime_type": "application/pdf"
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "displayName": "test cache",
+              "model": "models/publishers/google/models/gemini-2.5-flash",
+              "systemInstruction": {
+                "parts": [
+                  {
+                    "text": "What is the sum of the two pdfs?"
+                  }
+                ],
+                "role": "user"
+              },
+              "ttl": "86400s"
+            },
+            "method": "POST",
+            "path": "/v1beta/cachedContents",
+            "query": []
+          }
+        ],
+        "server_error": "404"
+      },
+      "name": "test_caches_create_model_partial_path_2",
+      "parameters": {
+        "config": {
+          "contents": [
+            {
+              "parts": [
+                {
+                  "fileData": {
+                    "fileUri": "gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf",
+                    "mimeType": "application/pdf"
+                  }
+                },
+                {
+                  "fileData": {
+                    "fileUri": "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
+                    "mimeType": "application/pdf"
+                  }
+                }
+              ],
+              "role": "user"
+            }
+          ],
+          "displayName": "test cache",
+          "systemInstruction": {
+            "parts": [
+              {
+                "text": "What is the sum of the two pdfs?"
+              }
+            ],
+            "role": "user"
+          },
+          "ttl": "86400s"
+        },
+        "model": "publishers/google/models/gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "fileData": {
+                        "file_uri": "https://generativelanguage.googleapis.com/v1beta/files/v200dhvn15h7",
+                        "mime_type": "application/pdf"
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "displayName": "test cache",
+              "model": "models/gemini-2.5-flash",
+              "systemInstruction": {
+                "parts": [
+                  {
+                    "text": "What is the sum of the two pdfs?"
+                  }
+                ],
+                "role": "user"
+              },
+              "ttl": "86400s"
+            },
+            "method": "POST",
+            "path": "/v1beta/cachedContents",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_caches_create_with_googleai_file",
+      "parameters": {
+        "config": {
+          "contents": [
+            {
+              "parts": [
+                {
+                  "fileData": {
+                    "fileUri": "https://generativelanguage.googleapis.com/v1beta/files/v200dhvn15h7",
+                    "mimeType": "application/pdf"
+                  }
+                }
+              ],
+              "role": "user"
+            }
+          ],
+          "displayName": "test cache",
+          "systemInstruction": {
+            "parts": [
+              {
+                "text": "What is the sum of the two pdfs?"
+              }
+            ],
+            "role": "user"
+          },
+          "ttl": "86400s"
+        },
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "fileData": {
+                        "file_uri": "https://generativelanguage.googleapis.com/v1beta/files/v200dhvn15h7",
+                        "mime_type": "application/pdf"
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "displayName": "test cache",
+              "expireTime": "2025-12-20T00:00:00Z",
+              "model": "models/gemini-2.5-flash",
+              "systemInstruction": {
+                "parts": [
+                  {
+                    "text": "What is the sum of the two pdfs?"
+                  }
+                ],
+                "role": "user"
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/cachedContents",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_caches_create_with_googleai_file_expire_time",
+      "parameters": {
+        "config": {
+          "contents": [
+            {
+              "parts": [
+                {
+                  "fileData": {
+                    "fileUri": "https://generativelanguage.googleapis.com/v1beta/files/v200dhvn15h7",
+                    "mimeType": "application/pdf"
+                  }
+                }
+              ],
+              "role": "user"
+            }
+          ],
+          "displayName": "test cache",
+          "expireTime": "2025-12-20T00:00:00Z",
+          "systemInstruction": {
+            "parts": [
+              {
+                "text": "What is the sum of the two pdfs?"
+              }
+            ],
+            "role": "user"
+          }
+        },
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "fileData": {
+                        "file_uri": "https://generativelanguage.googleapis.com/v1beta/files/v200dhvn15h7",
+                        "mime_type": "application/pdf"
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "displayName": "test cache",
+              "model": "models/gemini-2.5-flash",
+              "systemInstruction": {
+                "parts": [
+                  {
+                    "text": "What is the sum of the two pdfs?"
+                  }
+                ],
+                "role": "user"
+              },
+              "ttl": "86400s"
+            },
+            "method": "POST",
+            "path": "/v1beta/cachedContents",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_caches_create_with_googleai_file_model_partial_path_1",
+      "parameters": {
+        "config": {
+          "contents": [
+            {
+              "parts": [
+                {
+                  "fileData": {
+                    "fileUri": "https://generativelanguage.googleapis.com/v1beta/files/v200dhvn15h7",
+                    "mimeType": "application/pdf"
+                  }
+                }
+              ],
+              "role": "user"
+            }
+          ],
+          "displayName": "test cache",
+          "systemInstruction": {
+            "parts": [
+              {
+                "text": "What is the sum of the two pdfs?"
+              }
+            ],
+            "role": "user"
+          },
+          "ttl": "86400s"
+        },
+        "model": "models/gemini-2.5-flash"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "caches/test_create.py",
+  "test_method": "caches.create",
+  "upstream_version": "2.28.0"
+}

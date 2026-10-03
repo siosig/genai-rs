@@ -100,7 +100,7 @@ struct = "Documents"
 
 [[client_module]]
 name = "auth_tokens"
-owner = "crate::auth_tokens::AuthTokens"
+owner = "crate::tokens::AuthTokens"
 struct = "AuthTokens"
 
 # ---------------------------------------------------------------------------
@@ -724,7 +724,7 @@ http = "GET"
 
 [[method]]
 module = "auth_tokens"
-owner = "crate::auth_tokens::AuthTokens"
+owner = "crate::tokens::AuthTokens"
 name = "create"
 python = "tokens.create"
 args = ["config: Option<crate::types::CreateAuthTokenConfig>"]
@@ -834,25 +834,25 @@ owner = "crate::live::Live"
 name = "music"
 python = "live.music"
 args = []
-ret = "crate::live::music::LiveMusic"
+ret = "crate::live_music::LiveMusic"
 kind = "manual"
 path = ""
 http = ""
 
 [[method]]
 module = "live_music"
-owner = "crate::live::music::LiveMusic"
+owner = "crate::live_music::LiveMusic"
 name = "connect"
 python = "live.music.connect"
 args = ["model: &str"]
-ret = "crate::live::music::LiveMusicSession"
+ret = "crate::live_music::LiveMusicSession"
 kind = "session"
 path = "BidiGenerateMusic"
 http = "WS"
 
 [[method]]
 module = "live_music"
-owner = "crate::live::music::LiveMusicSession"
+owner = "crate::live_music::LiveMusicSession"
 name = "set_weighted_prompts"
 python = "live.music.set_weighted_prompts"
 args = ["prompts: Vec<crate::types::WeightedPrompt>"]
@@ -863,7 +863,7 @@ http = "WS"
 
 [[method]]
 module = "live_music"
-owner = "crate::live::music::LiveMusicSession"
+owner = "crate::live_music::LiveMusicSession"
 name = "set_music_generation_config"
 python = "live.music.set_music_generation_config"
 args = ["config: crate::types::LiveMusicGenerationConfig"]
@@ -874,7 +874,7 @@ http = "WS"
 
 [[method]]
 module = "live_music"
-owner = "crate::live::music::LiveMusicSession"
+owner = "crate::live_music::LiveMusicSession"
 name = "play"
 python = "live.music.play"
 args = []
@@ -885,7 +885,7 @@ http = "WS"
 
 [[method]]
 module = "live_music"
-owner = "crate::live::music::LiveMusicSession"
+owner = "crate::live_music::LiveMusicSession"
 name = "pause"
 python = "live.music.pause"
 args = []
@@ -896,7 +896,7 @@ http = "WS"
 
 [[method]]
 module = "live_music"
-owner = "crate::live::music::LiveMusicSession"
+owner = "crate::live_music::LiveMusicSession"
 name = "stop"
 python = "live.music.stop"
 args = []
@@ -907,7 +907,7 @@ http = "WS"
 
 [[method]]
 module = "live_music"
-owner = "crate::live::music::LiveMusicSession"
+owner = "crate::live_music::LiveMusicSession"
 name = "reset_context"
 python = "live.music.reset_context"
 args = []
@@ -918,7 +918,7 @@ http = "WS"
 
 [[method]]
 module = "live_music"
-owner = "crate::live::music::LiveMusicSession"
+owner = "crate::live_music::LiveMusicSession"
 name = "receive"
 python = "live.music.receive"
 args = []
@@ -929,7 +929,7 @@ http = "WS"
 
 [[method]]
 module = "live_music"
-owner = "crate::live::music::LiveMusicSession"
+owner = "crate::live_music::LiveMusicSession"
 name = "close"
 python = "live.music.close"
 args = []

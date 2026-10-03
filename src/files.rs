@@ -17,8 +17,8 @@ use tokio::io::AsyncWriteExt;
 use crate::{
     client::Client,
     converters::generated::files as conv,
-    error::{Error, Result},
-    pager::{PagedItem, Pager},
+    errors::{Error, Result},
+    pagers::{Page, PagedItem, Pager},
     types::{
         DeleteFileConfig, DeleteFileResponse, DownloadFileConfig, File, GeneratedVideo,
         GetFileConfig, HttpOptions, ListFilesConfig, ListFilesResponse, RegisterFilesConfig,
@@ -209,6 +209,53 @@ pub struct Files {
 }
 
 impl Files {
+    /// Retrieves a `File`'s metadata. Mirrors Python's `Files.get`.
+    ///
+    /// # Errors
+    /// Returns [`crate::Error::Validation`] if `name` is empty, or
+    /// [`crate::Error::Api`] for a non-2xx response.
+    pub async fn get(&self, name: &str, config: Option<GetFileConfig>) -> Result<File> {
+        let file_id = resolve_url_file(conv::get_file_parameters_to_mldev, name)?;
+        let path = format!("files/{file_id}");
+        let http_options = config.and_then(|c| c.http_options);
+        let response = self
+            .client
+            .http()
+            .request(Method::GET, &path, None, None, http_options.as_ref())
+            .await?;
+        let wire: Value = serde_json::from_slice(&response.body)?;
+        Ok(serde_json::from_value(wire)?)
+    }
+
+    /// Deletes a remotely stored `File`. Mirrors Python's `Files.delete`.
+    ///
+    /// # Errors
+    /// Returns [`crate::Error::Validation`] if `name` is empty, or
+    /// [`crate::Error::Api`] for a non-2xx response.
+    pub async fn delete(
+        &self,
+        name: &str,
+        config: Option<DeleteFileConfig>,
+    ) -> Result<DeleteFileResponse> {
+        let file_id = resolve_url_file(conv::delete_file_parameters_to_mldev, name)?;
+        let path = format!("files/{file_id}");
+        let http_options = config.and_then(|c| c.http_options);
+        let response = self
+            .client
+            .http()
+            .request(Method::DELETE, &path, None, None, http_options.as_ref())
+            .await?;
+        let wire: Value = if response.body.is_empty() {
+            Value::Object(Map::new())
+        } else {
+            serde_json::from_slice(&response.body)?
+        };
+        let mldev = conv::delete_file_response_from_mldev(&wire, None, None)?;
+        let mut parsed: DeleteFileResponse = serde_json::from_value(mldev)?;
+        parsed.sdk_http_response = Some(response.to_sdk_http_response());
+        Ok(parsed)
+    }
+
     /// Uploads `source` as a new [`File`] via the Gemini Developer API's
     /// resumable-upload protocol. Mirrors Python's `Files.upload`.
     ///
@@ -240,7 +287,7 @@ impl Files {
                             .to_string()
                     });
                 (
-                    crate::http::upload::UploadSourceData::open(&path).await?,
+                    crate::api_client::upload::UploadSourceData::open(&path).await?,
                     mime_type,
                 )
             }
@@ -250,7 +297,7 @@ impl Files {
                     .and_then(|c| c.mime_type.clone())
                     .unwrap_or(mime_type);
                 (
-                    crate::http::upload::UploadSourceData::Bytes(data),
+                    crate::api_client::upload::UploadSourceData::Bytes(data),
                     mime_type,
                 )
             }
@@ -277,7 +324,7 @@ impl Files {
         let params = serde_json::json!({ "file": Value::Object(file_obj) });
         let start_body = conv::create_file_parameters_to_mldev(&params, None, None)?;
 
-        let body = crate::http::upload::resumable_upload(
+        let body = crate::api_client::upload::resumable_upload(
             self.client.http(),
             "upload/v1beta/files",
             start_body,
@@ -293,80 +340,6 @@ impl Files {
         let wire: Value = serde_json::from_slice(&body)?;
         let file_value = wire.get("file").cloned().unwrap_or(wire);
         Ok(serde_json::from_value(file_value)?)
-    }
-
-    /// Retrieves a `File`'s metadata. Mirrors Python's `Files.get`.
-    ///
-    /// # Errors
-    /// Returns [`crate::Error::Validation`] if `name` is empty, or
-    /// [`crate::Error::Api`] for a non-2xx response.
-    pub async fn get(&self, name: &str, config: Option<GetFileConfig>) -> Result<File> {
-        let file_id = resolve_url_file(conv::get_file_parameters_to_mldev, name)?;
-        let path = format!("files/{file_id}");
-        let http_options = config.and_then(|c| c.http_options);
-        let response = self
-            .client
-            .http()
-            .request(Method::GET, &path, None, None, http_options.as_ref())
-            .await?;
-        let wire: Value = serde_json::from_slice(&response.body)?;
-        Ok(serde_json::from_value(wire)?)
-    }
-
-    /// Lists `File`s owned by the requesting project. Mirrors Python's
-    /// `Files.list`.
-    ///
-    /// # Errors
-    /// Returns [`crate::Error::Api`] for a non-2xx response.
-    pub async fn list(&self, config: Option<ListFilesConfig>) -> Result<Pager<File>> {
-        let config_map = match config {
-            Some(config) => serde_json::to_value(config)?
-                .as_object()
-                .cloned()
-                .unwrap_or_default(),
-            None => Map::new(),
-        };
-        let (files, next_page_token) =
-            fetch_files_page(self.client.clone(), config_map.clone()).await?;
-        let client = self.client.clone();
-        let fetch = Arc::new(move |cfg: Map<String, Value>| {
-            Box::pin(fetch_files_page(client.clone(), cfg))
-                as Pin<Box<dyn Future<Output = Result<(Vec<File>, Option<String>)>> + Send>>
-        });
-        Ok(Pager::new(
-            PagedItem::Files,
-            files,
-            config_map,
-            next_page_token,
-            fetch,
-        ))
-    }
-
-    /// Deletes a remotely stored `File`. Mirrors Python's `Files.delete`.
-    ///
-    /// # Errors
-    /// Returns [`crate::Error::Validation`] if `name` is empty, or
-    /// [`crate::Error::Api`] for a non-2xx response.
-    pub async fn delete(
-        &self,
-        name: &str,
-        config: Option<DeleteFileConfig>,
-    ) -> Result<DeleteFileResponse> {
-        let file_id = resolve_url_file(conv::delete_file_parameters_to_mldev, name)?;
-        let path = format!("files/{file_id}");
-        let http_options = config.and_then(|c| c.http_options);
-        let response = self
-            .client
-            .http()
-            .request(Method::DELETE, &path, None, None, http_options.as_ref())
-            .await?;
-        let wire: Value = if response.body.is_empty() {
-            Value::Object(Map::new())
-        } else {
-            serde_json::from_slice(&response.body)?
-        };
-        let mldev = conv::delete_file_response_from_mldev(&wire, None, None)?;
-        Ok(serde_json::from_value(mldev)?)
     }
 
     /// Downloads a `File`'s raw bytes (`GET {file}:download?alt=media`).
@@ -387,6 +360,63 @@ impl Files {
             .http()
             .download(&path, Some("alt=media"), http_options.as_ref())
             .await
+    }
+
+    /// Registers Cloud Storage URIs as `File`s with the file service.
+    /// Mirrors Python's internal `Files._register_files`.
+    ///
+    /// Deviation from Python: the public `Files.register_files` additionally
+    /// attaches an OAuth bearer token derived from a
+    /// `google.auth.credentials.Credentials` object, which this crate has no
+    /// equivalent for (no Vertex/GCP auth support). Callers that need an
+    /// `Authorization` header can set one via `config.http_options.headers`.
+    ///
+    /// # Errors
+    /// Returns [`crate::Error::Api`] for a non-2xx response.
+    pub async fn register_files(
+        &self,
+        uris: Vec<String>,
+        config: Option<RegisterFilesConfig>,
+    ) -> Result<RegisterFilesResponse> {
+        let http_options = config.and_then(|c| c.http_options);
+        let params = serde_json::json!({ "uris": uris });
+        let body = conv::internal_register_files_parameters_to_mldev(&params, None, None)?;
+        let response = self
+            .client
+            .http()
+            .request(
+                Method::POST,
+                "files:register",
+                None,
+                Some(body),
+                http_options.as_ref(),
+            )
+            .await?;
+        let wire: Value = serde_json::from_slice(&response.body)?;
+        let mldev = conv::register_files_response_from_mldev(&wire, None, None)?;
+        Ok(serde_json::from_value(mldev)?)
+    }
+
+    /// Lists `File`s owned by the requesting project. Mirrors Python's
+    /// `Files.list`.
+    ///
+    /// # Errors
+    /// Returns [`crate::Error::Api`] for a non-2xx response.
+    pub async fn list(&self, config: Option<ListFilesConfig>) -> Result<Pager<File>> {
+        let config_map = match config {
+            Some(config) => serde_json::to_value(config)?
+                .as_object()
+                .cloned()
+                .unwrap_or_default(),
+            None => Map::new(),
+        };
+        let first = fetch_files_page(self.client.clone(), config_map.clone()).await?;
+        let client = self.client.clone();
+        let fetch = Arc::new(move |cfg: Map<String, Value>| {
+            Box::pin(fetch_files_page(client.clone(), cfg))
+                as Pin<Box<dyn Future<Output = Result<Page<File>>> + Send>>
+        });
+        Ok(Pager::new(PagedItem::Files, first, config_map, fetch))
     }
 
     /// Downloads a file's data as a stream of chunks, instead of buffering
@@ -461,41 +491,6 @@ impl Files {
         let stream = self.download_stream(file, config).await?;
         write_stream_to_path(stream, destination.as_ref()).await
     }
-
-    /// Registers Cloud Storage URIs as `File`s with the file service.
-    /// Mirrors Python's internal `Files._register_files`.
-    ///
-    /// Deviation from Python: the public `Files.register_files` additionally
-    /// attaches an OAuth bearer token derived from a
-    /// `google.auth.credentials.Credentials` object, which this crate has no
-    /// equivalent for (no Vertex/GCP auth support). Callers that need an
-    /// `Authorization` header can set one via `config.http_options.headers`.
-    ///
-    /// # Errors
-    /// Returns [`crate::Error::Api`] for a non-2xx response.
-    pub async fn register_files(
-        &self,
-        uris: Vec<String>,
-        config: Option<RegisterFilesConfig>,
-    ) -> Result<RegisterFilesResponse> {
-        let http_options = config.and_then(|c| c.http_options);
-        let params = serde_json::json!({ "uris": uris });
-        let body = conv::internal_register_files_parameters_to_mldev(&params, None, None)?;
-        let response = self
-            .client
-            .http()
-            .request(
-                Method::POST,
-                "files:register",
-                None,
-                Some(body),
-                http_options.as_ref(),
-            )
-            .await?;
-        let wire: Value = serde_json::from_slice(&response.body)?;
-        let mldev = conv::register_files_response_from_mldev(&wire, None, None)?;
-        Ok(serde_json::from_value(mldev)?)
-    }
 }
 
 /// Writes `stream` to `destination` in [`DOWNLOAD_CHUNK_SIZE`]-sized
@@ -554,10 +549,7 @@ fn resolve_url_file(
         .unwrap_or_else(|| panic!("get/delete file converters always set _url.file")))
 }
 
-async fn fetch_files_page(
-    client: Client,
-    config: Map<String, Value>,
-) -> Result<(Vec<File>, Option<String>)> {
+async fn fetch_files_page(client: Client, config: Map<String, Value>) -> Result<Page<File>> {
     let http_options: Option<HttpOptions> = config
         .get("http_options")
         .cloned()
@@ -582,10 +574,11 @@ async fn fetch_files_page(
     let wire: Value = serde_json::from_slice(&response.body)?;
     let mldev = conv::list_files_response_from_mldev(&wire, None, None)?;
     let list_response: ListFilesResponse = serde_json::from_value(mldev)?;
-    Ok((
-        list_response.files.unwrap_or_default(),
-        list_response.next_page_token,
-    ))
+    Ok(Page {
+        items: list_response.files.unwrap_or_default(),
+        next_page_token: list_response.next_page_token,
+        sdk_http_response: Some(response.to_sdk_http_response()),
+    })
 }
 
 /// Builds a percent-encoded query string from a converter's `_query` object

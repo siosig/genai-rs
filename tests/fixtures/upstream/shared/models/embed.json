@@ -1,0 +1,83 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "requests": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "Hello world!"
+                      }
+                    ],
+                    "role": "user"
+                  },
+                  "model": "models/gemini-embedding-001",
+                  "outputDimensionality": 10
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-embedding-001:batchEmbedContents",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_embed",
+      "parameters": {
+        "config": {
+          "outputDimensionality": 10
+        },
+        "contents": "Hello world!",
+        "model": "gemini-embedding-001"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "requests": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "Hello world!"
+                      }
+                    ],
+                    "role": "user"
+                  },
+                  "model": "models/gemini-embedding-2",
+                  "outputDimensionality": 10
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-embedding-2:batchEmbedContents",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_embed_gemini_embedding_2",
+      "parameters": {
+        "config": {
+          "outputDimensionality": 10
+        },
+        "contents": "Hello world!",
+        "model": "gemini-embedding-2"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "shared/models/test_embed.py",
+  "test_method": "models.embed_content",
+  "upstream_version": "2.28.0"
+}

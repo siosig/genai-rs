@@ -1,0 +1,8 @@
+{
+  "name": "sample-name",
+  "state": "enabled",
+  "subscribed_events": [
+    "batch.succeeded"
+  ],
+  "uri": "sample-uri"
+}

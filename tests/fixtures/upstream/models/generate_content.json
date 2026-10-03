@@ -1,0 +1,1756 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is your name?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {}
+            },
+            "method": "POST",
+            "path": "/v1/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_http_options_in_method",
+      "parameters": {
+        "config": {
+          "httpOptions": {
+            "apiVersion": "v1",
+            "headers": {
+              "test": "headers"
+            }
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 300 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_union_contents_is_string",
+      "parameters": {
+        "config": null,
+        "contents": "Tell me a story in 300 words.",
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 300 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_union_contents_is_content",
+      "parameters": {
+        "config": null,
+        "contents": {
+          "parts": [
+            {
+              "text": "Tell me a story in 300 words."
+            }
+          ],
+          "role": "user"
+        },
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 300 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_union_contents_is_parts",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "text": "Tell me a story in 300 words."
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 300 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_union_contents_is_part",
+      "parameters": {
+        "config": null,
+        "contents": {
+          "text": "Tell me a story in 300 words."
+        },
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 300 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_sync_content_list",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 300 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is your name?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/meta/llama-3.2-90b-vision-instruct-maas:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": "404"
+      },
+      "name": "test_llama",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "meta/llama-3.2-90b-vision-instruct-maas"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "high"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {},
+              "systemInstruction": {
+                "parts": [
+                  {
+                    "text": "I say high, you say low"
+                  }
+                ],
+                "role": "user"
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_system_instructions",
+      "parameters": {
+        "config": {
+          "systemInstruction": {
+            "parts": [
+              {
+                "text": "I say high, you say low"
+              }
+            ],
+            "role": "user"
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "high"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is your name?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {},
+              "labels": {
+                "label1": "value1",
+                "label2": "value2"
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_labels",
+      "parameters": {
+        "config": {
+          "labels": {
+            "label1": "value1",
+            "label2": "value2"
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is your name?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "candidateCount": 2,
+                "maxOutputTokens": 100,
+                "responseMimeType": "application/json",
+                "seed": 42,
+                "stopSequences": [
+                  "\n"
+                ],
+                "temperature": 0.5,
+                "topK": 2.0,
+                "topP": 0.5
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_simple_shared_generation_config",
+      "parameters": {
+        "config": {
+          "candidateCount": 2,
+          "maxOutputTokens": 100,
+          "responseMimeType": "application/json",
+          "seed": 42,
+          "stopSequences": [
+            "\n"
+          ],
+          "temperature": 0.5,
+          "topK": 2.0,
+          "topP": 0.5
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 30 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "candidateCount": 2
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_2_candidates_gemini_2_5_flash",
+      "parameters": {
+        "config": {
+          "candidateCount": 2
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 30 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "method",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_safety_settings_on_difference",
+      "parameters": {
+        "config": {
+          "safetySettings": [
+            {
+              "category": "HARM_CATEGORY_HATE_SPEECH",
+              "method": "SEVERITY",
+              "threshold": "BLOCK_ONLY_HIGH"
+            },
+            {
+              "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+              "method": "PROBABILITY",
+              "threshold": "BLOCK_LOW_AND_ABOVE"
+            }
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 30 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "frequencyPenalty": 0.5,
+                "presencePenalty": 0.5
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.0-flash-001:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_penalty",
+      "parameters": {
+        "config": {
+          "frequencyPenalty": 0.5,
+          "presencePenalty": 0.5
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 30 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.0-flash-001"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 30 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "frequencyPenalty": 0.5,
+                "presencePenalty": 0.5
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.0-flash-001:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_penalty_gemini_2_0_flash",
+      "parameters": {
+        "config": {
+          "frequencyPenalty": 0.5,
+          "presencePenalty": 0.5
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 30 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.0-flash-001"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Why is the sky blue?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {},
+              "tools": [
+                {
+                  "googleSearch": {}
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_google_search_tool",
+      "parameters": {
+        "config": {
+          "tools": [
+            {
+              "googleSearch": {}
+            }
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Why is the sky blue?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Find restaurants near me."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {},
+              "toolConfig": {
+                "retrievalConfig": {
+                  "lat_lng": {
+                    "latitude": 37.421993,
+                    "longitude": -122.079725
+                  }
+                }
+              },
+              "tools": [
+                {
+                  "googleMaps": {}
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_google_maps_tool",
+      "parameters": {
+        "config": {
+          "toolConfig": {
+            "retrievalConfig": {
+              "latLng": {
+                "latitude": 37.421993,
+                "longitude": -122.079725
+              }
+            }
+          },
+          "tools": [
+            {
+              "googleMaps": {}
+            }
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Find restaurants near me."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is the QQQ stock price?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {},
+              "tools": [
+                {
+                  "googleSearch": {
+                    "timeRangeFilter": {
+                      "end_time": "2025-05-03T00:00:00Z",
+                      "start_time": "2025-05-01T00:00:00Z"
+                    }
+                  }
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_google_search_tool_with_time_range_filter",
+      "parameters": {
+        "config": {
+          "tools": [
+            {
+              "googleSearch": {
+                "timeRangeFilter": {
+                  "endTime": "2025-05-03T00:00:00Z",
+                  "startTime": "2025-05-01T00:00:00Z"
+                }
+              }
+            }
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is the QQQ stock price?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_google_search_tool_with_exclude_domains",
+      "parameters": {
+        "config": {
+          "tools": [
+            {
+              "googleSearch": {
+                "excludeDomains": [
+                  "amazon.com",
+                  "facebook.com"
+                ]
+              }
+            }
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Why is the sky blue?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_google_search_tool_with_blocking_confidence",
+      "parameters": {
+        "config": {
+          "tools": [
+            {
+              "googleSearch": {
+                "blockingConfidence": "BLOCK_LOW_AND_ABOVE"
+              }
+            }
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Why is the sky blue?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_enterprise_web_search_tool",
+      "parameters": {
+        "config": {
+          "tools": [
+            {
+              "enterpriseWebSearch": {}
+            }
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Why is the sky blue?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_enterprise_web_search_tool_with_exclude_domains",
+      "parameters": {
+        "config": {
+          "tools": [
+            {
+              "enterpriseWebSearch": {
+                "excludeDomains": [
+                  "amazon.com",
+                  "facebook.com"
+                ]
+              }
+            }
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Why is the sky blue?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_enterprise_web_search_tool_with_blocking_confidence",
+      "parameters": {
+        "config": {
+          "tools": [
+            {
+              "enterpriseWebSearch": {
+                "blockingConfidence": "BLOCK_LOW_AND_ABOVE"
+              }
+            }
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Why is the sky blue?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Produce a speech response saying \"Cheese\""
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "responseModalities": [
+                  "audio"
+                ],
+                "speechConfig": {
+                  "voice_config": {
+                    "prebuilt_voice_config": {
+                      "voice_name": "charon"
+                    }
+                  }
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash-preview-tts:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_speech_with_config",
+      "parameters": {
+        "config": {
+          "responseModalities": [
+            "audio"
+          ],
+          "speechConfig": {
+            "voiceConfig": {
+              "prebuiltVoiceConfig": {
+                "voiceName": "charon"
+              }
+            }
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Produce a speech response saying \"Cheese\""
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash-preview-tts"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Alice says \"Hi\", Bob replies with \"what's up\"?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "responseModalities": [
+                  "audio"
+                ],
+                "speechConfig": {
+                  "multi_speaker_voice_config": {
+                    "speaker_voice_configs": [
+                      {
+                        "speaker": "Alice",
+                        "voice_config": {
+                          "prebuilt_voice_config": {
+                            "voice_name": "leda"
+                          }
+                        }
+                      },
+                      {
+                        "speaker": "Bob",
+                        "voice_config": {
+                          "prebuilt_voice_config": {
+                            "voice_name": "kore"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash-preview-tts:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_speech_with_multi_speaker_voice_config",
+      "parameters": {
+        "config": {
+          "responseModalities": [
+            "audio"
+          ],
+          "speechConfig": {
+            "multiSpeakerVoiceConfig": {
+              "speakerVoiceConfigs": [
+                {
+                  "speaker": "Alice",
+                  "voiceConfig": {
+                    "prebuiltVoiceConfig": {
+                      "voiceName": "leda"
+                    }
+                  }
+                },
+                {
+                  "speaker": "Bob",
+                  "voiceConfig": {
+                    "prebuiltVoiceConfig": {
+                      "voiceName": "kore"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Alice says \"Hi\", Bob replies with \"what's up\"?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash-preview-tts"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Alice says \"Hi\", Bob replies with \"what's up\"?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "responseModalities": [
+                  "audio"
+                ],
+                "speechConfig": {
+                  "multi_speaker_voice_config": {
+                    "speaker_voice_configs": [
+                      {
+                        "speaker": "Alice",
+                        "voice_config": {
+                          "prebuilt_voice_config": {
+                            "voice_name": "leda"
+                          }
+                        }
+                      },
+                      {
+                        "speaker": "Bob",
+                        "voice_config": {
+                          "prebuilt_voice_config": {
+                            "voice_name": "kore"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "voice_config": {
+                    "prebuilt_voice_config": {
+                      "voice_name": "puck"
+                    }
+                  }
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash-preview-tts:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": "mutually exclusive"
+      },
+      "name": "test_speech_error_with_speech_config_and_multi_speech_config",
+      "parameters": {
+        "config": {
+          "responseModalities": [
+            "audio"
+          ],
+          "speechConfig": {
+            "multiSpeakerVoiceConfig": {
+              "speakerVoiceConfigs": [
+                {
+                  "speaker": "Alice",
+                  "voiceConfig": {
+                    "prebuiltVoiceConfig": {
+                      "voiceName": "leda"
+                    }
+                  }
+                },
+                {
+                  "speaker": "Bob",
+                  "voiceConfig": {
+                    "prebuiltVoiceConfig": {
+                      "voiceName": "kore"
+                    }
+                  }
+                }
+              ]
+            },
+            "voiceConfig": {
+              "prebuiltVoiceConfig": {
+                "voiceName": "puck"
+              }
+            }
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Alice says \"Hi\", Bob replies with \"what's up\"?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash-preview-tts"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Say hello!"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "responseModalities": [
+                  "audio"
+                ],
+                "speechConfig": {
+                  "voice_config": {
+                    "prebuilt_voice_config": {
+                      "voice_name": "charon"
+                    }
+                  }
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash-preview-tts:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_union_speech_string_config",
+      "parameters": {
+        "config": {
+          "responseModalities": [
+            "audio"
+          ],
+          "speechConfig": "charon"
+        },
+        "contents": "Say hello!",
+        "model": "gemini-2.5-flash-preview-tts"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_audio_timestamp",
+      "parameters": {
+        "config": {
+          "audioTimestamp": true
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "fileData": {
+                  "fileUri": "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
+                  "mimeType": "audio/mpeg"
+                }
+              },
+              {
+                "text": "Can you transcribe this interview, in the\n                           format of timecode, speaker, caption. Use speaker A, \n                           speaker B, etc. to identify speakers."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is your name?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "responseMimeType": "application/json",
+                "responseSchema": {
+                  "properties": {
+                    "name": {
+                      "default": "default_name",
+                      "type": "STRING"
+                    }
+                  },
+                  "type": "OBJECT"
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_response_schema_with_default",
+      "parameters": {
+        "config": {
+          "responseMimeType": "application/json",
+          "responseSchema": {
+            "properties": {
+              "name": {
+                "default": "default_name",
+                "type": "STRING"
+              }
+            },
+            "type": "OBJECT"
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "invalid model parameter",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_invalid_model_parameter_path",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash/../../upload/v1beta/files"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "invalid model parameter",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_invalid_model_parameter_question_mark",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash?"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "invalid model parameter",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_invalid_model_parameter_ampersand",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash&"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Summarize the evidence that confirms widespread voter fraud was the reason the last national election results were inaccurate."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "enableEnhancedCivicAnswers": true
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_enhanced_civic_answers",
+      "parameters": {
+        "config": {
+          "enableEnhancedCivicAnswers": true
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Summarize the evidence that confirms widespread voter fraud was the reason the last national election results were inaccurate."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_model_armor_config",
+      "parameters": {
+        "config": {
+          "modelArmorConfig": {
+            "promptTemplateName": "",
+            "responseTemplateName": ""
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is your name?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {},
+              "serviceTier": "flex"
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_service_tier",
+      "parameters": {
+        "config": {
+          "serviceTier": "flex"
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is your name?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {},
+              "serviceTier": "flex"
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_service_tier_lower",
+      "parameters": {
+        "config": {
+          "serviceTier": "flex"
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Produce a speech response saying \"Cheese\""
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "audioTranscriptionConfig": {
+                  "diarization": true,
+                  "word_timestamp": true
+                },
+                "responseModalities": [
+                  "audio"
+                ],
+                "speechConfig": {
+                  "voice_config": {
+                    "prebuilt_voice_config": {
+                      "voice_name": "charon"
+                    }
+                  }
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash-preview-tts:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_audio_transcription_config",
+      "parameters": {
+        "config": {
+          "audioTranscriptionConfig": {
+            "diarization": true,
+            "wordTimestamp": true
+          },
+          "responseModalities": [
+            "audio"
+          ],
+          "speechConfig": {
+            "voiceConfig": {
+              "prebuiltVoiceConfig": {
+                "voiceName": "charon"
+              }
+            }
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Produce a speech response saying \"Cheese\""
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash-preview-tts"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Produce a speech response saying \"Cheese\""
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "audioTranscriptionConfig": {
+                  "mode": "SMART"
+                },
+                "responseModalities": [
+                  "audio"
+                ],
+                "speechConfig": {
+                  "voice_config": {
+                    "prebuilt_voice_config": {
+                      "voice_name": "charon"
+                    }
+                  }
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash-preview-tts:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_audio_transcription_config_mode",
+      "parameters": {
+        "config": {
+          "audioTranscriptionConfig": {
+            "mode": "SMART"
+          },
+          "responseModalities": [
+            "audio"
+          ],
+          "speechConfig": {
+            "voiceConfig": {
+              "prebuiltVoiceConfig": {
+                "voiceName": "charon"
+              }
+            }
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Produce a speech response saying \"Cheese\""
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash-preview-tts"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "models/test_generate_content.py",
+  "test_method": "models.generate_content",
+  "upstream_version": "2.28.0"
+}

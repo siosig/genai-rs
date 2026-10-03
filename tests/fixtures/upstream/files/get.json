@@ -1,0 +1,27 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/files/vjvu9fwk2qj8",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_get",
+      "parameters": {
+        "config": null,
+        "name": "files/vjvu9fwk2qj8"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "files/test_get.py",
+  "test_method": "files.get",
+  "upstream_version": "2.28.0"
+}

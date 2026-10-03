@@ -53,6 +53,22 @@ generated wholesale), but Vertex-only *fields* are rejected at request time with
 `Error::UnsupportedByBackend`, and asking for the Vertex backend at all fails with
 `Error::UnsupportedBackend`.
 
+Since 0.4.0 the crate's modules mirror the Python package, so a module you
+imported from `google.genai` has a Rust module of the same name:
+
+| Python | Rust |
+|---|---|
+| `google.genai.errors` | `gemini_genai::errors` (`Error`, `Result` and `ApiError` are also at the crate root) |
+| `google.genai.pagers` | `gemini_genai::pagers` (`Pager` is also at the crate root) |
+| `google.genai.tokens` | `gemini_genai::tokens` (the accessor is still `client.auth_tokens()`) |
+| `google.genai.live`, `live_music` | `gemini_genai::live`, `gemini_genai::live_music` |
+| `google.genai._mcp_utils` | `gemini_genai::mcp_utils` |
+| `google.genai.types` | `gemini_genai::types` |
+| `agents`, `environments`, `triggers`, `webhooks`, `voices`, `credentials`, `interactions` | the modules of the same names |
+
+[docs/upstream-sync.md](upstream-sync.md#module-map) has the complete map, and
+the 0.4.0 entry of [CHANGELOG.md](../CHANGELOG.md) lists every path that moved.
+
 ## Client construction
 
 ```python
@@ -285,7 +301,7 @@ Mapping from Python's exception hierarchy:
 | `UnsupportedFunctionError` / `UnknownFunctionCallArgumentError` / `FunctionInvocationError` | `Error::FunctionCall(FunctionCallError::…)` |
 | `IndexError` from `pager.next_page()` | `Error::NoMorePages` |
 | network/timeout exceptions from `httpx` | `Error::Http(reqwest::Error)` |
-| — | `Error::Stream`, `Error::Upload`, `Error::UnsupportedBackend`, `Error::BlockingInsideRuntime`, `Error::Io` |
+| — | `Error::Stream`, `Error::Upload`, `Error::UnsupportedBackend`, `Error::UnsupportedMethod`, `Error::BlockingInsideRuntime`, `Error::Io` |
 
 `ApiError` keeps `code`, `status`, `message`, `details`, and `response_headers`,
 so nothing Python exposed is lost.
@@ -384,7 +400,7 @@ config = types.GenerateContentConfig(tools=[get_weather])
 ```
 
 ```rust,no_run
-use gemini_genai::afc::function_tool;
+use gemini_genai::function_tool;
 use gemini_genai::types::{GenerateContentConfig, Tool};
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
@@ -450,7 +466,7 @@ With the `mcp` feature, `mcp_tools` wraps every tool exposed by an MCP server
 (reached through an `rmcp` client `Peer`) as an AFC tool:
 
 ```rust,ignore
-let tools = gemini_genai::mcp::mcp_tools(&peer).await?;
+let tools = gemini_genai::mcp_utils::mcp_tools(&peer).await?;
 let config = GenerateContentConfig { tools: Some(tools), ..Default::default() };
 ```
 
@@ -524,7 +540,7 @@ differences worth knowing when porting code:
 | `client.http_options` | readable attribute | not exposed | keep the accessor set minimal for 0.2.0 |
 | generated enums | strict | extra `Unknown(String)` variant | forward compatibility with server-added values |
 | `local_tokenizer` | available | not ported | needs a sentencepiece binding |
-| `interactions` / `agents` / `webhooks` / `triggers` / `environments` | preview NextGen SDK | not ported | separate, independently generated SDK upstream |
+| `interactions` output helpers | derived `output_text` / `output_image` properties | not implemented; read the output items | listed under [Known gaps](upstream-sync.md#known-gaps) |
 | replay / `DebugConfig` | available | not ported | this crate tests with golden JSON fixtures plus `wiremock` |
 
 ## Full mapping

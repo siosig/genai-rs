@@ -1,0 +1,61 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": "not supported in Gemini API",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_union_generate_content_with_bigquery",
+      "parameters": {
+        "config": null,
+        "model": "publishers/google/models/gemini-2.5-flash",
+        "src": "bq://vertex-sdk-dev.unified_genai_tests_batches.generate_content_requests"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "not supported in Gemini API",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_union_embedding_with_bigquery",
+      "parameters": {
+        "config": {
+          "dest": "bq://vertex-sdk-dev.unified_genai_tests_batches.embedding_output",
+          "displayName": "test_batch"
+        },
+        "model": "publishers/google/models/text-embedding-004",
+        "src": "bq://vertex-sdk-dev.unified_genai_tests_batches.embedding_requests"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "one of",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_generate_content_with_bigquery",
+      "parameters": {
+        "config": {
+          "dest": {
+            "bigqueryUri": "bq://vertex-sdk-dev.unified_genai_tests_batches.generate_content_output",
+            "format": "bigquery"
+          },
+          "displayName": "test_batch"
+        },
+        "model": "publishers/google/models/gemini-2.5-flash",
+        "src": {
+          "bigqueryUri": "bq://vertex-sdk-dev.unified_genai_tests_batches.generate_content_requests",
+          "format": "bigquery"
+        }
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "batches/test_create_with_bigquery.py",
+  "test_method": "batches.create",
+  "upstream_version": "2.28.0"
+}

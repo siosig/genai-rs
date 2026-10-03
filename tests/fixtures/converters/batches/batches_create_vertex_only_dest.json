@@ -10,5 +10,5 @@
     }
   },
   "expected": null,
-  "expected_error": "field `dest` is only supported by the Vertex AI backend"
+  "expected_error": "dest parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

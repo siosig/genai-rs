@@ -1,0 +1,49 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": "only supported in Gemini Enterprise Agent Platform",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_simple_prompt",
+      "parameters": {
+        "config": {
+          "numberOfImages": 1,
+          "outputMimeType": "image/jpeg"
+        },
+        "model": "imagen-4.0-generate-001",
+        "prompt": "Red skateboard"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "only supported in Gemini Enterprise Agent Platform",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_all_mldev_config_parameters",
+      "parameters": {
+        "config": {
+          "aspectRatio": "1:1",
+          "guidanceScale": 15.0,
+          "imageSize": "2K",
+          "includeRaiReason": true,
+          "includeSafetyAttributes": true,
+          "numberOfImages": 1,
+          "outputCompressionQuality": 80,
+          "outputMimeType": "image/jpeg",
+          "personGeneration": "DONT_ALLOW",
+          "safetyFilterLevel": "BLOCK_LOW_AND_ABOVE"
+        },
+        "model": "imagen-4.0-generate-001",
+        "prompt": "Red skateboard"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "models/test_generate_images.py",
+  "test_method": "models.generate_images",
+  "upstream_version": "2.28.0"
+}

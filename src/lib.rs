@@ -1,6 +1,6 @@
 //! **Unofficial.** An independent Rust port of the
 //! [Google Gen AI Python SDK](https://github.com/googleapis/python-genai)
-//! (`google-genai` 2.23.0) for the **Gemini Developer API**. Not affiliated
+//! (`google-genai` 2.28.0) for the **Gemini Developer API**. Not affiliated
 //! with, endorsed by, or sponsored by Google. Portions of this crate are
 //! derived from `google-genai`, Copyright 2025 Google LLC, licensed under the
 //! Apache License, Version 2.0; see the `NOTICE` file at the repository root
@@ -89,16 +89,16 @@
 //!
 //! # Automatic function calling
 //!
-//! [`afc::function_tool`] wraps an async Rust function as a model-callable
+//! [`function_tool`] wraps an async Rust function as a model-callable
 //! tool; [`Tool::from_function`](types::Tool::from_function) declares it in
 //! [`GenerateContentConfig`](types::GenerateContentConfig), and
 //! `generate_content` then drives the call/response loop itself. See
-//! [`afc`] for the loop's limits and for the process-wide registry caveat
+//! [`automatic_function_calling_util`] for the loop's limits and for the process-wide registry caveat
 //! (callables are keyed by function name).
 //!
 //! ```no_run
 //! # async fn run() -> gemini_genai::Result<()> {
-//! use gemini_genai::afc::function_tool;
+//! use gemini_genai::function_tool;
 //! use gemini_genai::types::{GenerateContentConfig, Tool};
 //! use gemini_genai::Client;
 //!
@@ -135,8 +135,8 @@
 //! Every API surface hangs off [`Client`], one accessor per Python SDK
 //! module: [`models`], [`chats`], [`files`], [`caches`], [`tunings`],
 //! [`batches`], [`operations`], [`file_search_stores`] (plus
-//! [`documents`]), [`auth_tokens`], and [`live`]. Request/response types
-//! live in [`types`], errors in [`error`], and list endpoints return a
+//! [`documents`]), [`tokens`], and [`live`]. Request/response types
+//! live in [`types`], errors in [`errors`], and list endpoints return a
 //! [`Pager<T>`](Pager) with `page()`, `next_page().await`, and
 //! `into_stream()`.
 //!
@@ -190,28 +190,42 @@
 //! - `docs/migrating-from-python.md`: a migration guide for people coming
 //!   from the Python SDK.
 
-pub mod afc;
-pub mod auth_tokens;
+pub mod agents;
+pub(crate) mod api_client;
+pub mod automatic_function_calling_util;
+pub(crate) mod base_transformers;
+pub mod base_url;
 pub mod batches;
 pub mod caches;
 pub mod chats;
 pub(crate) mod client;
+pub(crate) mod common;
 pub mod converters;
+pub mod credentials;
 pub mod documents;
-pub mod error;
+pub mod environments;
+pub mod errors;
+pub(crate) mod extra_utils;
 pub mod file_search_stores;
 pub mod files;
-pub(crate) mod http;
+pub(crate) mod gaos;
+pub mod interactions;
 #[cfg(feature = "live")]
 pub mod live;
+#[cfg(feature = "live")]
+pub mod live_music;
 #[cfg(feature = "mcp")]
-pub mod mcp;
+pub mod mcp_utils;
 pub mod models;
 pub mod operations;
-pub mod pager;
+pub mod pagers;
+pub mod tokens;
 pub(crate) mod transformers;
+pub mod triggers;
 pub mod tunings;
 pub mod types;
+pub mod voices;
+pub mod webhooks;
 
 #[cfg(feature = "blocking")]
 pub mod blocking;
@@ -230,8 +244,42 @@ pub mod blocking;
 /// `[package.metadata.upstream]` in `Cargo.toml`;
 /// `tools/codegen/upstream.py` is the single source of truth that keeps
 /// them in sync and documents the upgrade procedure.
-pub const UPSTREAM_GENAI_VERSION: &str = "2.23.0";
+pub const UPSTREAM_GENAI_VERSION: &str = "2.28.0";
 
+pub use automatic_function_calling_util::{FunctionTool, function_tool};
 pub use client::{Backend, Client, ClientBuilder};
-pub use error::{ApiError, Error, Result};
-pub use pager::Pager;
+pub use errors::{ApiError, Error, Result};
+pub use pagers::Pager;
+
+/// Crate-internal items re-exported for the integration tests under
+/// `tests/`. Not part of the public API: it may change in any release.
+#[doc(hidden)]
+pub mod __test_support {
+    /// `crate::extra_utils` helpers, for the AFC tests under `tests/afc/`.
+    pub mod extra_utils {
+        pub use crate::extra_utils::{
+            append_chunk_contents, convert_number_values_for_dict_function_call_args,
+            convert_number_values_for_function_call_args, find_afc_incompatible_tool_indexes,
+            get_function_map, get_function_response_parts, get_max_remote_calls_afc,
+            get_usage_header, invoke_function_from_dict_args, log_afc_incompatible_tools_warning,
+            raise_error_for_afc_incompatible_config, should_append_afc_history, should_disable_afc,
+        };
+    }
+
+    /// `crate::api_client` helpers, for the `common/` upstream tests under
+    /// `tests/common_upstream/`.
+    pub mod api_client {
+        pub use crate::api_client::recursive_body_update;
+    }
+
+    /// `crate::transformers` (`_transformers.py`), for `tests/transformers/`.
+    pub mod transformers {
+        pub use crate::transformers::*;
+    }
+
+    /// `crate::base_transformers` (`_base_transformers.py`), for
+    /// `tests/transformers/`.
+    pub mod base_transformers {
+        pub use crate::base_transformers::*;
+    }
+}

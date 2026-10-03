@@ -1,0 +1,142 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "cachedContent": "batchPredictionJobs/123",
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is in these docs?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {}
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": "INVALID_ARGUMENT"
+      },
+      "name": "test_cached_content_wrong_name",
+      "parameters": {
+        "config": {
+          "cachedContent": "batchPredictionJobs/123"
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is in these docs?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "cachedContent": "cachedContents/idv6zldt3p2f1lbm31vn41tx2ld42qngpcnka2s3",
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is in these docs?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {}
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_cached_content_partial_mldev_resource_name_1",
+      "parameters": {
+        "config": {
+          "cachedContent": "idv6zldt3p2f1lbm31vn41tx2ld42qngpcnka2s3"
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is in these docs?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "cachedContent": "cachedContents/idv6zldt3p2f1lbm31vn41tx2ld42qngpcnka2s3",
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 300 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {}
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_cached_content_for_mldev",
+      "parameters": {
+        "config": {
+          "cachedContent": "cachedContents/idv6zldt3p2f1lbm31vn41tx2ld42qngpcnka2s3"
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 300 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "models/test_generate_content_cached_content.py",
+  "test_method": "models.generate_content",
+  "upstream_version": "2.28.0"
+}

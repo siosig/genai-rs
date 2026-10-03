@@ -1,6 +1,6 @@
 //! `client.file_search_stores().documents()`: Document get/list/delete. Mirrors Python's `documents.py`.
 
-use std::{future::Future, pin::Pin, sync::Arc};
+use std::sync::Arc;
 
 use reqwest::Method;
 use serde_json::{Map, Value};
@@ -8,8 +8,8 @@ use serde_json::{Map, Value};
 use crate::{
     client::Client,
     converters::generated::documents as conv,
-    error::Result,
-    pager::{PagedItem, Pager},
+    errors::Result,
+    pagers::{FetchPage, Page, PagedItem, Pager},
     types::{
         DeleteDocumentConfig, Document, GetDocumentConfig, ListDocumentsConfig,
         ListDocumentsResponse,
@@ -77,17 +77,6 @@ fn config_to_map<C: serde::Serialize>(config: Option<C>) -> Result<Map<String, V
     }
 }
 
-/// The boxed-closure type used to fetch subsequent pages in
-/// [`Documents::list`]. A type alias mainly to keep clippy's
-/// `type_complexity` lint quiet.
-type FetchListPage<T> = Arc<
-    dyn Fn(
-            Map<String, Value>,
-        ) -> Pin<Box<dyn Future<Output = Result<(Vec<T>, Option<String>)>> + Send>>
-        + Send
-        + Sync,
->;
-
 /// Handle for `client.file_search_stores().documents()`. Cheap to
 /// construct; borrows nothing.
 #[derive(Clone)]
@@ -145,28 +134,21 @@ impl Documents {
         let config_map = config_to_map(config)?;
         let client = self.client.clone();
         let parent_owned = parent.to_owned();
-        let (page, next_token) =
-            Self::fetch_list_page(&client, &parent_owned, config_map.clone()).await?;
+        let first = Self::fetch_list_page(&client, &parent_owned, config_map.clone()).await?;
         let fetch_client = client.clone();
-        let fetch: FetchListPage<Document> = Arc::new(move |cfg: Map<String, Value>| {
+        let fetch: FetchPage<Document> = Arc::new(move |cfg: Map<String, Value>| {
             let client = fetch_client.clone();
             let parent = parent_owned.clone();
             Box::pin(async move { Self::fetch_list_page(&client, &parent, cfg).await })
         });
-        Ok(Pager::new(
-            PagedItem::Documents,
-            page,
-            config_map,
-            next_token,
-            fetch,
-        ))
+        Ok(Pager::new(PagedItem::Documents, first, config_map, fetch))
     }
 
     async fn fetch_list_page(
         client: &Client,
         parent: &str,
         config_map: Map<String, Value>,
-    ) -> Result<(Vec<Document>, Option<String>)> {
+    ) -> Result<Page<Document>> {
         let config: ListDocumentsConfig = serde_json::from_value(Value::Object(config_map))?;
         let params = serde_json::json!({ "parent": parent, "config": config });
         let mut request = conv::list_documents_parameters_to_mldev(&params, None, None)?;
@@ -186,7 +168,13 @@ impl Documents {
         let wire = parse_body(&response.body)?;
         let mldev = conv::list_documents_response_from_mldev(&wire, None, None)?;
         let parsed: ListDocumentsResponse = serde_json::from_value(mldev)?;
-        Ok((parsed.documents.unwrap_or_default(), parsed.next_page_token))
+        // Python's generated `_list` does not attach the HTTP headers for
+        // documents, so `Pager.sdk_http_response` is only what the body carried.
+        Ok(Page {
+            items: parsed.documents.unwrap_or_default(),
+            next_page_token: parsed.next_page_token,
+            sdk_http_response: parsed.sdk_http_response,
+        })
     }
 }
 

@@ -1,0 +1,755 @@
+# Hand-maintained exceptions to the naming rule (R-05 in specs/008-.../research.md).
+# Each entry needs a `reason`. `qualname` is exact; `qualname_regex` (+ optional
+# `module_regex`) matches whole names. kind: renamed | merged | not_ported | generated.
+# `renamed` targets are verified to exist by gen_ledger.py.
+
+[[deviation]]
+module = "__init__"
+qualname = "__getattr__"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Lazy attribute access for the Python package namespace."
+
+[[deviation]]
+module = "_api_client"
+qualname = "READ_BUFFER_SIZE"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Retry and buffering parameters live in api_client/retry.rs (RetryPolicy, JitteredBackoff) and reqwest, under Rust names."
+
+[[deviation]]
+module = "_api_client"
+qualname = "MAX_RETRY_COUNT"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Retry and buffering parameters live in api_client/retry.rs (RetryPolicy, JitteredBackoff) and reqwest, under Rust names."
+
+[[deviation]]
+module = "_api_client"
+qualname = "INITIAL_RETRY_DELAY"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Retry and buffering parameters live in api_client/retry.rs (RetryPolicy, JitteredBackoff) and reqwest, under Rust names."
+
+[[deviation]]
+module = "_api_client"
+qualname = "DELAY_MULTIPLIER"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Retry and buffering parameters live in api_client/retry.rs (RetryPolicy, JitteredBackoff) and reqwest, under Rust names."
+
+[[deviation]]
+module = "_api_client"
+qualname = "_RETRY_ATTEMPTS"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Retry and buffering parameters live in api_client/retry.rs (RetryPolicy, JitteredBackoff) and reqwest, under Rust names."
+
+[[deviation]]
+module = "_api_client"
+qualname = "_RETRY_INITIAL_DELAY"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Retry and buffering parameters live in api_client/retry.rs (RetryPolicy, JitteredBackoff) and reqwest, under Rust names."
+
+[[deviation]]
+module = "_api_client"
+qualname = "_RETRY_MAX_DELAY"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Retry and buffering parameters live in api_client/retry.rs (RetryPolicy, JitteredBackoff) and reqwest, under Rust names."
+
+[[deviation]]
+module = "_api_client"
+qualname = "_RETRY_EXP_BASE"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Retry and buffering parameters live in api_client/retry.rs (RetryPolicy, JitteredBackoff) and reqwest, under Rust names."
+
+[[deviation]]
+module = "_api_client"
+qualname = "_RETRY_JITTER"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Retry and buffering parameters live in api_client/retry.rs (RetryPolicy, JitteredBackoff) and reqwest, under Rust names."
+
+[[deviation]]
+module = "_api_client"
+qualname = "_RETRY_HTTP_STATUS_CODES"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Retry and buffering parameters live in api_client/retry.rs (RetryPolicy, JitteredBackoff) and reqwest, under Rust names."
+
+[[deviation]]
+module = "_api_client"
+qualname = "_MULTI_REGIONAL_LOCATIONS"
+kind = "not_ported"
+reason_code = "vertex"
+reason = "Multi-regional endpoints are a Vertex AI feature; Vertex AI is out of scope."
+
+[[deviation]]
+module = "_api_client"
+qualname = "_HTTPX_RESPONSE_TYPES"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Python httpx/aiohttp stack types; the crate uses reqwest."
+
+[[deviation]]
+module = "_api_client"
+qualname = "_HTTPX_HEADERS_TYPES"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Python httpx/aiohttp stack types; the crate uses reqwest."
+
+[[deviation]]
+module = "_api_client"
+qualname = "_HTTPX_TRANSIENT_EXC"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Python httpx/aiohttp stack types; the crate uses reqwest."
+
+[[deviation]]
+module = "_api_client"
+qualname = "SyncHttpxClient"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Python httpx/aiohttp stack types; the crate uses reqwest."
+
+[[deviation]]
+module = "_api_client"
+qualname = "AsyncHttpxClient"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Python httpx/aiohttp stack types; the crate uses reqwest."
+
+[[deviation]]
+module = "_api_client"
+qualname = "get_env_api_key"
+kind = "renamed"
+rust = "src/client.rs::resolve_api_key"
+reason = "Same behavior under a Rust name (Client builder reads GOOGLE_API_KEY, then GEMINI_API_KEY)."
+
+[[deviation]]
+module = "_api_client"
+qualname = "append_library_version_headers"
+kind = "renamed"
+rust = "src/api_client/headers.rs::apply_sdk_headers"
+reason = "Same behavior under a Rust name."
+
+[[deviation]]
+module = "_api_client"
+qualname = "patch_http_options"
+kind = "merged"
+rust = "src/api_client/mod.rs::merged_headers"
+reason = "Merging of per-request HttpOptions into client options is done by HttpClient::merged_headers and merged_body."
+
+[[deviation]]
+module = "_api_client"
+qualname = "populate_server_timeout_header"
+kind = "renamed"
+rust = "src/api_client/headers.rs::server_timeout_seconds"
+reason = "Same behavior under a Rust name."
+
+[[deviation]]
+module = "_api_client"
+qualname = "join_url_path"
+kind = "renamed"
+rust = "src/api_client/mod.rs::build_url"
+reason = "Same behavior under a Rust name (also inserts the API version)."
+
+[[deviation]]
+module = "_api_client"
+qualname = "get_timeout_in_seconds"
+kind = "renamed"
+rust = "src/api_client/mod.rs::timeout"
+reason = "Same behavior under a Rust name."
+
+[[deviation]]
+module = "_api_client"
+qualname = "load_auth"
+kind = "not_ported"
+reason_code = "vertex"
+reason = "google-auth credential handling (Application Default Credentials) is only needed for Vertex AI; Vertex AI is out of scope."
+
+[[deviation]]
+module = "_api_client"
+qualname = "refresh_auth"
+kind = "not_ported"
+reason_code = "vertex"
+reason = "google-auth credential handling (Application Default Credentials) is only needed for Vertex AI; Vertex AI is out of scope."
+
+[[deviation]]
+module = "_api_client"
+qualname = "get_token_from_credentials"
+kind = "not_ported"
+reason_code = "vertex"
+reason = "google-auth credential handling (Application Default Credentials) is only needed for Vertex AI; Vertex AI is out of scope."
+
+[[deviation]]
+module = "_api_client"
+qualname = "async_get_token_from_credentials"
+kind = "not_ported"
+reason_code = "vertex"
+reason = "google-auth credential handling (Application Default Credentials) is only needed for Vertex AI; Vertex AI is out of scope."
+
+[[deviation]]
+module = "_api_client"
+qualname = "BaseApiClient"
+kind = "renamed"
+rust = "src/api_client/mod.rs::HttpClient"
+reason = "The Rust client type has a different name."
+
+[[deviation]]
+module = "_api_client"
+qualname_regex = "BaseApiClient\\.(_use_google_auth_sync|_use_google_auth_async|_access_token|_async_access_token|_get_async_auth_lock)"
+kind = "not_ported"
+reason_code = "vertex"
+reason = "google-auth credential handling is only needed for Vertex AI; Vertex AI is out of scope."
+
+[[deviation]]
+module = "_api_client"
+qualname_regex = "BaseApiClient\\.(_is_session_closed|_discard_closed_loop_entries|_aiohttp_session|_get_aiohttp_session|_ensure_httpx_ssl_ctx|_ensure_aiohttp_ssl_ctx|_ensure_websocket_ssl_ctx|_use_aiohttp)"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "aiohttp session caches, event-loop bookkeeping and SSL context plumbing; reqwest and tokio own these in Rust."
+
+[[deviation]]
+module = "_api_client"
+qualname = "BaseApiClient._websocket_base_url"
+kind = "merged"
+rust = "src/live.rs::connect"
+reason = "The Live connection derives its WebSocket URL from the base URL inside Live::connect."
+
+[[deviation]]
+module = "_api_client"
+qualname = "BaseApiClient._build_request"
+kind = "merged"
+rust = "src/api_client/mod.rs::build_url"
+reason = "Request assembly is split across HttpClient::build_url, merged_headers and merged_body."
+
+[[deviation]]
+module = "_api_client"
+qualname = "BaseApiClient._request_once"
+kind = "renamed"
+rust = "src/api_client/mod.rs::send_once"
+reason = "Same behavior under a Rust name."
+
+[[deviation]]
+module = "_api_client"
+qualname = "BaseApiClient._async_request_once"
+kind = "merged"
+rust = "src/api_client/mod.rs::send_once"
+reason = "Rust has a single async implementation."
+
+[[deviation]]
+module = "_api_client"
+qualname = "BaseApiClient.request_streamed"
+kind = "renamed"
+rust = "src/api_client/mod.rs::request_stream"
+reason = "Same behavior under a Rust name."
+
+[[deviation]]
+module = "_api_client"
+qualname = "BaseApiClient.async_request"
+kind = "merged"
+rust = "src/api_client/mod.rs::request"
+reason = "Rust has a single async implementation."
+
+[[deviation]]
+module = "_api_client"
+qualname = "BaseApiClient.async_request_streamed"
+kind = "merged"
+rust = "src/api_client/mod.rs::request_stream"
+reason = "Rust has a single async implementation."
+
+[[deviation]]
+module = "_api_client"
+qualname = "BaseApiClient.get_read_only_http_options"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Python needs a read-only copy of mutable pydantic options; Rust passes immutable references."
+
+[[deviation]]
+module = "_api_client"
+qualname_regex = "BaseApiClient\\.(upload_file|_upload_fd|async_upload_file|_async_upload_fd)"
+kind = "renamed"
+rust = "src/api_client/upload.rs::resumable_upload"
+reason = "Resumable upload lives in api_client/upload.rs under a Rust name."
+
+[[deviation]]
+module = "_api_client"
+qualname_regex = "BaseApiClient\\.(download_file|async_download_file)"
+kind = "renamed"
+rust = "src/api_client/mod.rs::download"
+reason = "Same behavior under a Rust name."
+
+[[deviation]]
+module = "_api_client"
+qualname = "BaseApiClient._verify_response"
+kind = "not_ported"
+reason_code = "replay_infra"
+reason = "Hook used only by upstream's replay test client."
+
+[[deviation]]
+module = "_api_client"
+qualname_regex = "BaseApiClient\\.(close|aclose)"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Rust releases connections when the client is dropped."
+
+[[deviation]]
+module = "_api_client"
+qualname = "retry_args"
+kind = "renamed"
+rust = "src/api_client/retry.rs::from_options"
+reason = "Same behavior under a Rust name (RetryPolicy::from_options)."
+
+[[deviation]]
+module = "_api_client"
+qualname = "HttpRequest"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Rust sends requests through reqwest builders in HttpClient::send_once; there is no request value type."
+
+[[deviation]]
+module = "_api_client"
+qualname_regex = "HttpResponse\\.(json|segments|async_segments|byte_segments|_copy_to_dict|_iter_response_stream|_aiter_response_stream|_load_json_from_response)"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Response streaming and JSON loading are done by api_client/sse.rs and reqwest."
+
+[[deviation]]
+module = "_common"
+qualname = "loaded_requests"
+kind = "not_ported"
+reason_code = "replay_infra"
+reason = "Test-infrastructure helper for upstream's replay client."
+
+[[deviation]]
+module = "_common"
+qualname_regex = "ExperimentalWarning|experimental_warning"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Python warnings machinery."
+
+[[deviation]]
+module = "_common"
+qualname = "set_value_by_path"
+kind = "renamed"
+rust = "src/common.rs::setv"
+reason = "Same behavior under a Rust name."
+
+[[deviation]]
+module = "_common"
+qualname = "get_value_by_path"
+kind = "renamed"
+rust = "src/common.rs::getv"
+reason = "Same behavior under a Rust name."
+
+[[deviation]]
+module = "_common"
+qualname = "_normalize_key_for_matching"
+kind = "renamed"
+rust = "src/api_client/mod.rs::normalize_key_for_matching"
+reason = "Same behavior, lives with the body-merge code."
+
+[[deviation]]
+module = "_common"
+qualname = "recursive_dict_update"
+kind = "renamed"
+rust = "src/api_client/mod.rs::recursive_body_update"
+reason = "Same behavior under a Rust name."
+
+[[deviation]]
+module = "_common"
+qualname_regex = "_pretty_repr|_format_collection|BaseModel|BaseModel\\..*|CaseInSensitiveEnum|CaseInSensitiveEnum\\..*|T|_is_struct_type|is_duck_type_of|convert_to_dict|encode_unserializable_types|_remove_extra_fields|maybe_snake_to_camel|align_key_case"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "pydantic/dict conversion machinery for Python models; serde derives cover this in Rust."
+
+[[deviation]]
+module = "errors"
+qualname = "_HTTPX_RESPONSE_TYPES"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "httpx response type tuple."
+
+[[deviation]]
+module = "errors"
+qualname = "APIError"
+kind = "renamed"
+rust = "src/errors.rs::ApiError"
+reason = "Rust name differs (clippy upper_case_acronyms)."
+
+[[deviation]]
+module = "errors"
+qualname_regex = "APIError\\.(_get_status|_get_message|_get_code)"
+kind = "merged"
+rust = "src/errors.rs::from_response"
+reason = "Folded into ApiError::from_response."
+
+[[deviation]]
+module = "errors"
+qualname_regex = "APIError\\.(_rebuild|_to_replay_record)"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Pickling and replay-record helpers for Python exceptions."
+
+[[deviation]]
+module = "errors"
+qualname_regex = "APIError\\.(raise_for_response|raise_error|raise_for_async_response|raise_error_async)"
+kind = "renamed"
+rust = "src/errors.rs::from_response"
+reason = "Same behavior: errors are built from the HTTP response."
+
+[[deviation]]
+module = "errors"
+qualname_regex = "ClientError|ServerError"
+kind = "merged"
+rust = "src/errors.rs::is_client_error"
+reason = "Python subclasses by status class; Rust exposes ApiError::is_client_error / is_server_error."
+
+[[deviation]]
+module = "errors"
+qualname_regex = "UnknownFunctionCallArgumentError|UnsupportedFunctionError|FunctionInvocationError"
+kind = "merged"
+rust = "src/errors.rs::FunctionCallError"
+reason = "Rust folds these into the FunctionCallError enum."
+
+[[deviation]]
+module = "errors"
+qualname = "UnknownApiResponseError"
+kind = "merged"
+rust = "src/errors.rs::Error"
+reason = "Responses that cannot be parsed surface as Error::Json."
+
+[[deviation]]
+module = "live"
+qualname = "AsyncLive"
+kind = "renamed"
+rust = "src/live.rs::Live"
+reason = "Rust name drops the Async prefix (live is async-only in Rust and Python)."
+
+[[deviation]]
+module = "live"
+qualname = "AsyncSession"
+kind = "renamed"
+rust = "src/live.rs::LiveSession"
+reason = "Rust name differs."
+
+[[deviation]]
+module = "live"
+qualname = "AsyncSession.send"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Deprecated generic send(); superseded by send_client_content / send_realtime_input / send_tool_response."
+
+[[deviation]]
+module = "live"
+qualname = "AsyncSession.start_stream"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Deprecated helper that pumps a Python async generator into the session."
+
+[[deviation]]
+module = "live"
+qualname_regex = "AsyncSession\\._send_loop|AsyncSession\\._parse_client_message|_auth_requests"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Helpers of the deprecated start_stream/send path and Python websocket auth."
+
+[[deviation]]
+module = "live"
+qualname = "_FUNCTION_RESPONSE_REQUIRES_ID"
+kind = "not_ported"
+reason_code = "vertex"
+reason = "Used only by Vertex AI validation in send_tool_response."
+
+[[deviation]]
+module = "live"
+qualname = "_t_live_connect_config"
+kind = "merged"
+rust = "src/live.rs::connect"
+reason = "Connection config conversion happens inside Live::connect via the generated live converters."
+
+[[deviation]]
+module = "live_music"
+qualname = "AsyncLiveMusic"
+kind = "renamed"
+rust = "src/live_music.rs::LiveMusic"
+reason = "Rust name differs."
+
+[[deviation]]
+module = "live_music"
+qualname = "AsyncMusicSession"
+kind = "renamed"
+rust = "src/live_music.rs::LiveMusicSession"
+reason = "Rust name differs."
+
+[[deviation]]
+module = "live_music"
+qualname = "AsyncMusicSession._send_control_signal"
+kind = "merged"
+rust = "src/live_music.rs::play"
+reason = "Folded into the play/pause/stop/reset_context methods."
+
+[[deviation]]
+module = "pagers"
+qualname = "T"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Python TypeVar."
+
+[[deviation]]
+module = "pagers"
+qualname_regex = "_BasePager|_BasePager\\..*"
+kind = "merged"
+rust = "src/pagers.rs::Pager"
+reason = "Shared pager state lives in the generic Pager<T>."
+
+[[deviation]]
+module = "chats"
+qualname = "_validate_contents"
+kind = "merged"
+rust = "src/chats.rs::send_message"
+reason = "Content validation happens in Chat::send_message via the transformers."
+
+[[deviation]]
+module = "chats"
+qualname = "_BaseChat"
+kind = "merged"
+rust = "src/chats.rs::Chat"
+reason = "Shared chat state lives in the Rust Chat type."
+
+[[deviation]]
+module = "chats"
+qualname = "_is_part_type"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Python isinstance check on a union type; Rust types are already distinct."
+
+[[deviation]]
+module = "operations"
+qualname_regex = "Operations\\._get_videos_operation|Operations\\._fetch_predict_videos_operation"
+kind = "not_ported"
+reason_code = "vertex"
+reason = "Vertex AI video operation polling; Vertex AI is out of scope."
+
+[[deviation]]
+module = "tunings"
+qualname = "Tunings.validate_reward"
+kind = "not_ported"
+reason_code = "vertex"
+reason = "validate_reward is Vertex AI only; Vertex AI is out of scope."
+
+[[deviation]]
+module = "tunings"
+qualname_regex = "_IpythonUtils|_IpythonUtils\\..*"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Jupyter notebook display helpers."
+
+[[deviation]]
+module = "models"
+qualname_regex = "Models\\.(recontext_image|segment_image|edit_image|upscale_image)"
+kind = "not_ported"
+reason_code = "vertex"
+reason = "Vertex AI only (raises ValueError on the Gemini Developer API); Vertex AI is out of scope."
+
+[[deviation]]
+module = "models"
+qualname = "_VideoGenerationReferenceType_to_mldev_enum_validate"
+kind = "merged"
+rust = "src/converters/generated/models.rs"
+reason = "Enum validation is performed by the generated converter for generate_videos."
+
+[[deviation]]
+module = "files"
+qualname = "Files._create"
+kind = "merged"
+rust = "src/files.rs::upload"
+reason = "The resumable-upload start request is part of Files::upload."
+
+[[deviation]]
+module = "tokens"
+qualname = "Tokens"
+kind = "renamed"
+rust = "src/tokens.rs::AuthTokens"
+reason = "Rust name differs (accessor stays client.auth_tokens())."
+
+[[deviation]]
+module = "_mcp_utils"
+qualname_regex = "_is_mcp_loaded|has_mcp_tool_usage|has_mcp_session_usage|set_mcp_usage_header|agent_platform_to_gemini_tool|_connect_agent_platform_mcp|_filter_to_supported_schema"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Python MCP client-session plumbing; Rust accepts an rmcp peer in mcp_tools."
+
+[[deviation]]
+module = "_mcp_utils"
+qualname_regex = "mcp_to_gemini_tool|mcp_to_gemini_tools"
+kind = "merged"
+rust = "src/mcp_utils.rs::mcp_tools"
+reason = "Folded into mcp_tools, which builds FunctionTools from an rmcp peer."
+
+[[deviation]]
+module = "_automatic_function_calling_util"
+qualname_regex = ".*"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Derives a FunctionDeclaration from a Python callable's signature and annotations; a Rust FunctionTool declares its schema explicitly."
+
+[[deviation]]
+module = "_extra_utils"
+qualname_regex = "C|_create_generate_content_config_model|is_annotation_pydantic_model|convert_if_exist_pydantic_model|convert_argument_from_function|parse_config_for_mcp_usage|parse_config_for_mcp_sessions|has_agent_platform_mcp_servers"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Python callable/pydantic/MCP-session argument handling for automatic function calling."
+
+[[deviation]]
+module = "_extra_utils"
+qualname_regex = "_get_gcs_uri|_get_bigquery_uri|format_destination"
+kind = "not_ported"
+reason_code = "vertex"
+reason = "Batch destination formatting for Vertex AI (GCS/BigQuery); Vertex AI is out of scope."
+
+[[deviation]]
+module = "_extra_utils"
+qualname = "prepare_resumable_upload"
+kind = "merged"
+rust = "src/api_client/upload.rs::resumable_upload"
+reason = "Resumable upload preparation is part of api_client/upload.rs."
+
+[[deviation]]
+module = "types"
+qualname_regex = "_is_mcp_imported|__getattr__|T|_validate_tool_list|FunctionDeclaration\\.from_callable.*|FunctionResponse\\.from_mcp_response|Metric\\.to_yaml_file|Part\\._t_part_media_resolution|GenerateContentResponse\\._get_text|GenerateContentResponse\\._from_response|LiveServerMessage\\.data|GenerationConfigThinkingConfigDict"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Python-only conversion helper (callables, JSON-schema/pydantic, MCP objects, YAML) or typing aid."
+
+[[deviation]]
+module = "types"
+qualname_regex = "(Blob|Part|Image|Video)\\.(as_image|from_file|show|save|_pil_image)|GenerateImagesResponse\\.images"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Python PIL / local-file convenience helper; no API request behavior."
+
+[[deviation]]
+module = "types"
+qualname_regex = "_[A-Za-z]+Parameters(Private)?|_[A-Za-z]+API(Parameters|Config)?|_ReferenceImageAPI"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Internal pydantic parameter container for a client method; Rust methods take the arguments directly."
+
+[[deviation]]
+module = "_common"
+qualname = "timestamped_unique_name"
+kind = "not_ported"
+reason_code = "vertex"
+reason = "Used only to name Vertex AI batch destinations; Vertex AI is out of scope."
+
+[[deviation]]
+module = "_common"
+qualname_regex = "move_value_by_path|_move_value_recursive"
+kind = "merged"
+rust = "src/converters/generated/batches.rs"
+reason = "The generated batch converters emit the moved fields directly."
+
+[[deviation]]
+module = "_transformers"
+qualname = "pil_to_blob"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Converts a PIL image; Pillow is Python-only."
+
+[[deviation]]
+module = "_transformers"
+qualname = "_is_type_dict_str_any"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Python typing introspection helper."
+
+[[deviation]]
+module = "_transformers"
+qualname = "t_is_vertex_embed_content_model"
+kind = "not_ported"
+reason_code = "vertex"
+reason = "Selects the Vertex AI embedding request shape; Vertex AI is out of scope."
+
+[[deviation]]
+module = "client"
+qualname = "DebugConfig"
+kind = "not_ported"
+reason_code = "replay_infra"
+reason = "Replay/record debug configuration for upstream's test harness."
+
+[[deviation]]
+module = "client"
+qualname_regex = "Client\\._get_api_client|Client\\._nextgen_client"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "Python-internal accessors for the API client objects."
+
+[[deviation]]
+module = "client"
+qualname = "Client.aio"
+kind = "not_ported"
+reason_code = "structural"
+reason = "The Rust client is async; blocking use goes through the blocking module."
+
+[[deviation]]
+module = "client"
+qualname = "Client.close"
+kind = "not_ported"
+reason_code = "structural"
+reason = "Rust releases connections when the client is dropped."
+
+[[deviation]]
+module = "interactions"
+qualname_regex = "(CreateModelInteraction|CreateAgentInteraction|InteractionGet)Params(Non)?Streaming"
+kind = "not_ported"
+reason_code = "python_only"
+reason = "TypedDict overload helpers selecting the streaming/non-streaming return type; Rust uses separate create/stream methods."
+
+[[deviation]]
+module = "types"
+qualname_regex = "JOB_STATES_[A-Z]+_VERTEX"
+kind = "not_ported"
+reason_code = "vertex"
+reason = "Vertex AI job-state set; Vertex AI is out of scope."
+
+# --- from dev_t041.toml
+# t041: no new deviation blocks. All eight assigned symbols are implemented in
+# src/extra_utils.rs under their upstream names (snake_case):
+#   get_function_map, get_function_response_parts, should_append_afc_history,
+#   append_chunk_contents, get_usage_header, find_afc_incompatible_tool_indexes,
+#   log_afc_incompatible_tools_warning, raise_error_for_afc_incompatible_config.
+#
+# ORCHESTRATOR ACTION: tools/codegen/deviations.toml has a `python_only`
+# not_ported block for `_extra_utils` whose qualname_regex lists
+# `convert_number_values_for_dict_function_call_args` and
+# `convert_number_values_for_function_call_args`. Both are now implemented
+# (src/extra_utils.rs, ported by tests/afc/convert_number_values_for_function_call_args.rs),
+# so remove those two names from that regex.
+
+# --- from dev_t043.toml
+[[deviation]]
+module = "_api_client"
+qualname = "EphemeralTokenAPIKeyError"
+kind = "renamed"
+rust = "src/api_client/mod.rs::ensure_not_ephemeral_token"
+reason = "Python raises a ValueError subclass when an auth_tokens/ API key is used outside the Live API; the crate returns Error::Validation from HttpClient::ensure_not_ephemeral_token, called by request, request_stream, download_stream and resumable_upload (Live reads the key directly)."
+
+# --- from dev_t046.toml
+
+
+# --- from dev_t048a.toml
+
+
+# --- from dev_t048b.toml
+
+
+# --- from dev_t048c.toml
+
+# --- from dev_t076.toml
+# t076: no deviation blocks. Schema.from_json_schema / Schema.json_schema are implemented in src/types/ext.rs, so the regex entry
+# "Schema\.json_schema|Schema\.from_json_schema" must be removed from the "types" python_only deviation in tools/codegen/deviations.toml.

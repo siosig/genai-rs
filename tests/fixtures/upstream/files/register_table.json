@@ -1,0 +1,33 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "uris": [
+                "gs://unified-genai-dev/image.jpg"
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/files:register",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_register",
+      "parameters": {
+        "config": null,
+        "uris": [
+          "gs://unified-genai-dev/image.jpg"
+        ]
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "files/test_register_table.py",
+  "test_method": "files._register_files",
+  "upstream_version": "2.28.0"
+}

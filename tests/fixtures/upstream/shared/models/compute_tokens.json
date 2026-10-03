@@ -1,0 +1,21 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": "only supported in Gemini Enterprise Agent Platform",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_compute_tokens",
+      "parameters": {
+        "config": null,
+        "contents": "The quick brown fox jumps over the lazy dog.",
+        "model": "gemini-3.5-flash"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "shared/models/test_compute_tokens.py",
+  "test_method": "models.compute_tokens",
+  "upstream_version": "2.28.0"
+}

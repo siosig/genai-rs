@@ -1,0 +1,397 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_dataset_gcs_uri",
+      "parameters": {
+        "base_model": "gemini-2.5-flash",
+        "config": null,
+        "training_dataset": {
+          "gcsUri": "gs://cloud-samples-data/ai-platform/generative_ai/gemini-1_5/text/sft_train_data.jsonl"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_tune_pretuned_model",
+      "parameters": {
+        "base_model": "projects/801452371447/locations/us-central1/models/9030969596621881344",
+        "config": null,
+        "training_dataset": {
+          "gcsUri": "gs://cloud-samples-data/ai-platform/generative_ai/gemini-2_0/text/sft_train_data.jsonl"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_tune_pretuned_model_with_checkpoint_id",
+      "parameters": {
+        "base_model": "projects/801452371447/locations/us-central1/models/9030969596621881344",
+        "config": {
+          "preTunedModelCheckpointId": "3"
+        },
+        "training_dataset": {
+          "gcsUri": "gs://cloud-samples-data/ai-platform/generative_ai/gemini-2_0/text/sft_train_data.jsonl"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_tune_simple_dpo",
+      "parameters": {
+        "base_model": "gemini-2.5-flash",
+        "config": {
+          "epochCount": 1,
+          "method": "PREFERENCE_TUNING",
+          "tunedModelDisplayName": "Model display name"
+        },
+        "training_dataset": {
+          "gcsUri": "gs://cloud-samples-data/ai-platform/generative_ai/gemini-1_5/text/sft_train_data.jsonl"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_tune_dpo_with_beta",
+      "parameters": {
+        "base_model": "gemini-2.5-flash",
+        "config": {
+          "beta": 0.5,
+          "epochCount": 1,
+          "method": "PREFERENCE_TUNING",
+          "tunedModelDisplayName": "Model display name"
+        },
+        "training_dataset": {
+          "gcsUri": "gs://cloud-samples-data/ai-platform/generative_ai/gemini-1_5/text/sft_train_data.jsonl"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_non_pretuned_model_with_checkpoint_id",
+      "parameters": {
+        "base_model": "gemini-2.5-flash",
+        "config": {
+          "preTunedModelCheckpointId": "3"
+        },
+        "training_dataset": {
+          "gcsUri": "gs://cloud-samples-data/ai-platform/generative_ai/gemini-1_5/text/sft_train_data.jsonl"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_dataset_gcs_uri_all_parameters",
+      "parameters": {
+        "base_model": "gemini-2.5-flash",
+        "config": {
+          "adapterSize": "ADAPTER_SIZE_ONE",
+          "epochCount": 1,
+          "learningRateMultiplier": 1.0,
+          "tunedModelDisplayName": "Model display name",
+          "validationDataset": {
+            "gcsUri": "gs://cloud-samples-data/ai-platform/generative_ai/gemini-1_5/text/sft_validation_data.jsonl"
+          }
+        },
+        "training_dataset": {
+          "gcsUri": "gs://cloud-samples-data/ai-platform/generative_ai/gemini-1_5/text/sft_train_data.jsonl"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_dataset_dataset_resource_all_parameters",
+      "parameters": {
+        "base_model": "gemini-2.5-flash",
+        "config": {
+          "adapterSize": "ADAPTER_SIZE_ONE",
+          "epochCount": 1,
+          "labels": {
+            "testlabelkey": "testlabelvalue"
+          },
+          "learningRateMultiplier": 1.0,
+          "tunedModelDisplayName": "Model display name",
+          "validationDataset": {
+            "vertexDatasetResource": "projects/801452371447/locations/us-central1/datasets/1168232753779441664"
+          }
+        },
+        "training_dataset": {
+          "vertexDatasetResource": "projects/801452371447/locations/us-central1/datasets/5779918772206829568"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_tune_distillation",
+      "parameters": {
+        "base_model": "meta/llama3_1@llama-3.1-8b-instruct",
+        "config": {
+          "baseTeacherModel": "deepseek-ai/deepseek-v3.1-maas",
+          "epochCount": 20,
+          "httpOptions": {
+            "apiVersion": "v1beta1",
+            "baseUrl": "https://us-central1-autopush-aiplatform.sandbox.googleapis.com/"
+          },
+          "method": "DISTILLATION",
+          "outputUri": "gs://nathreya-oss-tuning-sdk-test/ayushagra-distillation-test-folder",
+          "validationDataset": {
+            "gcsUri": "gs://nathreya-oss-tuning-sdk-test/distillation-val-openai-opposites.jsonl"
+          }
+        },
+        "training_dataset": {
+          "gcsUri": "gs://nathreya-oss-tuning-sdk-test/distillation-openai-opposites.jsonl"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_tune_oss_sft",
+      "parameters": {
+        "base_model": "meta/llama3_1@llama-3.1-8b-instruct",
+        "config": {
+          "customBaseModel": "gs://nathreya-oss-tuning-sdk-test/ayushagra-distillation-test-folder/postprocess/node-0/checkpoints/final",
+          "epochCount": 20,
+          "httpOptions": {
+            "apiVersion": "v1beta1",
+            "baseUrl": "https://us-central1-autopush-aiplatform.sandbox.googleapis.com/"
+          },
+          "outputUri": "gs://nathreya-oss-tuning-sdk-test/ayushagra-distillation-test",
+          "validationDataset": {
+            "gcsUri": "gs://nathreya-oss-tuning-sdk-test/distillation-val-openai-opposites.jsonl"
+          }
+        },
+        "training_dataset": {
+          "gcsUri": "gs://nathreya-oss-tuning-sdk-test/distillation-openai-opposites.jsonl"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_tune_oss_sft_hyperparams",
+      "parameters": {
+        "base_model": "meta/llama3_1@llama-3.1-8b-instruct",
+        "config": {
+          "customBaseModel": "gs://nathreya-oss-tuning-sdk-test/ayushagra-distillation-test-folder/postprocess/node-0/checkpoints/final",
+          "epochCount": 20,
+          "httpOptions": {
+            "apiVersion": "v1beta1",
+            "baseUrl": "https://us-central1-autopush-aiplatform.sandbox.googleapis.com/"
+          },
+          "learningRate": 0.00025,
+          "outputUri": "gs://nathreya-oss-tuning-sdk-test/ayushagra-distillation-test",
+          "tuningMode": "TUNING_MODE_FULL",
+          "validationDataset": {
+            "gcsUri": "gs://nathreya-oss-tuning-sdk-test/distillation-val-openai-opposites.jsonl"
+          }
+        },
+        "training_dataset": {
+          "gcsUri": "gs://nathreya-oss-tuning-sdk-test/distillation-openai-opposites.jsonl"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_tune_oss_distillation",
+      "parameters": {
+        "base_model": "meta/llama3_1@llama-3.1-8b-instruct",
+        "config": {
+          "baseTeacherModel": "deepseek-ai/deepseek-v3.1-maas",
+          "customBaseModel": "gs://nathreya-oss-tuning-sdk-test/ayushagra-distillation-test-folder/postprocess/node-0/checkpoints/final",
+          "epochCount": 20,
+          "httpOptions": {
+            "apiVersion": "v1beta1",
+            "baseUrl": "https://us-central1-autopush-aiplatform.sandbox.googleapis.com/"
+          },
+          "method": "DISTILLATION",
+          "outputUri": "gs://nathreya-oss-tuning-sdk-test/ayushagra-distillation-test",
+          "validationDataset": {
+            "gcsUri": "gs://nathreya-oss-tuning-sdk-test/distillation-val-openai-opposites.jsonl"
+          }
+        },
+        "training_dataset": {
+          "gcsUri": "gs://nathreya-oss-tuning-sdk-test/distillation-openai-opposites.jsonl"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_tune_oss_distillation_hyperparams",
+      "parameters": {
+        "base_model": "qwen/qwen3@qwen3-4b",
+        "config": {
+          "baseTeacherModel": "deepseek-ai/deepseek-r1-0528-maas",
+          "batchSize": 4,
+          "httpOptions": {
+            "apiVersion": "v1beta1",
+            "baseUrl": "https://us-central1-autopush-aiplatform.sandbox.googleapis.com/"
+          },
+          "learningRate": 0.0001,
+          "method": "DISTILLATION",
+          "outputUri": "gs://nathreya-oss-tuning-sdk-test/ayushagra-distillation-test",
+          "tuningMode": "TUNING_MODE_FULL"
+        },
+        "training_dataset": {
+          "gcsUri": "gs://nathreya-oss-tuning-sdk-test/distillation-openai-opposites.jsonl"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_tune_encryption_spec",
+      "parameters": {
+        "base_model": "gemini-2.5-flash",
+        "config": {
+          "encryptionSpec": {
+            "kmsKeyName": "projects/vertex-sdk-dev/locations/us-central1/keyRings/ayush-test-key/cryptoKeys/ayush-key"
+          }
+        },
+        "training_dataset": {
+          "gcsUri": "gs://cloud-samples-data/ai-platform/generative_ai/gemini-1_5/text/sft_train_data.jsonl"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_tune_reinforcement",
+      "parameters": {
+        "base_model": "gemini-2.5-flash",
+        "config": {
+          "adapterSize": "ADAPTER_SIZE_ONE",
+          "batchSize": 4,
+          "checkpointInterval": 100,
+          "epochCount": 1,
+          "evaluateInterval": 100,
+          "learningRateMultiplier": 1.0,
+          "maxOutputTokens": 2048,
+          "method": "REINFORCEMENT_TUNING",
+          "rewardConfig": {
+            "autoraterScorer": {
+              "autoraterConfig": {
+                "autoraterModel": "test-model"
+              }
+            }
+          },
+          "samplesPerPrompt": 4,
+          "tunedModelDisplayName": "Model display name"
+        },
+        "training_dataset": {
+          "gcsUri": "gs://cloud-samples-data/ai-platform/generative_ai/gemini-1_5/text/sft_train_data.jsonl"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "parameter is only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_tune_reinforcement_composite",
+      "parameters": {
+        "base_model": "gemini-2.5-flash",
+        "config": {
+          "adapterSize": "ADAPTER_SIZE_ONE",
+          "compositeRewardConfig": {
+            "weightedRewardConfigs": [
+              {
+                "rewardConfig": {
+                  "autoraterScorer": {
+                    "autoraterConfig": {
+                      "autoraterModel": "test-model"
+                    }
+                  }
+                },
+                "weight": 1.0
+              }
+            ]
+          },
+          "epochCount": 1,
+          "learningRateMultiplier": 1.0,
+          "method": "REINFORCEMENT_TUNING",
+          "tunedModelDisplayName": "Model display name"
+        },
+        "training_dataset": {
+          "gcsUri": "gs://cloud-samples-data/ai-platform/generative_ai/gemini-1_5/text/sft_train_data.jsonl"
+        }
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "tunings/test_tune.py",
+  "test_method": "tunings.tune",
+  "upstream_version": "2.28.0"
+}

@@ -1,0 +1,26 @@
+# Hand-maintained inputs of `gen_gaos.py` (the `_gaos` surface generator).
+#
+# `unmapped_count` records how many struct fields fell back to
+# `serde_json::Value` because their Python annotation could not be mapped to a
+# Rust type. The generator fails if the recorded count or the `[unmapped.*]`
+# entries below disagree with what it finds, so a new upstream shape cannot
+# silently widen the gap. Limit: 60 (specs/008-python-genai-rust-conformance,
+# T061); beyond that, extend the union handling in gen_gaos.py instead.
+#
+# As of google-genai 2.28.0 every field maps: discriminated unions
+# (`Field(discriminator=...)`) and Speakeasy open unions (`parse_open_union`)
+# become tagged Rust enums, `Literal[...]` / `Union[Literal[...], UnrecognizedStr]`
+# become string enums with an `Unknown(String)` fallback, and every other union
+# becomes an untagged enum.
+
+unmapped_count = 0
+
+# Rename a generated type: "<sub-package>.<RustName>" = "<NewName>".
+# Needed only when a generated name would collide with something hand-written.
+[rename]
+
+# One entry per unmapped field, keyed "<sub-package>.<Struct>.<field>":
+#
+#   [unmapped."interactions.Example.field"]
+#   reason = "why the field stays a serde_json::Value"
+[unmapped]

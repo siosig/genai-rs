@@ -1,0 +1,87 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/fileSearchStores/fr3l0ri2so25-a3r1ump9x821/documents/asurveyofmodernistpoetrytxt-uvmqjtmkm1h2",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_get_success",
+      "parameters": {
+        "config": null,
+        "name": "fileSearchStores/fr3l0ri2so25-a3r1ump9x821/documents/asurveyofmodernistpoetrytxt-uvmqjtmkm1h2"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/fileSearchStores/fr3l0ri2so25-a3r1ump9x821/documents/non-existent-document",
+            "query": []
+          }
+        ],
+        "server_error": "Documents does not exist"
+      },
+      "name": "test_get_not_found",
+      "parameters": {
+        "config": null,
+        "name": "fileSearchStores/fr3l0ri2so25-a3r1ump9x821/documents/non-existent-document"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/fileSearchStores/fr3l0ri2so25-a3r1ump9x821/documents/_invalid_document_name",
+            "query": []
+          }
+        ],
+        "server_error": "INVALID_ARGUMENT"
+      },
+      "name": "test_get_invalid_name",
+      "parameters": {
+        "config": null,
+        "name": "fileSearchStores/fr3l0ri2so25-a3r1ump9x821/documents/_invalid_document_name"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/genai-test-document",
+            "query": []
+          }
+        ],
+        "server_error": "Not Found"
+      },
+      "name": "test_get_not_a_document_name",
+      "parameters": {
+        "config": null,
+        "name": "genai-test-document"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "documents/test_get.py",
+  "test_method": "file_search_stores.documents.get",
+  "upstream_version": "2.28.0"
+}

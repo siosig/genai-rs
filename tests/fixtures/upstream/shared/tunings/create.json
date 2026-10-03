@@ -1,0 +1,25 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": "only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_tune",
+      "parameters": {
+        "base_model": "gemini-3.1-flash-lite",
+        "config": {
+          "epochCount": 1
+        },
+        "training_dataset": {
+          "gcsUri": "gs://cloud-samples-data/ai-platform/generative_ai/gemini-2_0/text/sft_train_data.jsonl"
+        }
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "shared/tunings/test_create.py",
+  "test_method": "tunings.tune",
+  "upstream_version": "2.28.0"
+}

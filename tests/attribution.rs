@@ -51,6 +51,10 @@ fn files_requiring_header() -> Vec<String> {
         "src/blocking/generated.rs".to_owned(),
         "docs/parity.md".to_owned(),
         "tests/fixtures/converters/README.md".to_owned(),
+        "src/gaos/mod.rs".to_owned(),
+        "src/gaos/types.rs".to_owned(),
+        "src/gaos/models.rs".to_owned(),
+        "tests/fixtures/gaos/README.md".to_owned(),
     ];
     // The Japanese parity table is emitted only when the generator has its
     // locale support; checked when present rather than required, so this suite
@@ -147,7 +151,10 @@ fn notice_lists_derived_paths_that_all_exist() {
         "src/types/generated/",
         "src/converters/generated/",
         "src/blocking/generated.rs",
+        "src/gaos/",
         "tests/fixtures/converters/",
+        "tests/fixtures/gaos/",
+        "tests/gaos/generated_ops.rs",
         "docs/parity.md",
         "docs/parity.ja.md",
     ];

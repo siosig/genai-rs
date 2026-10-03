@@ -1,0 +1,74 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "DELETE",
+            "path": "/v1beta/models/8533706666867163136",
+            "query": []
+          }
+        ],
+        "server_error": "404"
+      },
+      "name": "test_delete_model",
+      "parameters": {
+        "config": null,
+        "model": "models/8533706666867163136"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "DELETE",
+            "path": "/test_api_version/models/tmodels/8533706666867163136",
+            "query": []
+          }
+        ],
+        "server_error": "404"
+      },
+      "name": "test_delete_model_with_http_options_in_method",
+      "parameters": {
+        "config": {
+          "httpOptions": {
+            "apiVersion": "test_api_version",
+            "headers": {
+              "test": "headers"
+            }
+          }
+        },
+        "model": "tmodels/8533706666867163136"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "DELETE",
+            "path": "/v1beta/tunedModels/generate-num-9598",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_delete_tuned_model",
+      "parameters": {
+        "config": null,
+        "model": "tunedModels/generate-num-9598"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "models/test_delete.py",
+  "test_method": "models.delete",
+  "upstream_version": "2.28.0"
+}

@@ -1,0 +1,31 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "ttl": "7600s"
+            },
+            "method": "PATCH",
+            "path": "/v1beta/cachedContents/o239k1gxzz0juy9wqstndhncr85krehehf551hqh",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_caches_update_with_mldev_cache_name",
+      "parameters": {
+        "config": {
+          "ttl": "7600s"
+        },
+        "name": "cachedContents/o239k1gxzz0juy9wqstndhncr85krehehf551hqh"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "caches/test_update.py",
+  "test_method": "caches.update",
+  "upstream_version": "2.28.0"
+}

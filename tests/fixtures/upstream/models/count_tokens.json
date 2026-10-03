@@ -1,0 +1,182 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 300 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:countTokens",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_count_tokens",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 300 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 300 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:countTokens",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_count_tokens_mldev_custom_url",
+      "parameters": {
+        "config": {
+          "http_options": {
+            "api_version": "v1beta",
+            "base_url": "https://generativelanguage.googleapis.com/"
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 300 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_count_tokens_with_system_instruction",
+      "parameters": {
+        "config": {
+          "system_instruction": {
+            "parts": [
+              {
+                "text": "you are a chatbot."
+              }
+            ],
+            "role": "user"
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 300 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_count_tokens_with_tools",
+      "parameters": {
+        "config": {
+          "tools": [
+            {
+              "google_search_retrieval": {}
+            }
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 300 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_count_tokens_with_generation_config",
+      "parameters": {
+        "config": {
+          "generation_config": {
+            "max_output_tokens": 50
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 300 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "models/test_count_tokens.py",
+  "test_method": "models.count_tokens",
+  "upstream_version": "2.28.0"
+}

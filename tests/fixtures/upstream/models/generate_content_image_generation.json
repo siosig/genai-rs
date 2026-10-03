@@ -1,0 +1,287 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "A photorealistic red apple on a table."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "imageConfig": {
+                  "aspectRatio": "16:9"
+                },
+                "responseModalities": [
+                  "IMAGE"
+                ]
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash-image:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_image_generation_config",
+      "parameters": {
+        "config": {
+          "imageConfig": {
+            "aspectRatio": "16:9"
+          },
+          "responseModalities": [
+            "IMAGE"
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "A photorealistic red apple on a table."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash-image"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_image_generation_config_output_mime_type",
+      "parameters": {
+        "config": {
+          "imageConfig": {
+            "aspectRatio": "16:9",
+            "outputMimeType": "image/jpeg"
+          },
+          "responseModalities": [
+            "IMAGE"
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "A photorealistic red apple on a table."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash-image"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "only supported in Gemini Enterprise Agent Platform mode",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_image_generation_config_output_compression_quality",
+      "parameters": {
+        "config": {
+          "imageConfig": {
+            "aspectRatio": "16:9",
+            "outputCompressionQuality": 80
+          },
+          "responseModalities": [
+            "IMAGE"
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "A photorealistic red apple on a table."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash-image"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Make a zombie anime style"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "imageConfig": {
+                  "aspectRatio": "16:9"
+                },
+                "responseModalities": [
+                  "IMAGE"
+                ]
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash-image:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_image_generation_filtered",
+      "parameters": {
+        "config": {
+          "imageConfig": {
+            "aspectRatio": "16:9"
+          },
+          "responseModalities": [
+            "IMAGE"
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Make a zombie anime style"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash-image"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is your name?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "imageConfig": {
+                  "aspectRatio": "16:9"
+                },
+                "responseModalities": [
+                  "IMAGE"
+                ]
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash-image:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_image_generation_no_image",
+      "parameters": {
+        "config": {
+          "imageConfig": {
+            "aspectRatio": "16:9"
+          },
+          "responseModalities": [
+            "IMAGE"
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash-image"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "A photorealistic red apple on a table."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "responseModalities": [
+                  "IMAGE"
+                ]
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash-image:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_image_generation_config_validation_none",
+      "parameters": {
+        "config": {
+          "responseModalities": [
+            "IMAGE"
+          ]
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "A photorealistic red apple on a table."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash-image"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "models/test_generate_content_image_generation.py",
+  "test_method": "models.generate_content",
+  "upstream_version": "2.28.0"
+}

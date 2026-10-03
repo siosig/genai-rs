@@ -1,0 +1,48 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "how are you doing?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_generate_content_with_http_options",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "how are you doing?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "models/gemini-2.5-flash"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "models/test_generate_content_http_options.py",
+  "test_method": "models.generate_content",
+  "upstream_version": "2.28.0"
+}

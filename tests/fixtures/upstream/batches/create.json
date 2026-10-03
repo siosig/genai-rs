@@ -1,0 +1,191 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": "Unsupported source",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_union_with_invalid_src",
+      "parameters": {
+        "config": {
+          "dest": "bq://vertex-sdk-dev.unified_genai_tests_batches.generate_content_output",
+          "displayName": "test_batch"
+        },
+        "model": "gemini-2.5-flash",
+        "src": "invalid_src"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "supported",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_union_with_invalid_dest",
+      "parameters": {
+        "config": {
+          "dest": "invalid_dest",
+          "displayName": "test_batch"
+        },
+        "model": "gemini-embedding-001",
+        "src": "bq://vertex-sdk-dev.unified_genai_tests_batches.embedding_requests"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "batch": {
+                "displayName": "test_batch",
+                "inputConfig": {
+                  "requests": {
+                    "requests": [
+                      {
+                        "request": {
+                          "contents": [
+                            {
+                              "parts": [
+                                {
+                                  "text": "say hello"
+                                }
+                              ],
+                              "role": "user"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "webhookConfig": {
+                  "uris": [
+                    "https://example.com/webhook"
+                  ],
+                  "user_metadata": {
+                    "batch_id": "123"
+                  }
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:batchGenerateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_create_with_webhook_config",
+      "parameters": {
+        "config": {
+          "displayName": "test_batch",
+          "webhookConfig": {
+            "uris": [
+              "https://example.com/webhook"
+            ],
+            "userMetadata": {
+              "batch_id": "123"
+            }
+          }
+        },
+        "model": "gemini-2.5-flash",
+        "src": {
+          "inlinedRequests": [
+            {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "say hello"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "batch": {
+                "displayName": "test_batch",
+                "inputConfig": {
+                  "requests": {
+                    "requests": [
+                      {
+                        "request": {
+                          "contents": [
+                            {
+                              "parts": [
+                                {
+                                  "text": "say hello"
+                                }
+                              ],
+                              "role": "user"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "webhookConfig": {
+                  "uris": [
+                    "https://example.com/webhook"
+                  ]
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:batchGenerateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_create_with_webhook_config_dict",
+      "parameters": {
+        "config": {
+          "displayName": "test_batch",
+          "webhookConfig": {
+            "uris": [
+              "https://example.com/webhook"
+            ]
+          }
+        },
+        "model": "gemini-2.5-flash",
+        "src": {
+          "inlinedRequests": [
+            {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "say hello"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "batches/test_create.py",
+  "test_method": "batches.create",
+  "upstream_version": "2.28.0"
+}

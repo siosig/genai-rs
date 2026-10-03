@@ -87,5 +87,5 @@ scope_tail = "バックエンド単位で対象外としているもの（Vertex
 "tunings.validate_reward" = "`tunings.py::validate_reward` にも同じ `vertexai` ガードがある。Vertex AI 専用（報酬モデルの検証は Vertex AI のチューニング機能）。"
 
 [non_method_rows]
-"pagers" = "`Pager` / `AsyncPager` はメソッドではなく型。Rust では `crate::pager::Pager<T>`（`page()` / `name()` / `page_size()` / `config()` / `next_page()`）として実装しており、`src/pager.rs` の `#[cfg(test)]` テストと各 `list` メソッドのテストで担保している。"
-"errors" = "`APIError` 系はメソッドではなく型。Rust では `crate::error::Error` enum（`Api` / `Function*` / `UnknownApiResponse` など）として実装しており、`src/error.rs` の `#[cfg(test)]` テストで担保している。"
+"pagers" = "`Pager` / `AsyncPager` はメソッドではなく型。Rust では `crate::pagers::Pager<T>`（`page()` / `name()` / `page_size()` / `config()` / `next_page()`）として実装しており、`src/pagers.rs` の `#[cfg(test)]` テストと各 `list` メソッドのテストで担保している。"
+"errors" = "`APIError` 系はメソッドではなく型。Rust では `crate::errors::Error` enum（`Api` / `Function*` / `UnknownApiResponse` など）として実装しており、`src/errors.rs` の `#[cfg(test)]` テストで担保している。"

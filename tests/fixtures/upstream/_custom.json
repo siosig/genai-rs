@@ -1,0 +1,52 @@
+[
+  {
+    "case": "test_multimodal_search_flow",
+    "file": "file_search_stores/test_multimodal_flow.py",
+    "reason": "test_method is not a client method path"
+  },
+  {
+    "case": "test_create_delete_mldev",
+    "file": "shared/batches/test_create_delete.py",
+    "reason": "test_method is not a client method path"
+  },
+  {
+    "case": "test_create_get_cancel_mldev",
+    "file": "shared/batches/test_create_get_cancel.py",
+    "reason": "test_method is not a client method path"
+  },
+  {
+    "case": "test_create_get_delete",
+    "file": "shared/caches/test_create_get_delete.py",
+    "reason": "test_method is not a client method path"
+  },
+  {
+    "case": "test_create_update_get",
+    "file": "shared/caches/test_create_update_get.py",
+    "reason": "test_method is not a client method path"
+  },
+  {
+    "case": "test_send_message",
+    "file": "shared/chats/test_send_message.py",
+    "reason": "test_method is not a client method path"
+  },
+  {
+    "case": "test_send_message_stream",
+    "file": "shared/chats/test_send_message_stream.py",
+    "reason": "test_method is not a client method path"
+  },
+  {
+    "case": "test_upload_get_delete_image",
+    "file": "shared/files/test_upload_get_delete.py",
+    "reason": "resumable upload needs a multi-step server; ported by hand"
+  },
+  {
+    "case": "test_generate_content_stream",
+    "file": "shared/models/test_generate_content_stream.py",
+    "reason": "test_method is not a client method path"
+  },
+  {
+    "case": "test_create_get_cancel",
+    "file": "shared/tunings/test_create_get_cancel.py",
+    "reason": "test_method is not a client method path"
+  }
+]

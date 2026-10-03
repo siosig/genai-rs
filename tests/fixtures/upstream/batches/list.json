@@ -1,0 +1,48 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/batches",
+            "query": [
+              [
+                "pageSize",
+                "5"
+              ]
+            ]
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_list_batch_jobs",
+      "parameters": {
+        "config": {
+          "pageSize": 5
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "filter parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_list_batch_jobs_with_config",
+      "parameters": {
+        "config": {
+          "filter": "display_name:\"genai_*\"",
+          "pageSize": 5
+        }
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "batches/test_list.py",
+  "test_method": "batches.list",
+  "upstream_version": "2.28.0"
+}

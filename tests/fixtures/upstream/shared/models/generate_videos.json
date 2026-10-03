@@ -1,0 +1,51 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "instances": [
+                {
+                  "prompt": "Man with a dog"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/veo-3.1-lite-generate-preview:predictLongRunning",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_simple_prompt_gemini",
+      "parameters": {
+        "config": {
+          "httpOptions": {
+            "retryOptions": {
+              "attempts": 2,
+              "httpStatusCodes": [
+                429,
+                500,
+                502,
+                503,
+                504
+              ],
+              "initialDelay": 10.0
+            }
+          }
+        },
+        "image": null,
+        "model": "veo-3.1-lite-generate-preview",
+        "prompt": "Man with a dog",
+        "source": null,
+        "video": null
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "shared/models/test_generate_videos.py",
+  "test_method": "models.generate_videos",
+  "upstream_version": "2.28.0"
+}

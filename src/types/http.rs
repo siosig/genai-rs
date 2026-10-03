@@ -18,17 +18,21 @@ use serde_json::Map;
 pub struct HttpOptions {
     /// Overrides the API base URL (default:
     /// `https://generativelanguage.googleapis.com/`).
+    #[serde(alias = "baseUrl")]
     pub base_url: Option<String>,
     /// Overrides the API version path segment (default: `v1beta`; an empty
     /// string omits the version segment entirely).
+    #[serde(alias = "apiVersion")]
     pub api_version: Option<String>,
     /// Additional headers merged into every request.
     pub headers: Option<HashMap<String, String>>,
     /// Request timeout in milliseconds.
     pub timeout: Option<i64>,
     /// Extra fields deep-merged into every request body.
+    #[serde(alias = "extraBody")]
     pub extra_body: Option<Map<String, serde_json::Value>>,
     /// Retry policy; unset means no retries (a single attempt).
+    #[serde(alias = "retryOptions")]
     pub retry_options: Option<HttpRetryOptions>,
 }
 
@@ -45,14 +49,18 @@ pub struct HttpRetryOptions {
     /// Total number of attempts, including the first.
     pub attempts: Option<i64>,
     /// Initial backoff delay in seconds.
+    #[serde(alias = "initialDelay")]
     pub initial_delay: Option<f64>,
     /// Maximum backoff delay in seconds.
+    #[serde(alias = "maxDelay")]
     pub max_delay: Option<f64>,
     /// Exponential backoff base.
+    #[serde(alias = "expBase")]
     pub exp_base: Option<f64>,
     /// Maximum random jitter added to each delay, in seconds.
     pub jitter: Option<f64>,
     /// HTTP status codes that should trigger a retry.
+    #[serde(alias = "httpStatusCodes")]
     pub http_status_codes: Option<Vec<i64>>,
 }
 

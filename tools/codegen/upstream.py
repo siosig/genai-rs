@@ -18,25 +18,37 @@ Everything that stamps or checks a version reads it from here:
 
 ## Upgrading to a new upstream release
 
-1. Bump `PINNED_VERSION` here and the `google-genai==` pin in
-   `tools/codegen/requirements.in` to the same value, then relock:
+Everything below runs with the codegen venv (`target/codegen-venv`, Python
+3.12; see tools/codegen/README.md) -- `docs/upstream-sync.md` has the full
+procedure and how to read each report.
+
+1. See what changed, paired with the Rust counterparts:
+   `python tools/codegen/sync_diff.py --from <current pin> --to <new>`
+2. Bump `PINNED_VERSION` here, the `google-genai==` pin in
+   `tools/codegen/requirements.in`, and the version sites `assert_all_in_sync`
+   lists (Cargo.toml, src/lib.rs); relock:
    `uv pip compile tools/codegen/requirements.in --generate-hashes
-   --python-version 3.12 -o tools/codegen/requirements.txt`
-2. `pip install --require-hashes -r tools/codegen/requirements.txt`
-3. `python tools/codegen/generate.py`
-4. `cargo check --all-features` — new or renamed `t_*` transformers show up
-   here as missing-function errors; add them to `src/transformers.rs`.
-5. `cargo test --all-features` — the golden converter fixtures
-   (`tests/fixtures/converters/`) are regenerated from the new SDK in step
-   3, so a behavioural change upstream surfaces as a diff there.
-6. Update `CHANGELOG.md` with the new upstream version.
+   --python-version 3.12 -o tools/codegen/requirements.txt`, then reinstall
+   with `uv pip install --python target/codegen-venv/bin/python
+   --require-hashes -r tools/codegen/requirements.txt`
+3. `python tools/codegen/generate.py` regenerates types, converters, golden
+   fixtures, the oracle corpus (tests/fixtures/upstream/), blocking wrappers,
+   the `_gaos` sub-SDK, the parity table and the symbol ledger.
+4. `cargo check --all-features --all-targets`, then port every entry the
+   sync report named into its Rust counterpart.
+5. `python tools/codegen/check_ledger.py` (no unmapped symbol) and
+   `python tools/codegen/check_upstream_tests.py` (new or changed upstream
+   tests show up as `pending`; port or exclude them with a reason).
+6. `cargo test --all-features` -- the converter goldens and the oracle corpus
+   fail where Rust diverges from the new SDK.
+7. Update `CHANGELOG.md`.
 """
 
 from __future__ import annotations
 
 # The upstream release this port is generated from and verified against.
 # Keep in sync with the `google-genai==` pin in requirements.txt.
-PINNED_VERSION = "2.23.0"
+PINNED_VERSION = "2.28.0"
 
 # The Python version the generated output is pinned to, as "major.minor".
 #

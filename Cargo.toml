@@ -1,6 +1,6 @@
 [package]
 name = "gemini-genai"
-version = "0.3.1"
+version = "0.4.0"
 edition = "2024"
 # Minimum supported Rust version, for every feature combination; the `msrv` CI
 # job checks `--all-features` on exactly this toolchain.
@@ -37,7 +37,7 @@ all-features = true
 # matching install. See `tools/codegen/upstream.py` for the upgrade procedure.
 [package.metadata.upstream]
 python-sdk = "google-genai"
-version = "2.23.0"
+version = "2.28.0"
 backend = "gemini-developer-api"
 
 [lib]
@@ -60,7 +60,7 @@ mcp = ["dep:rmcp"]
 
 [dependencies]
 reqwest = { version = "0.13", default-features = false, features = ["json", "stream", "multipart"] }
-# `io-util` supplies AsyncReadExt, which `src/http/upload.rs` uses to read a file
+# `io-util` supplies AsyncReadExt, which `src/api_client/upload.rs` uses to read a file
 # in chunks for resumable upload. It is not listed by accident being harmless:
 # without it `--no-default-features` fails to compile, and it only ever built
 # because another dependency happened to enable the feature for us. Cargo
@@ -74,7 +74,7 @@ futures-util = "0.3"
 async-stream = "0.3"
 eventsource-stream = "0.2"
 serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+serde_json = { version = "1", features = ["preserve_order"] }
 serde_with = { version = "3", features = ["base64"] }
 thiserror = "2"
 backon = "1.6"

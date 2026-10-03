@@ -4,5 +4,5 @@
     "output_mime_type": "image/jpeg"
   },
   "expected": null,
-  "expected_error": "field `output_mime_type` is only supported by the Vertex AI backend"
+  "expected_error": "output_mime_type parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

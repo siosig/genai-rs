@@ -1,0 +1,18 @@
+{
+  "environments": [
+    {
+      "created": "sample-created",
+      "file_count": "1",
+      "id": "sample-id",
+      "last_accessed": "sample-last_accessed",
+      "network": {
+        "allowlist": []
+      },
+      "size_bytes": "1",
+      "sources": [],
+      "status": "active",
+      "updated": "sample-updated"
+    }
+  ],
+  "next_page_token": "sample-next_page_token"
+}

@@ -69,6 +69,17 @@ RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features --locked
 python tools/codegen/generate.py && git diff --exit-code
 ```
 
+最後の 1 行には、「[生成コード](#生成コード)」で説明する codegen 用 venv が要る。
+CI の `codegen-check` ジョブは、この後にさらに 3 つのチェックを回す。`tools/codegen/`、
+上流のコードを移植した手書きモジュール、上流のテストを移植したテストのいずれかを
+触ったときは、手元でも回す。
+
+```sh
+python tools/codegen/check_ledger.py            # 上流の全シンボルが台帳で説明されている
+python tools/codegen/check_upstream_tests.py    # 上流の全テストが対応済みか除外済み
+python -m unittest discover tools/codegen/tests
+```
+
 `--locked` は省略不可。`Cargo.lock` をコミットしているので、これを書き換えないと
 通らないビルドは、あなたの変更が前提としたのとは別の依存グラフでのビルドということ。
 
@@ -114,19 +125,32 @@ cargo +nightly fmt --all
 - `src/types/generated/`
 - `src/converters/generated/`
 - `src/blocking/generated.rs`
+- `src/gaos/`
 - `tests/fixtures/converters/`
+- `tests/fixtures/upstream/`
+- `tests/fixtures/gaos/`
+- `tools/codegen/ledger.toml`
 - `docs/parity.md`, `docs/parity.ja.md`
 
 入力側の `tools/codegen/methods.toml`、`tools/codegen/parity-matrix.ja.md`、
-`tools/codegen/fixtures_cases.py` は追跡されていて手で編集する。
+`tools/codegen/fixtures_cases.py`、`tools/codegen/module_map.toml`、
+`tools/codegen/deviations.toml`、`tools/codegen/upstream_tests_rules.toml`、
+`tools/codegen/gaos_overrides.toml`、`tools/codegen/renames.toml` は追跡されていて手で編集する。
+`tools/codegen/upstream_tests.toml` も同様だが、テストの一覧は
+`check_upstream_tests.py --update` が保守し、`status`・`rust`・`reason` に加えた編集は保たれる。
 
 生成器（または `converter_overrides/<fn>.rs`）のほうを直して再生成する。
 
 ```sh
-uv venv --python 3.12 --seed .venv-codegen
-.venv-codegen/bin/pip install --require-hashes -r tools/codegen/requirements.txt
-.venv-codegen/bin/python tools/codegen/generate.py   # あるいは --only types,converters,…
+uv venv --python 3.12 target/codegen-venv
+uv pip install --python target/codegen-venv/bin/python --require-hashes -r tools/codegen/requirements.txt
+target/codegen-venv/bin/python tools/codegen/generate.py   # あるいは --only types,converters,…
 ```
+
+生成器は上流タグのソースも読む（wheel にはテストが含まれない）。
+`tools/codegen/upstream_src.py` が初回に `target/upstream-src/` へ shallow clone するため、
+最初の実行にはネットワークが要る。各ツールの説明は
+[tools/codegen/README.md](tools/codegen/README.md) にある。
 
 **インタプリタのバージョンも入力の一部。** `google.genai.types` が公開する
 pydantic モデルの集合がバージョンで変わる（3.12 は `BlobImageUnion` を含む 464、
@@ -172,8 +196,18 @@ Dependabot が PR で提案する。手動が要るのは次のもの。
 ### 上流 SDK のアップグレード
 
 これは依存のバンプではなく、生成ツリー全体の再生成を伴う作業。Dependabot が
-`google-genai` を対象外にしているのはそのため。手順は
-`tools/codegen/upstream.py` のモジュール docstring にある。
+`google-genai` を対象外にしているのはそのため。手順の要点は次のとおり。
+
+1. `python tools/codegen/sync_diff.py --from <現在のピン>` で、変わった上流シンボルだけを
+   Rust 側の対応先つきで一覧する。
+2. `tools/codegen/upstream.py` の `PINNED_VERSION` と `requirements.in` の
+   `google-genai==` を上げ、ロックし直して `generate.py` を回す。
+3. 一覧に出た手書き項目を移植し、`check_upstream_tests.py`（新しい上流テストは
+   `pending` として現れる）と oracle corpus（`cargo test`）、続いて `check_ledger.py` を回す。
+4. `docs/upstream-sync.md` のピン表を更新し、CHANGELOG に追記する。
+
+完全な手順、上流と Rust のモジュール対応表、台帳とテスト目録の読み方は
+[docs/upstream-sync.md](docs/upstream-sync.md) にある。
 
 ## リリース
 

@@ -50,8 +50,8 @@
       "language": "PYTHON"
     },
     "fileData": {
-      "fileUri": "files/abc",
-      "mimeType": "image/png"
+      "file_uri": "files/abc",
+      "mime_type": "image/png"
     },
     "functionCall": {
       "id": "c1",
@@ -69,7 +69,7 @@
     },
     "inlineData": {
       "data": "aGVsbG8=",
-      "mimeType": "image/png"
+      "mime_type": "image/png"
     },
     "text": "hello",
     "thought": true,

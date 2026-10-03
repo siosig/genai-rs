@@ -4,5 +4,5 @@
     "resource_name": "projects/p/locations/l/publishers/google/models/m"
   },
   "expected": null,
-  "expected_error": "field `resource_name` is only supported by the Vertex AI backend"
+  "expected_error": "resource_name parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

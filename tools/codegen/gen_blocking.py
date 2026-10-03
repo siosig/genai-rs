@@ -33,6 +33,8 @@ except ModuleNotFoundError:  # Python < 3.11
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 METHODS_TOML = pathlib.Path(__file__).resolve().parent / "methods.toml"
+# Written by `gen_gaos.py` (the `_gaos` surface); merged after `methods.toml`.
+METHODS_GAOS_TOML = pathlib.Path(__file__).resolve().parent / "methods_gaos.toml"
 OUT_DIR = REPO_ROOT / "src" / "blocking"
 
 GENAI_VERSION = upstream.PINNED_VERSION
@@ -108,10 +110,10 @@ def render_method(m: dict[str, Any]) -> str:
     )
 
     if kind in ("unary", "upload"):
-        ret_ty = f"crate::error::Result<{ret}>"
+        ret_ty = f"crate::errors::Result<{ret}>"
         body = f"        self.runtime.block_on(self.inner.{name}({call_args}))?"
     elif kind == "stream":
-        ret_ty = f"crate::error::Result<crate::blocking::BlockingStream<{ret}>>"
+        ret_ty = f"crate::errors::Result<crate::blocking::BlockingStream<{ret}>>"
         body = (
             # Two `?`s: `block_on` returns `Result<F::Output>` where
             # `F::Output` is itself the wrapped async method's
@@ -125,7 +127,7 @@ def render_method(m: dict[str, Any]) -> str:
             "        ))"
         )
     elif kind == "pager":
-        ret_ty = f"crate::error::Result<crate::blocking::Pager<{ret}>>"
+        ret_ty = f"crate::errors::Result<crate::blocking::Pager<{ret}>>"
         body = (
             f"        let pager = self.runtime.block_on(self.inner.{name}({call_args}))??;\n"
             "        Ok(crate::blocking::Pager::new(\n"
@@ -164,10 +166,21 @@ def render_struct(cm: dict[str, Any], methods: list[dict[str, Any]]) -> str:
     )
 
 
+def load_methods() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """The union of `methods.toml` and `methods_gaos.toml` (the latter if present)."""
+    client_modules: list[dict[str, Any]] = []
+    methods: list[dict[str, Any]] = []
+    for path in (METHODS_TOML, METHODS_GAOS_TOML):
+        if not path.exists():
+            continue
+        data = tomllib.loads(path.read_text(encoding="utf-8"))
+        client_modules += data.get("client_module", [])
+        methods += data.get("method", [])
+    return client_modules, methods
+
+
 def main() -> None:
-    data = tomllib.loads(METHODS_TOML.read_text(encoding="utf-8"))
-    client_modules: list[dict[str, Any]] = data.get("client_module", [])
-    methods: list[dict[str, Any]] = data.get("method", [])
+    client_modules, methods = load_methods()
 
     unknown_kinds = {m["kind"] for m in methods} - GENERATED_KINDS - SKIPPED_KINDS
     if unknown_kinds:

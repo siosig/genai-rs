@@ -16,11 +16,11 @@
     "mediaChunks": [
       {
         "data": "aGVsbG8=",
-        "mimeType": "audio/pcm;rate=16000"
+        "mime_type": "audio/pcm;rate=16000"
       },
       {
         "data": "aGVsbG8=",
-        "mimeType": "image/jpeg"
+        "mime_type": "image/jpeg"
       }
     ]
   },

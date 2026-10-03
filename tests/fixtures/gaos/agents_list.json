@@ -1,0 +1,23 @@
+{
+  "agents": [
+    {
+      "agent_config": {
+        "max_total_tokens": "1",
+        "model": "sample-model",
+        "type": "antigravity"
+      },
+      "base_agent": "sample-base_agent",
+      "base_environment": {
+        "env": {},
+        "environment_id": "sample-environment_id",
+        "sources": [],
+        "type": "remote"
+      },
+      "description": "sample-description",
+      "id": "sample-id",
+      "system_instruction": "sample-system_instruction",
+      "tools": []
+    }
+  ],
+  "next_page_token": "sample-next_page_token"
+}

@@ -1,0 +1,39 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "The quick brown fox jumps over the lazy dog."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-3.5-flash:countTokens",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_count_tokens",
+      "parameters": {
+        "config": null,
+        "contents": "The quick brown fox jumps over the lazy dog.",
+        "model": "gemini-3.5-flash"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "shared/models/test_count_tokens.py",
+  "test_method": "models.count_tokens",
+  "upstream_version": "2.28.0"
+}

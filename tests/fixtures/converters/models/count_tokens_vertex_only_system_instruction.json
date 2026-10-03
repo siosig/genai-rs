@@ -24,5 +24,5 @@
     }
   },
   "expected": null,
-  "expected_error": "field `system_instruction` is only supported by the Vertex AI backend"
+  "expected_error": "system_instruction parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

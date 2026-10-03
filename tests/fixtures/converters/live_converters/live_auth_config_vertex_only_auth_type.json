@@ -4,5 +4,5 @@
     "auth_type": "API_KEY_AUTH"
   },
   "expected": null,
-  "expected_error": "field `auth_type` is only supported by the Vertex AI backend"
+  "expected_error": "auth_type parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

@@ -7,5 +7,5 @@
     }
   },
   "expected": null,
-  "expected_error": "field `explicit_vad_signal` is only supported by the Vertex AI backend"
+  "expected_error": "explicit_vad_signal parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

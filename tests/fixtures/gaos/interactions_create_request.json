@@ -1,0 +1,83 @@
+{
+  "agent": "deep-research-pro-preview-12-2025",
+  "agent_config": {
+    "max_total_tokens": "1",
+    "model": "sample-model",
+    "type": "antigravity"
+  },
+  "background": true,
+  "continuation_token": "sample-continuation_token",
+  "environment": {
+    "env": {
+      "key": {
+        "credential": "sample-credential",
+        "value": "sample-value"
+      }
+    },
+    "environment_id": "sample-environment_id",
+    "network": {
+      "allowlist": []
+    },
+    "sources": [
+      {
+        "content": "sample-content",
+        "encoding": "sample-encoding",
+        "source": "sample-source",
+        "target": "sample-target",
+        "type": "gcs"
+      }
+    ],
+    "type": "remote"
+  },
+  "input": {
+    "channels": 1,
+    "data": "sample-data",
+    "mime_type": "audio/wav",
+    "sample_rate": 1,
+    "type": "audio",
+    "uri": "sample-uri"
+  },
+  "labels": {
+    "key": "sample-labels"
+  },
+  "previous_interaction_id": "sample-previous_interaction_id",
+  "response_format": {
+    "mime_type": "application/json",
+    "schema": {
+      "key": {
+        "key": "value"
+      }
+    },
+    "type": "text"
+  },
+  "response_mime_type": "sample-response_mime_type",
+  "response_modalities": [
+    "text"
+  ],
+  "safety_settings": [
+    {
+      "method": "severity",
+      "threshold": "block_low_and_above",
+      "type": "hate_speech"
+    }
+  ],
+  "service_tier": "flex",
+  "store": true,
+  "stream": true,
+  "system_instruction": "sample-system_instruction",
+  "tools": [
+    {
+      "type": "code_execution"
+    }
+  ],
+  "webhook_config": {
+    "uris": [
+      "sample-uris"
+    ],
+    "user_metadata": {
+      "key": {
+        "key": "value"
+      }
+    }
+  }
+}

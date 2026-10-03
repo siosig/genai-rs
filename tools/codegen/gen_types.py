@@ -94,6 +94,12 @@ FIELD_TYPE_OVERRIDES = {
     ("EvaluationConfig", "metrics"): "Vec<crate::types::Metric>",
 }
 
+# Extra accepted input keys that upstream implements with a pydantic
+# `model_validator(mode="before")` key rename instead of a field alias.
+# `CitationMetadata._rename_citation_sources` maps the wire key
+# `citationSources` onto `citations`.
+EXTRA_FIELD_ALIASES = {("CitationMetadata", "citations"): ("citationSources",)}
+
 RUST_RAW_IDENT_FIELDS = {"type", "ref", "enum"}
 
 
@@ -313,11 +319,13 @@ def render_struct(name: str, cls: type, boxed_edges: set[tuple[str, str]]) -> st
         # Rust equivalent.
         if field.alias and field.alias != field_name:
             lines.append(f'    #[serde(alias = "{field.alias}")]')
+        for extra_alias in EXTRA_FIELD_ALIASES.get((name, field_name), ()):
+            lines.append(f'    #[serde(alias = "{extra_alias}")]')
         lines.append('    #[serde(default, skip_serializing_if = "Option::is_none")]')
         if is_bytes == "list":
-            lines.append('    #[serde_as(as = "Option<Vec<serde_with::base64::Base64>>")]')
+            lines.append('    #[serde_as(as = "Option<Vec<crate::types::wire_base64::WireBase64>>")]')
         elif is_bytes:
-            lines.append('    #[serde_as(as = "Option<serde_with::base64::Base64>")]')
+            lines.append('    #[serde_as(as = "Option<crate::types::wire_base64::WireBase64>")]')
         elif rust_type in INT64_LENIENT_TYPES:
             # proto3's canonical JSON mapping encodes int64/uint64 as
             # *strings* (to survive JavaScript's 2^53 precision limit), so

@@ -1,0 +1,113 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Is the audio related to the video? If so, how? What are the common themes? What are the different emphases?"
+                    }
+                  ],
+                  "role": "user"
+                },
+                {
+                  "parts": [
+                    {
+                      "fileData": {
+                        "file_uri": "gs://cloud-samples-data/generative-ai/video/pixel8.mp4",
+                        "mime_type": "video/mp4"
+                      }
+                    }
+                  ],
+                  "role": "user"
+                },
+                {
+                  "parts": [
+                    {
+                      "fileData": {
+                        "file_uri": "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
+                        "mime_type": "audio/mpeg"
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "mediaResolution": "MEDIA_RESOLUTION_LOW"
+              },
+              "systemInstruction": {
+                "parts": [
+                  {
+                    "text": "you are a helpful assistant for people with visual and hearing disabilities."
+                  }
+                ],
+                "role": "user"
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": "400"
+      },
+      "name": "test_video_audio_uri_with_media_resolution",
+      "parameters": {
+        "config": {
+          "mediaResolution": "MEDIA_RESOLUTION_LOW",
+          "systemInstruction": {
+            "parts": [
+              {
+                "text": "you are a helpful assistant for people with visual and hearing disabilities."
+              }
+            ],
+            "role": "user"
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Is the audio related to the video? If so, how? What are the common themes? What are the different emphases?"
+              }
+            ],
+            "role": "user"
+          },
+          {
+            "parts": [
+              {
+                "fileData": {
+                  "fileUri": "gs://cloud-samples-data/generative-ai/video/pixel8.mp4",
+                  "mimeType": "video/mp4"
+                }
+              }
+            ],
+            "role": "user"
+          },
+          {
+            "parts": [
+              {
+                "fileData": {
+                  "fileUri": "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
+                  "mimeType": "audio/mpeg"
+                }
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "models/test_generate_content_media_resolution.py",
+  "test_method": "models.generate_content",
+  "upstream_version": "2.28.0"
+}

@@ -1,0 +1,72 @@
+# Auto-classification of upstream tests (first matching rule wins). Everything
+# not matched stays `pending` until it is ported (`mapped`) or excluded by hand
+# in upstream_tests.toml. `match_file` is an fnmatch glob over the path relative
+# to google/genai/tests; `match_name` is a regex over the test name or case.
+# See specs/008-python-genai-rust-conformance/contracts/upstream-tests.md.
+
+[[rule]]
+match_file = "local_tokenizer/*"
+status = "excluded"
+reason_code = "python_only"
+reason = "Local tokenizer needs a downloaded sentencepiece model; no API request behavior."
+
+[[rule]]
+match_file = "imports/*"
+status = "excluded"
+reason_code = "python_only"
+reason = "Checks Python optional-import behavior of the package."
+
+[[rule]]
+match_file = "public_samples/*"
+status = "excluded"
+reason_code = "live_network"
+reason = "Calls the live API with a real key; covered by the opt-in tests/e2e*.rs instead."
+
+[[rule]]
+match_file = "client/test_replay_client_equality.py"
+status = "excluded"
+reason_code = "replay_infra"
+reason = "Tests the Python replay client used by upstream's own test harness."
+
+[[rule]]
+match_file = "*test_edit_image.py"
+status = "excluded"
+reason_code = "vertex"
+reason = "edit_image is Vertex AI only; Vertex AI is out of scope."
+
+[[rule]]
+match_file = "*test_recontext_image.py"
+status = "excluded"
+reason_code = "vertex"
+reason = "recontext_image is Vertex AI only; Vertex AI is out of scope."
+
+[[rule]]
+match_file = "*test_segment_image.py"
+status = "excluded"
+reason_code = "vertex"
+reason = "segment_image is Vertex AI only; Vertex AI is out of scope."
+
+[[rule]]
+match_file = "*test_validate_reward.py"
+status = "excluded"
+reason_code = "vertex"
+reason = "validate_reward is Vertex AI only; Vertex AI is out of scope."
+
+[[rule]]
+match_file = "*multi_regional*"
+status = "excluded"
+reason_code = "vertex"
+reason = "Multi-regional endpoints are a Vertex AI feature; Vertex AI is out of scope."
+
+[[rule]]
+match_file = "batches/test_create_with_vertex_dataset.py"
+status = "excluded"
+reason_code = "vertex"
+reason = "Vertex AI dataset batch source; Vertex AI is out of scope."
+
+[[rule]]
+match_file = "*"
+match_name = "(?i)vertex"
+status = "excluded"
+reason_code = "vertex"
+reason = "Test name marks it as Vertex AI specific; Vertex AI is out of scope."

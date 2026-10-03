@@ -159,3 +159,6 @@ jobs:
       - run: pip install --require-hashes -r tools/codegen/requirements.txt
       - run: python tools/codegen/generate.py
       - run: git diff --exit-code
+      - run: python tools/codegen/check_ledger.py
+      - run: python tools/codegen/check_upstream_tests.py
+      - run: python -m unittest discover tools/codegen/tests

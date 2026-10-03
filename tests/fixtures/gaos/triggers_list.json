@@ -1,0 +1,42 @@
+{
+  "next_page_token": "sample-next_page_token",
+  "triggers": [
+    {
+      "consecutive_failure_count": 1,
+      "create_time": "2026-01-01T00:00:00Z",
+      "display_name": "sample-display_name",
+      "environment_id": "sample-environment_id",
+      "execution_timeout_seconds": 1,
+      "id": "sample-id",
+      "interaction": {
+        "agent": "deep-research-pro-preview-12-2025",
+        "background": true,
+        "continuation_token": "sample-continuation_token",
+        "labels": {
+          "key": "sample-labels"
+        },
+        "previous_interaction_id": "sample-previous_interaction_id",
+        "response_mime_type": "sample-response_mime_type",
+        "response_modalities": [
+          "text"
+        ],
+        "safety_settings": [],
+        "service_tier": "flex",
+        "store": true,
+        "stream": true,
+        "system_instruction": "sample-system_instruction",
+        "tools": []
+      },
+      "last_pause_time": "2026-01-01T00:00:00Z",
+      "last_resume_time": "2026-01-01T00:00:00Z",
+      "last_run_time": "2026-01-01T00:00:00Z",
+      "max_consecutive_failures": 1,
+      "next_run_time": "2026-01-01T00:00:00Z",
+      "previous_interaction_id": "sample-previous_interaction_id",
+      "schedule": "sample-schedule",
+      "status": "active",
+      "time_zone": "sample-time_zone",
+      "update_time": "2026-01-01T00:00:00Z"
+    }
+  ]
+}

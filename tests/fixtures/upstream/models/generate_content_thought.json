@@ -1,0 +1,107 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Explain the monty hall problem."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "thinkingConfig": {
+                  "thinking_budget": 0
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_disable_thinking",
+      "parameters": {
+        "config": {
+          "thinkingConfig": {
+            "thinkingBudget": 0
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Explain the monty hall problem."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Explain the monty hall problem."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "thinkingConfig": {
+                  "thinking_level": "LOW"
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_thinking_level",
+      "parameters": {
+        "config": {
+          "thinkingConfig": {
+            "thinkingLevel": "LOW"
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Explain the monty hall problem."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "models/test_generate_content_thought.py",
+  "test_method": "models.generate_content",
+  "upstream_version": "2.28.0"
+}

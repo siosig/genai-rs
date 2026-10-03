@@ -5,5 +5,5 @@
     "will_continue": true
   },
   "expected": null,
-  "expected_error": "field `will_continue` is only supported by the Vertex AI backend"
+  "expected_error": "will_continue parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

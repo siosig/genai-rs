@@ -23,5 +23,5 @@
     }
   },
   "expected": null,
-  "expected_error": "field `method` is only supported by the Vertex AI backend"
+  "expected_error": "method parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

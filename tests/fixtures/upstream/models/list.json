@@ -1,0 +1,169 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/tunedModels",
+            "query": [
+              [
+                "pageSize",
+                "3"
+              ]
+            ]
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_tuned_models",
+      "parameters": {
+        "config": {
+          "pageSize": 3,
+          "queryBase": false
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/tunedModels",
+            "query": [
+              [
+                "filter",
+                "displayName=\"gemini-2.5-flash-1b0689e3-9773-43b4-97eb-c8140d5f183b\""
+              ],
+              [
+                "pageSize",
+                "3"
+              ]
+            ]
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_tuned_models_with_filter",
+      "parameters": {
+        "config": {
+          "filter": "displayName=\"gemini-2.5-flash-1b0689e3-9773-43b4-97eb-c8140d5f183b\"",
+          "pageSize": 3,
+          "queryBase": false
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/models",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_base_models",
+      "parameters": {
+        "config": null
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/models",
+            "query": [
+              [
+                "pageSize",
+                "10"
+              ]
+            ]
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_base_models_with_config",
+      "parameters": {
+        "config": {
+          "pageSize": 10,
+          "queryBase": true
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/models",
+            "query": [
+              [
+                "pageSize",
+                "3"
+              ]
+            ]
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_with_config",
+      "parameters": {
+        "config": {
+          "pageSize": 3
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/models",
+            "query": [
+              [
+                "pageSize",
+                "3"
+              ]
+            ]
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_list_models_with_http_options_in_method",
+      "parameters": {
+        "config": {
+          "httpOptions": {
+            "headers": {
+              "test": "headers"
+            }
+          },
+          "pageSize": 3
+        }
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "models/test_list.py",
+  "test_method": "models.list",
+  "upstream_version": "2.28.0"
+}

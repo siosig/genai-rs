@@ -17,8 +17,8 @@ use serde_json::Value;
 use crate::{
     client::Client,
     converters::generated::tunings as conv,
-    error::{Backend, Error, Result},
-    pager::Pager,
+    errors::{Error, Result},
+    pagers::Pager,
     types::{
         CancelTuningJobConfig, CancelTuningJobResponse, CreateTuningJobConfig, GetTuningJobConfig,
         JobState, ListTuningJobsConfig, TuningDataset, TuningJob, TuningOperation,
@@ -54,6 +54,72 @@ fn take_url_field(request: &mut Value, key: &str, converter_name: &'static str) 
 }
 
 impl Tunings {
+    /// Cancels a tuning job. Mirrors Python's `Tunings.cancel`.
+    ///
+    /// # Errors
+    /// Returns [`crate::Error::Api`] for a non-2xx response, or
+    /// [`crate::Error::Validation`] if the request converter did not set
+    /// the URL name field (a crate-internal invariant violation, not a
+    /// caller mistake).
+    pub async fn cancel(
+        &self,
+        name: &str,
+        config: Option<CancelTuningJobConfig>,
+    ) -> Result<CancelTuningJobResponse> {
+        let http_options = config.as_ref().and_then(|c| c.http_options.clone());
+        let params = serde_json::json!({ "name": name });
+        let mut request = conv::cancel_tuning_job_parameters_to_mldev(&params, None, None)?;
+        let name = take_url_field(
+            &mut request,
+            "name",
+            "cancel_tuning_job_parameters_to_mldev",
+        )?;
+        let path = format!("{name}:cancel");
+
+        let response = self
+            .client
+            .http()
+            .request(
+                Method::POST,
+                &path,
+                None,
+                Some(request),
+                http_options.as_ref(),
+            )
+            .await?;
+        let wire: Value = serde_json::from_slice(&response.body)?;
+        let mldev = conv::cancel_tuning_job_response_from_mldev(&wire, None, None)?;
+        let mut parsed: CancelTuningJobResponse = serde_json::from_value(mldev)?;
+        parsed.sdk_http_response = Some(response.to_sdk_http_response());
+        Ok(parsed)
+    }
+
+    /// Fetches the latest status of a tuning job. Mirrors Python's
+    /// `Tunings.get`.
+    ///
+    /// # Errors
+    /// Returns [`crate::Error::Api`] for a non-2xx response, or
+    /// [`crate::Error::Validation`] if the request converter did not set
+    /// the URL name field (a crate-internal invariant violation, not a
+    /// caller mistake).
+    pub async fn get(&self, name: &str, config: Option<GetTuningJobConfig>) -> Result<TuningJob> {
+        let http_options = config.as_ref().and_then(|c| c.http_options.clone());
+        let params = serde_json::json!({ "name": name });
+        let mut request = conv::get_tuning_job_parameters_to_mldev(&params, None, None)?;
+        let path = take_url_field(&mut request, "name", "get_tuning_job_parameters_to_mldev")?;
+
+        let response = self
+            .client
+            .http()
+            .request(Method::GET, &path, None, None, http_options.as_ref())
+            .await?;
+        let wire: Value = serde_json::from_slice(&response.body)?;
+        let mldev = conv::tuning_job_from_mldev(&wire, None, None)?;
+        let mut parsed: TuningJob = serde_json::from_value(mldev)?;
+        parsed.sdk_http_response = Some(response.to_sdk_http_response());
+        Ok(parsed)
+    }
+
     /// Creates a fine-tuning job. Mirrors Python's `Tunings.tune`
     /// (Gemini Developer API branch, `_tune_mldev`).
     ///
@@ -129,34 +195,10 @@ impl Tunings {
         })
     }
 
-    /// Fetches the latest status of a tuning job. Mirrors Python's
-    /// `Tunings.get`.
-    ///
-    /// # Errors
-    /// Returns [`crate::Error::Api`] for a non-2xx response, or
-    /// [`crate::Error::Validation`] if the request converter did not set
-    /// the URL name field (a crate-internal invariant violation, not a
-    /// caller mistake).
-    pub async fn get(&self, name: &str, config: Option<GetTuningJobConfig>) -> Result<TuningJob> {
-        let http_options = config.as_ref().and_then(|c| c.http_options.clone());
-        let params = serde_json::json!({ "name": name });
-        let mut request = conv::get_tuning_job_parameters_to_mldev(&params, None, None)?;
-        let path = take_url_field(&mut request, "name", "get_tuning_job_parameters_to_mldev")?;
-
-        let response = self
-            .client
-            .http()
-            .request(Method::GET, &path, None, None, http_options.as_ref())
-            .await?;
-        let wire: Value = serde_json::from_slice(&response.body)?;
-        let mldev = conv::tuning_job_from_mldev(&wire, None, None)?;
-        Ok(serde_json::from_value(mldev)?)
-    }
-
     /// Lists `TuningJob` objects. Mirrors Python's `Tunings.list`.
     ///
     /// # Errors
-    /// Always returns [`crate::Error::UnsupportedByBackend`]. Listing
+    /// Always returns [`crate::Error::UnsupportedMethod`]. Listing
     /// tuning jobs is implemented only for the Vertex AI backend in the
     /// upstream Python SDK: `Tunings._list` raises `ValueError` unless
     /// `api_client.vertexai` is set, before ever building a request, and
@@ -172,48 +214,7 @@ impl Tunings {
         reason = "kept async for signature parity with this resource's other methods, even though the Gemini Developer API doesn't support this operation and this method never awaits"
     )]
     pub async fn list(&self, _config: Option<ListTuningJobsConfig>) -> Result<Pager<TuningJob>> {
-        Err(Error::UnsupportedByBackend {
-            field: "tunings().list",
-            backend: Backend::VertexAi,
-        })
-    }
-
-    /// Cancels a tuning job. Mirrors Python's `Tunings.cancel`.
-    ///
-    /// # Errors
-    /// Returns [`crate::Error::Api`] for a non-2xx response, or
-    /// [`crate::Error::Validation`] if the request converter did not set
-    /// the URL name field (a crate-internal invariant violation, not a
-    /// caller mistake).
-    pub async fn cancel(
-        &self,
-        name: &str,
-        config: Option<CancelTuningJobConfig>,
-    ) -> Result<CancelTuningJobResponse> {
-        let http_options = config.as_ref().and_then(|c| c.http_options.clone());
-        let params = serde_json::json!({ "name": name });
-        let mut request = conv::cancel_tuning_job_parameters_to_mldev(&params, None, None)?;
-        let name = take_url_field(
-            &mut request,
-            "name",
-            "cancel_tuning_job_parameters_to_mldev",
-        )?;
-        let path = format!("{name}:cancel");
-
-        let response = self
-            .client
-            .http()
-            .request(
-                Method::POST,
-                &path,
-                None,
-                Some(request),
-                http_options.as_ref(),
-            )
-            .await?;
-        let wire: Value = serde_json::from_slice(&response.body)?;
-        let mldev = conv::cancel_tuning_job_response_from_mldev(&wire, None, None)?;
-        Ok(serde_json::from_value(mldev)?)
+        Err(Error::UnsupportedMethod("tunings.list"))
     }
 }
 
@@ -227,7 +228,7 @@ mod tests {
     use super::Tunings;
     use crate::{
         client::Client,
-        error::{Backend, Error},
+        errors::{Backend, Error},
         types::{CreateTuningJobConfig, HttpOptions, JobState, TuningDataset, TuningExample},
     };
 
@@ -415,11 +416,8 @@ mod tests {
         let server = MockServer::start().await;
         let err = tunings(&server).list(None).await.unwrap_err();
         match err {
-            Error::UnsupportedByBackend { field, backend } => {
-                assert_eq!(field, "tunings().list");
-                assert_eq!(backend, Backend::VertexAi);
-            }
-            other => panic!("expected Error::UnsupportedByBackend, got {other:?}"),
+            Error::UnsupportedMethod(method) => assert_eq!(method, "tunings.list"),
+            other => panic!("expected Error::UnsupportedMethod, got {other:?}"),
         }
     }
 }

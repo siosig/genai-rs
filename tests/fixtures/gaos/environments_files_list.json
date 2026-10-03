@@ -1,0 +1,14 @@
+{
+  "files": [
+    {
+      "created": "2026-01-01T00:00:00Z",
+      "mime_type": "sample-mime_type",
+      "modified": "2026-01-01T00:00:00Z",
+      "name": "sample-name",
+      "path": "sample-path",
+      "size_bytes": "1",
+      "type": "file"
+    }
+  ],
+  "next_page_token": "sample-next_page_token"
+}

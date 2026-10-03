@@ -2,7 +2,7 @@
 
 > **Unofficial.** An independent Rust port of the
 > [Google Gen AI Python SDK](https://github.com/googleapis/python-genai)
-> (`google-genai` 2.23.0 — see [docs/upstream-sync.md](docs/upstream-sync.md)
+> (`google-genai` 2.28.0 — see [docs/upstream-sync.md](docs/upstream-sync.md)
 > for the sync ledger) for the **Gemini Developer API**. Not affiliated
 > with, endorsed by, or sponsored by Google. Portions are derived from
 > `google-genai`, Copyright 2025 Google LLC, licensed under the Apache
@@ -184,7 +184,7 @@ let client = Client::builder()
 | `native-tls` | — | TLS through the platform's native stack instead. Turn `default-features` off to avoid pulling in both. |
 | `live` | ✅ | `client.live()`: the bidirectional realtime (WebSocket) API, plus `client.live().music()`. |
 | `blocking` | — | `gemini_genai::blocking`: a synchronous (`fn`, not `async fn`) mirror of the whole API, minus Live. |
-| `mcp` | — | `gemini_genai::mcp::mcp_tools`: exposes an MCP server's tools to the model as function-calling tools. |
+| `mcp` | — | `gemini_genai::mcp_utils::mcp_tools`: exposes an MCP server's tools to the model as function-calling tools. |
 
 To use `native-tls` instead of the default `rustls`:
 
@@ -349,7 +349,7 @@ call/response loop (up to `maximum_remote_calls`, default 10) before returning t
 final answer.
 
 ```rust,no_run
-use gemini_genai::afc::function_tool;
+use gemini_genai::function_tool;
 use gemini_genai::types::{GenerateContentConfig, Tool};
 use gemini_genai::{Client, Result};
 
@@ -396,7 +396,7 @@ async fn main() -> Result<()> {
 > `Arc<dyn FunctionTool>`. Registering two *different* callables under the same
 > name means the later one wins for both. Python rebuilds its `function_map` per
 > call and has no such coupling. Give each callable a unique name — registering
-> tools once at startup sidesteps it entirely. See the `afc` module docs.
+> tools once at startup sidesteps it entirely. See the `automatic_function_calling_util` module docs.
 
 Set `GenerateContentConfig::automatic_function_calling` to
 `AutomaticFunctionCallingConfig { disable: Some(true), .. }` to get the raw
@@ -551,17 +551,20 @@ of the blocking API (`BlockingInsideRuntime`).
   the idiom differences (config structs, `Contents` conversions, streams, pagers,
   errors).
 - [`docs/upstream-sync.md`](docs/upstream-sync.md) — which `google-genai`
-  release this crate is pinned to, and any upstream change deliberately not
-  taken yet (with why, and when it will be).
+  release this crate is pinned to, where each upstream module lives in this
+  crate, how to read the symbol ledger and test inventory, how to take the next
+  release, and the known gaps.
 
 Not implemented: the Vertex AI backend, and the Python surfaces that are
 Vertex-only or Python-specific — `models.compute_tokens`, `models.generate_images`
 and `tunings.list` are present but always error; `models.edit_image` /
 `upscale_image` / `recontext_image` / `segment_image` and
 `tunings.validate_reward` are absent (Python raises `ValueError` for all of them
-outside Vertex AI); `local_tokenizer`, the NextGen
-`interactions`/`agents`/`webhooks`/`triggers`/`environments` modules, and the
-replay/`DebugConfig` machinery are not ported. See [CHANGELOG.md](CHANGELOG.md).
+outside Vertex AI); `local_tokenizer` and the replay/`DebugConfig` machinery
+are not ported. The NextGen `interactions`, `agents`, `environments`,
+`triggers`, `webhooks`, `voices` and `credentials` modules are ported (generated
+into `src/gaos/`). See [CHANGELOG.md](CHANGELOG.md) for the 0.4.0 module moves
+and [docs/upstream-sync.md](docs/upstream-sync.md) for the module map.
 
 ## Examples
 
@@ -583,7 +586,7 @@ Contributing guide: [CONTRIBUTING.md](CONTRIBUTING.md) — one-time hook setup,
 the five quality gates, the codegen workflow, and how the pinned dependencies
 are updated. Security issues: [SECURITY.md](SECURITY.md).
 
-Most of `src/types/generated/`, `src/converters/generated/`,
+Most of `src/types/generated/`, `src/converters/generated/`, `src/gaos/`,
 `src/blocking/generated.rs`, and `tests/fixtures/` is generated from the installed
 Python SDK. Do not hand-edit those; change the generator or its overrides under
 `tools/codegen/` and regenerate:
@@ -634,7 +637,7 @@ GEMINI_API_KEY=... GENAI_E2E_EXPENSIVE=1 \
 Apache-2.0 — see [LICENSE](LICENSE) for the full text.
 
 Portions of this crate are derived from the Google Gen AI Python SDK
-(`google-genai` 2.23.0), Copyright 2025 Google LLC, also licensed under
+(`google-genai` 2.28.0), Copyright 2025 Google LLC, also licensed under
 Apache-2.0. [NOTICE](NOTICE) records which paths those are and what was
 changed.
 

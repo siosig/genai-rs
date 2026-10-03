@@ -1,0 +1,25 @@
+{
+  "from_environment": "sample-from_environment",
+  "network": {
+    "allowlist": [
+      {
+        "credential": "sample-credential",
+        "domain": "sample-domain",
+        "transform": [
+          {
+            "key": "sample-transform"
+          }
+        ]
+      }
+    ]
+  },
+  "sources": [
+    {
+      "content": "sample-content",
+      "encoding": "sample-encoding",
+      "source": "sample-source",
+      "target": "sample-target",
+      "type": "gcs"
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2026 Daisuke ITO
 // SPDX-License-Identifier: Apache-2.0
 //
-// Derived from the Google Gen AI Python SDK (google-genai 2.23.0),
+// Derived from the Google Gen AI Python SDK (google-genai 2.28.0),
 // https://github.com/googleapis/python-genai
 // Copyright 2025 Google LLC, licensed under the Apache License, Version 2.0.
 //
@@ -18,7 +18,7 @@
 // re-run `python tools/codegen/generate.py --only blocking` instead.
 //! Blocking (`feature = "blocking"`) wrappers for every `Client`-accessor
 //! module's async methods, generated from `tools/codegen/methods.toml`
-//! against google-genai 2.23.0's method inventory. `Chat` (returned by
+//! against google-genai 2.28.0's method inventory. `Chat` (returned by
 //! `Chats::create`), `Operations::get<T>`, and `FileSearchStores::documents()`
 //! are hand-written in `src/blocking/mod.rs` instead -- see that file and
 //! `methods.toml`'s header comment.
@@ -53,7 +53,7 @@ impl Models {
         model: &str,
         contents: impl Into<crate::types::Contents>,
         config: Option<crate::types::GenerateContentConfig>,
-    ) -> crate::error::Result<crate::types::GenerateContentResponse> {
+    ) -> crate::errors::Result<crate::types::GenerateContentResponse> {
         self.runtime
             .block_on(self.inner.generate_content(model, contents, config))?
     }
@@ -68,7 +68,7 @@ impl Models {
         model: &str,
         contents: impl Into<crate::types::Contents>,
         config: Option<crate::types::GenerateContentConfig>,
-    ) -> crate::error::Result<crate::blocking::BlockingStream<crate::types::GenerateContentResponse>>
+    ) -> crate::errors::Result<crate::blocking::BlockingStream<crate::types::GenerateContentResponse>>
     {
         let stream = self
             .runtime
@@ -89,7 +89,7 @@ impl Models {
         model: &str,
         contents: impl Into<crate::types::Contents>,
         config: Option<crate::types::EmbedContentConfig>,
-    ) -> crate::error::Result<crate::types::EmbedContentResponse> {
+    ) -> crate::errors::Result<crate::types::EmbedContentResponse> {
         self.runtime
             .block_on(self.inner.embed_content(model, contents, config))?
     }
@@ -104,7 +104,7 @@ impl Models {
         model: &str,
         contents: impl Into<crate::types::Contents>,
         config: Option<crate::types::CountTokensConfig>,
-    ) -> crate::error::Result<crate::types::CountTokensResponse> {
+    ) -> crate::errors::Result<crate::types::CountTokensResponse> {
         self.runtime
             .block_on(self.inner.count_tokens(model, contents, config))?
     }
@@ -119,7 +119,7 @@ impl Models {
         model: &str,
         contents: impl Into<crate::types::Contents>,
         config: Option<serde_json::Value>,
-    ) -> crate::error::Result<crate::types::ComputeTokensResponse> {
+    ) -> crate::errors::Result<crate::types::ComputeTokensResponse> {
         self.runtime
             .block_on(self.inner.compute_tokens(model, contents, config))?
     }
@@ -133,7 +133,7 @@ impl Models {
         &self,
         model: &str,
         config: Option<crate::types::GetModelConfig>,
-    ) -> crate::error::Result<crate::types::Model> {
+    ) -> crate::errors::Result<crate::types::Model> {
         self.runtime.block_on(self.inner.get(model, config))?
     }
 
@@ -145,7 +145,7 @@ impl Models {
     pub fn list(
         &self,
         config: Option<crate::types::ListModelsConfig>,
-    ) -> crate::error::Result<crate::blocking::Pager<crate::types::Model>> {
+    ) -> crate::errors::Result<crate::blocking::Pager<crate::types::Model>> {
         let pager = self.runtime.block_on(self.inner.list(config))??;
         Ok(crate::blocking::Pager::new(
             std::sync::Arc::clone(&self.runtime),
@@ -162,7 +162,7 @@ impl Models {
         &self,
         model: &str,
         config: crate::types::UpdateModelConfig,
-    ) -> crate::error::Result<crate::types::Model> {
+    ) -> crate::errors::Result<crate::types::Model> {
         self.runtime.block_on(self.inner.update(model, config))?
     }
 
@@ -175,7 +175,7 @@ impl Models {
         &self,
         model: &str,
         config: Option<crate::types::DeleteModelConfig>,
-    ) -> crate::error::Result<crate::types::DeleteModelResponse> {
+    ) -> crate::errors::Result<crate::types::DeleteModelResponse> {
         self.runtime.block_on(self.inner.delete(model, config))?
     }
 
@@ -193,7 +193,7 @@ impl Models {
         model: &str,
         prompt: &str,
         config: Option<crate::types::GenerateImagesConfig>,
-    ) -> crate::error::Result<crate::types::GenerateImagesResponse> {
+    ) -> crate::errors::Result<crate::types::GenerateImagesResponse> {
         self.runtime
             .block_on(self.inner.generate_images(model, prompt, config))?
     }
@@ -208,7 +208,7 @@ impl Models {
         model: &str,
         source: crate::types::GenerateVideosSource,
         config: Option<crate::types::GenerateVideosConfig>,
-    ) -> crate::error::Result<crate::types::GenerateVideosOperation> {
+    ) -> crate::errors::Result<crate::types::GenerateVideosOperation> {
         self.runtime
             .block_on(self.inner.generate_videos(model, source, config))?
     }
@@ -252,7 +252,7 @@ impl Files {
         &self,
         source: impl Into<crate::files::UploadSource>,
         config: Option<crate::types::UploadFileConfig>,
-    ) -> crate::error::Result<crate::types::File> {
+    ) -> crate::errors::Result<crate::types::File> {
         self.runtime.block_on(self.inner.upload(source, config))?
     }
 
@@ -265,7 +265,7 @@ impl Files {
         &self,
         name: &str,
         config: Option<crate::types::GetFileConfig>,
-    ) -> crate::error::Result<crate::types::File> {
+    ) -> crate::errors::Result<crate::types::File> {
         self.runtime.block_on(self.inner.get(name, config))?
     }
 
@@ -277,7 +277,7 @@ impl Files {
     pub fn list(
         &self,
         config: Option<crate::types::ListFilesConfig>,
-    ) -> crate::error::Result<crate::blocking::Pager<crate::types::File>> {
+    ) -> crate::errors::Result<crate::blocking::Pager<crate::types::File>> {
         let pager = self.runtime.block_on(self.inner.list(config))??;
         Ok(crate::blocking::Pager::new(
             std::sync::Arc::clone(&self.runtime),
@@ -294,7 +294,7 @@ impl Files {
         &self,
         name: &str,
         config: Option<crate::types::DeleteFileConfig>,
-    ) -> crate::error::Result<crate::types::DeleteFileResponse> {
+    ) -> crate::errors::Result<crate::types::DeleteFileResponse> {
         self.runtime.block_on(self.inner.delete(name, config))?
     }
 
@@ -307,7 +307,7 @@ impl Files {
         &self,
         file: &str,
         config: Option<crate::types::DownloadFileConfig>,
-    ) -> crate::error::Result<bytes::Bytes> {
+    ) -> crate::errors::Result<bytes::Bytes> {
         self.runtime.block_on(self.inner.download(file, config))?
     }
 
@@ -320,7 +320,7 @@ impl Files {
         &self,
         file: impl Into<crate::files::FileSource>,
         config: Option<crate::types::DownloadFileConfig>,
-    ) -> crate::error::Result<crate::blocking::BlockingStream<bytes::Bytes>> {
+    ) -> crate::errors::Result<crate::blocking::BlockingStream<bytes::Bytes>> {
         let stream = self
             .runtime
             .block_on(self.inner.download_stream(file, config))??;
@@ -340,7 +340,7 @@ impl Files {
         file: impl Into<crate::files::FileSource>,
         destination: &std::path::Path,
         config: Option<crate::types::DownloadFileConfig>,
-    ) -> crate::error::Result<()> {
+    ) -> crate::errors::Result<()> {
         self.runtime
             .block_on(self.inner.download_to_path(file, destination, config))?
     }
@@ -354,7 +354,7 @@ impl Files {
         &self,
         uris: Vec<String>,
         config: Option<crate::types::RegisterFilesConfig>,
-    ) -> crate::error::Result<crate::types::RegisterFilesResponse> {
+    ) -> crate::errors::Result<crate::types::RegisterFilesResponse> {
         self.runtime
             .block_on(self.inner.register_files(uris, config))?
     }
@@ -383,7 +383,7 @@ impl Caches {
         &self,
         model: &str,
         config: Option<crate::types::CreateCachedContentConfig>,
-    ) -> crate::error::Result<crate::types::CachedContent> {
+    ) -> crate::errors::Result<crate::types::CachedContent> {
         self.runtime.block_on(self.inner.create(model, config))?
     }
 
@@ -396,7 +396,7 @@ impl Caches {
         &self,
         name: &str,
         config: Option<crate::types::GetCachedContentConfig>,
-    ) -> crate::error::Result<crate::types::CachedContent> {
+    ) -> crate::errors::Result<crate::types::CachedContent> {
         self.runtime.block_on(self.inner.get(name, config))?
     }
 
@@ -408,7 +408,7 @@ impl Caches {
     pub fn list(
         &self,
         config: Option<crate::types::ListCachedContentsConfig>,
-    ) -> crate::error::Result<crate::blocking::Pager<crate::types::CachedContent>> {
+    ) -> crate::errors::Result<crate::blocking::Pager<crate::types::CachedContent>> {
         let pager = self.runtime.block_on(self.inner.list(config))??;
         Ok(crate::blocking::Pager::new(
             std::sync::Arc::clone(&self.runtime),
@@ -425,7 +425,7 @@ impl Caches {
         &self,
         name: &str,
         config: Option<crate::types::UpdateCachedContentConfig>,
-    ) -> crate::error::Result<crate::types::CachedContent> {
+    ) -> crate::errors::Result<crate::types::CachedContent> {
         self.runtime.block_on(self.inner.update(name, config))?
     }
 
@@ -438,7 +438,7 @@ impl Caches {
         &self,
         name: &str,
         config: Option<crate::types::DeleteCachedContentConfig>,
-    ) -> crate::error::Result<crate::types::DeleteCachedContentResponse> {
+    ) -> crate::errors::Result<crate::types::DeleteCachedContentResponse> {
         self.runtime.block_on(self.inner.delete(name, config))?
     }
 }
@@ -467,7 +467,7 @@ impl Tunings {
         base_model: &str,
         training_dataset: crate::types::TuningDataset,
         config: Option<crate::types::CreateTuningJobConfig>,
-    ) -> crate::error::Result<crate::types::TuningJob> {
+    ) -> crate::errors::Result<crate::types::TuningJob> {
         self.runtime
             .block_on(self.inner.tune(base_model, training_dataset, config))?
     }
@@ -481,7 +481,7 @@ impl Tunings {
         &self,
         name: &str,
         config: Option<crate::types::GetTuningJobConfig>,
-    ) -> crate::error::Result<crate::types::TuningJob> {
+    ) -> crate::errors::Result<crate::types::TuningJob> {
         self.runtime.block_on(self.inner.get(name, config))?
     }
 
@@ -493,7 +493,7 @@ impl Tunings {
     pub fn list(
         &self,
         config: Option<crate::types::ListTuningJobsConfig>,
-    ) -> crate::error::Result<crate::blocking::Pager<crate::types::TuningJob>> {
+    ) -> crate::errors::Result<crate::blocking::Pager<crate::types::TuningJob>> {
         let pager = self.runtime.block_on(self.inner.list(config))??;
         Ok(crate::blocking::Pager::new(
             std::sync::Arc::clone(&self.runtime),
@@ -510,7 +510,7 @@ impl Tunings {
         &self,
         name: &str,
         config: Option<crate::types::CancelTuningJobConfig>,
-    ) -> crate::error::Result<crate::types::CancelTuningJobResponse> {
+    ) -> crate::errors::Result<crate::types::CancelTuningJobResponse> {
         self.runtime.block_on(self.inner.cancel(name, config))?
     }
 }
@@ -539,7 +539,7 @@ impl Batches {
         model: &str,
         src: impl Into<crate::types::BatchJobSource>,
         config: Option<crate::types::CreateBatchJobConfig>,
-    ) -> crate::error::Result<crate::types::BatchJob> {
+    ) -> crate::errors::Result<crate::types::BatchJob> {
         self.runtime
             .block_on(self.inner.create(model, src, config))?
     }
@@ -554,7 +554,7 @@ impl Batches {
         model: &str,
         src: crate::types::EmbeddingsBatchJobSource,
         config: Option<crate::types::CreateEmbeddingsBatchJobConfig>,
-    ) -> crate::error::Result<crate::types::BatchJob> {
+    ) -> crate::errors::Result<crate::types::BatchJob> {
         self.runtime
             .block_on(self.inner.create_embeddings(model, src, config))?
     }
@@ -568,7 +568,7 @@ impl Batches {
         &self,
         name: &str,
         config: Option<crate::types::GetBatchJobConfig>,
-    ) -> crate::error::Result<crate::types::BatchJob> {
+    ) -> crate::errors::Result<crate::types::BatchJob> {
         self.runtime.block_on(self.inner.get(name, config))?
     }
 
@@ -581,7 +581,7 @@ impl Batches {
         &self,
         name: &str,
         config: Option<crate::types::CancelBatchJobConfig>,
-    ) -> crate::error::Result<()> {
+    ) -> crate::errors::Result<()> {
         self.runtime.block_on(self.inner.cancel(name, config))?
     }
 
@@ -594,7 +594,7 @@ impl Batches {
         &self,
         name: &str,
         config: Option<crate::types::DeleteBatchJobConfig>,
-    ) -> crate::error::Result<crate::types::DeleteResourceJob> {
+    ) -> crate::errors::Result<crate::types::DeleteResourceJob> {
         self.runtime.block_on(self.inner.delete(name, config))?
     }
 
@@ -606,7 +606,7 @@ impl Batches {
     pub fn list(
         &self,
         config: Option<crate::types::ListBatchJobsConfig>,
-    ) -> crate::error::Result<crate::blocking::Pager<crate::types::BatchJob>> {
+    ) -> crate::errors::Result<crate::blocking::Pager<crate::types::BatchJob>> {
         let pager = self.runtime.block_on(self.inner.list(config))??;
         Ok(crate::blocking::Pager::new(
             std::sync::Arc::clone(&self.runtime),
@@ -652,7 +652,7 @@ impl FileSearchStores {
     pub fn create(
         &self,
         config: Option<crate::types::CreateFileSearchStoreConfig>,
-    ) -> crate::error::Result<crate::types::FileSearchStore> {
+    ) -> crate::errors::Result<crate::types::FileSearchStore> {
         self.runtime.block_on(self.inner.create(config))?
     }
 
@@ -665,7 +665,7 @@ impl FileSearchStores {
         &self,
         name: &str,
         config: Option<crate::types::GetFileSearchStoreConfig>,
-    ) -> crate::error::Result<crate::types::FileSearchStore> {
+    ) -> crate::errors::Result<crate::types::FileSearchStore> {
         self.runtime.block_on(self.inner.get(name, config))?
     }
 
@@ -678,7 +678,7 @@ impl FileSearchStores {
         &self,
         name: &str,
         config: Option<crate::types::DeleteFileSearchStoreConfig>,
-    ) -> crate::error::Result<()> {
+    ) -> crate::errors::Result<()> {
         self.runtime.block_on(self.inner.delete(name, config))?
     }
 
@@ -690,7 +690,7 @@ impl FileSearchStores {
     pub fn list(
         &self,
         config: Option<crate::types::ListFileSearchStoresConfig>,
-    ) -> crate::error::Result<crate::blocking::Pager<crate::types::FileSearchStore>> {
+    ) -> crate::errors::Result<crate::blocking::Pager<crate::types::FileSearchStore>> {
         let pager = self.runtime.block_on(self.inner.list(config))??;
         Ok(crate::blocking::Pager::new(
             std::sync::Arc::clone(&self.runtime),
@@ -708,7 +708,7 @@ impl FileSearchStores {
         file_search_store_name: &str,
         file_name: &str,
         config: Option<crate::types::ImportFileConfig>,
-    ) -> crate::error::Result<crate::types::ImportFileOperation> {
+    ) -> crate::errors::Result<crate::types::ImportFileOperation> {
         self.runtime.block_on(
             self.inner
                 .import_file(file_search_store_name, file_name, config),
@@ -726,7 +726,7 @@ impl FileSearchStores {
         data: &[u8],
         mime_type: &str,
         config: Option<crate::types::UploadToFileSearchStoreConfig>,
-    ) -> crate::error::Result<crate::types::UploadToFileSearchStoreOperation> {
+    ) -> crate::errors::Result<crate::types::UploadToFileSearchStoreOperation> {
         self.runtime
             .block_on(self.inner.upload_to_file_search_store(
                 file_search_store_name,
@@ -745,7 +745,7 @@ impl FileSearchStores {
         &self,
         media_id: &str,
         config: Option<crate::types::DownloadMediaConfig>,
-    ) -> crate::error::Result<bytes::Bytes> {
+    ) -> crate::errors::Result<bytes::Bytes> {
         self.runtime
             .block_on(self.inner.download_media(media_id, config))?
     }
@@ -774,7 +774,7 @@ impl Documents {
         &self,
         name: &str,
         config: Option<crate::types::GetDocumentConfig>,
-    ) -> crate::error::Result<crate::types::Document> {
+    ) -> crate::errors::Result<crate::types::Document> {
         self.runtime.block_on(self.inner.get(name, config))?
     }
 
@@ -787,7 +787,7 @@ impl Documents {
         &self,
         name: &str,
         config: Option<crate::types::DeleteDocumentConfig>,
-    ) -> crate::error::Result<()> {
+    ) -> crate::errors::Result<()> {
         self.runtime.block_on(self.inner.delete(name, config))?
     }
 
@@ -800,7 +800,7 @@ impl Documents {
         &self,
         parent: &str,
         config: Option<crate::types::ListDocumentsConfig>,
-    ) -> crate::error::Result<crate::blocking::Pager<crate::types::Document>> {
+    ) -> crate::errors::Result<crate::blocking::Pager<crate::types::Document>> {
         let pager = self.runtime.block_on(self.inner.list(parent, config))??;
         Ok(crate::blocking::Pager::new(
             std::sync::Arc::clone(&self.runtime),
@@ -809,21 +809,21 @@ impl Documents {
     }
 }
 
-/// Blocking wrapper for [`crate::auth_tokens::AuthTokens`] (`client.auth_tokens()`).
+/// Blocking wrapper for [`crate::tokens::AuthTokens`] (`client.auth_tokens()`).
 pub struct AuthTokens {
     pub(crate) runtime: std::sync::Arc<crate::blocking::Runtime>,
-    pub(crate) inner: crate::auth_tokens::AuthTokens,
+    pub(crate) inner: crate::tokens::AuthTokens,
 }
 
 impl AuthTokens {
     pub(crate) fn new(
         runtime: std::sync::Arc<crate::blocking::Runtime>,
-        inner: crate::auth_tokens::AuthTokens,
+        inner: crate::tokens::AuthTokens,
     ) -> Self {
         Self { runtime, inner }
     }
 
-    /// Blocking wrapper for [`crate::auth_tokens::AuthTokens::create`] (Python `tokens.create`).
+    /// Blocking wrapper for [`crate::tokens::AuthTokens::create`] (Python `tokens.create`).
     ///
     /// # Errors
     /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
@@ -831,7 +831,582 @@ impl AuthTokens {
     pub fn create(
         &self,
         config: Option<crate::types::CreateAuthTokenConfig>,
-    ) -> crate::error::Result<crate::types::AuthToken> {
+    ) -> crate::errors::Result<crate::types::AuthToken> {
         self.runtime.block_on(self.inner.create(config))?
+    }
+}
+
+/// Blocking wrapper for [`crate::gaos::resources::agents::Agents`] (`client.agents()`).
+pub struct Agents {
+    pub(crate) runtime: std::sync::Arc<crate::blocking::Runtime>,
+    pub(crate) inner: crate::gaos::resources::agents::Agents,
+}
+
+impl Agents {
+    pub(crate) fn new(
+        runtime: std::sync::Arc<crate::blocking::Runtime>,
+        inner: crate::gaos::resources::agents::Agents,
+    ) -> Self {
+        Self { runtime, inner }
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::agents::Agents::list`] (Python `agents.list`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn list(
+        &self,
+        params: &crate::gaos::models::ListAgentsRequest,
+    ) -> crate::errors::Result<crate::gaos::types::agents::AgentListResponse> {
+        self.runtime.block_on(self.inner.list(params))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::agents::Agents::create`] (Python `agents.create`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn create(
+        &self,
+        body: &crate::gaos::types::agents::Agent,
+    ) -> crate::errors::Result<crate::gaos::types::agents::Agent> {
+        self.runtime.block_on(self.inner.create(body))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::agents::Agents::delete`] (Python `agents.delete`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn delete(
+        &self,
+        id: &str,
+    ) -> crate::errors::Result<crate::gaos::types::interactions::Empty> {
+        self.runtime.block_on(self.inner.delete(id))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::agents::Agents::get`] (Python `agents.get`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn get(&self, id: &str) -> crate::errors::Result<crate::gaos::types::agents::Agent> {
+        self.runtime.block_on(self.inner.get(id))?
+    }
+}
+
+/// Blocking wrapper for [`crate::gaos::resources::credentials::Credentials`] (`client.credentials()`).
+pub struct Credentials {
+    pub(crate) runtime: std::sync::Arc<crate::blocking::Runtime>,
+    pub(crate) inner: crate::gaos::resources::credentials::Credentials,
+}
+
+impl Credentials {
+    pub(crate) fn new(
+        runtime: std::sync::Arc<crate::blocking::Runtime>,
+        inner: crate::gaos::resources::credentials::Credentials,
+    ) -> Self {
+        Self { runtime, inner }
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::credentials::Credentials::list`] (Python `credentials.list`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn list(
+        &self,
+        params: &crate::gaos::models::ListCredentialsRequest,
+    ) -> crate::errors::Result<crate::gaos::types::credentials::CredentialListResponse> {
+        self.runtime.block_on(self.inner.list(params))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::credentials::Credentials::create`] (Python `credentials.create`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn create(
+        &self,
+        body: &crate::gaos::types::credentials::CredentialCreateParams,
+    ) -> crate::errors::Result<crate::gaos::types::credentials::Credential> {
+        self.runtime.block_on(self.inner.create(body))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::credentials::Credentials::delete`] (Python `credentials.delete`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn delete(
+        &self,
+        id: &str,
+    ) -> crate::errors::Result<crate::gaos::types::interactions::Empty> {
+        self.runtime.block_on(self.inner.delete(id))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::credentials::Credentials::get`] (Python `credentials.get`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn get(
+        &self,
+        id: &str,
+    ) -> crate::errors::Result<crate::gaos::types::credentials::Credential> {
+        self.runtime.block_on(self.inner.get(id))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::credentials::Credentials::update`] (Python `credentials.update`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn update(
+        &self,
+        id: &str,
+        body: &crate::gaos::types::credentials::CredentialUpdate,
+        params: &crate::gaos::models::UpdateCredentialRequest,
+    ) -> crate::errors::Result<crate::gaos::types::credentials::Credential> {
+        self.runtime.block_on(self.inner.update(id, body, params))?
+    }
+}
+
+/// Blocking wrapper for [`crate::gaos::resources::environments::Environments`] (`client.environments()`).
+pub struct Environments {
+    pub(crate) runtime: std::sync::Arc<crate::blocking::Runtime>,
+    pub(crate) inner: crate::gaos::resources::environments::Environments,
+}
+
+impl Environments {
+    pub(crate) fn new(
+        runtime: std::sync::Arc<crate::blocking::Runtime>,
+        inner: crate::gaos::resources::environments::Environments,
+    ) -> Self {
+        Self { runtime, inner }
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::environments::Environments::list_environments`] (Python `environments.list_environments`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn list_environments(
+        &self,
+        params: &crate::gaos::models::ListEnvironmentsRequest,
+    ) -> crate::errors::Result<crate::gaos::types::environments::ListEnvironmentsResponse> {
+        self.runtime
+            .block_on(self.inner.list_environments(params))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::environments::Environments::create_environment`] (Python `environments.create_environment`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn create_environment(
+        &self,
+        body: &crate::gaos::types::environments::CreateEnvironmentRequest,
+    ) -> crate::errors::Result<crate::gaos::types::environments::Environment> {
+        self.runtime.block_on(self.inner.create_environment(body))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::environments::Environments::delete_environment`] (Python `environments.delete_environment`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn delete_environment(
+        &self,
+        id: &str,
+    ) -> crate::errors::Result<crate::gaos::types::interactions::Empty> {
+        self.runtime.block_on(self.inner.delete_environment(id))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::environments::Environments::get_environment`] (Python `environments.get_environment`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn get_environment(
+        &self,
+        id: &str,
+    ) -> crate::errors::Result<crate::gaos::types::environments::Environment> {
+        self.runtime.block_on(self.inner.get_environment(id))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::environments::Environments::files_list`] (Python `environments.files.list`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn files_list(
+        &self,
+        environment: &str,
+        path: &str,
+        params: &crate::gaos::models::GetEnvironmentFilesRequest,
+    ) -> crate::errors::Result<crate::gaos::types::environments::GetEnvironmentFilesResponse> {
+        self.runtime
+            .block_on(self.inner.files_list(environment, path, params))?
+    }
+}
+
+/// Blocking wrapper for [`crate::gaos::resources::interactions::Interactions`] (`client.interactions()`).
+pub struct Interactions {
+    pub(crate) runtime: std::sync::Arc<crate::blocking::Runtime>,
+    pub(crate) inner: crate::gaos::resources::interactions::Interactions,
+}
+
+impl Interactions {
+    pub(crate) fn new(
+        runtime: std::sync::Arc<crate::blocking::Runtime>,
+        inner: crate::gaos::resources::interactions::Interactions,
+    ) -> Self {
+        Self { runtime, inner }
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::interactions::Interactions::create`] (Python `interactions.create`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn create(
+        &self,
+        body: &crate::gaos::types::interactions::CreateInteractionRequestBody,
+    ) -> crate::errors::Result<crate::gaos::types::interactions::Interaction> {
+        self.runtime.block_on(self.inner.create(body))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::interactions::Interactions::create_stream`] (Python `interactions.create`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn create_stream(
+        &self,
+        body: &crate::gaos::types::interactions::CreateInteractionRequestBody,
+    ) -> crate::errors::Result<
+        crate::blocking::BlockingStream<crate::gaos::types::interactions::InteractionSSEEvent>,
+    > {
+        let stream = self.runtime.block_on(self.inner.create_stream(body))??;
+        Ok(crate::blocking::BlockingStream::new(
+            std::sync::Arc::clone(&self.runtime),
+            stream,
+        ))
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::interactions::Interactions::delete`] (Python `interactions.delete`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn delete(&self, id: &str) -> crate::errors::Result<()> {
+        self.runtime.block_on(self.inner.delete(id))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::interactions::Interactions::get`] (Python `interactions.get`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn get(
+        &self,
+        id: &str,
+        params: &crate::gaos::models::GetInteractionByIDRequest,
+    ) -> crate::errors::Result<crate::gaos::types::interactions::Interaction> {
+        self.runtime.block_on(self.inner.get(id, params))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::interactions::Interactions::get_stream`] (Python `interactions.get`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn get_stream(
+        &self,
+        id: &str,
+        params: &crate::gaos::models::GetInteractionByIDRequest,
+    ) -> crate::errors::Result<
+        crate::blocking::BlockingStream<crate::gaos::types::interactions::InteractionSSEEvent>,
+    > {
+        let stream = self.runtime.block_on(self.inner.get_stream(id, params))??;
+        Ok(crate::blocking::BlockingStream::new(
+            std::sync::Arc::clone(&self.runtime),
+            stream,
+        ))
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::interactions::Interactions::cancel`] (Python `interactions.cancel`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn cancel(
+        &self,
+        id: &str,
+    ) -> crate::errors::Result<crate::gaos::types::interactions::Interaction> {
+        self.runtime.block_on(self.inner.cancel(id))?
+    }
+}
+
+/// Blocking wrapper for [`crate::gaos::resources::triggers::Triggers`] (`client.triggers()`).
+pub struct Triggers {
+    pub(crate) runtime: std::sync::Arc<crate::blocking::Runtime>,
+    pub(crate) inner: crate::gaos::resources::triggers::Triggers,
+}
+
+impl Triggers {
+    pub(crate) fn new(
+        runtime: std::sync::Arc<crate::blocking::Runtime>,
+        inner: crate::gaos::resources::triggers::Triggers,
+    ) -> Self {
+        Self { runtime, inner }
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::triggers::Triggers::list`] (Python `triggers.list`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn list(
+        &self,
+        params: &crate::gaos::models::ListTriggersRequest,
+    ) -> crate::errors::Result<crate::gaos::types::triggers::ListTriggersResponse> {
+        self.runtime.block_on(self.inner.list(params))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::triggers::Triggers::create`] (Python `triggers.create`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn create(
+        &self,
+        body: &crate::gaos::types::triggers::TriggerCreateParams,
+    ) -> crate::errors::Result<crate::gaos::types::triggers::Trigger> {
+        self.runtime.block_on(self.inner.create(body))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::triggers::Triggers::delete`] (Python `triggers.delete`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn delete(
+        &self,
+        id: &str,
+    ) -> crate::errors::Result<crate::gaos::types::interactions::Empty> {
+        self.runtime.block_on(self.inner.delete(id))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::triggers::Triggers::get`] (Python `triggers.get`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn get(&self, id: &str) -> crate::errors::Result<crate::gaos::types::triggers::Trigger> {
+        self.runtime.block_on(self.inner.get(id))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::triggers::Triggers::update`] (Python `triggers.update`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn update(
+        &self,
+        id: &str,
+        body: &crate::gaos::types::triggers::TriggerUpdate,
+    ) -> crate::errors::Result<crate::gaos::types::triggers::Trigger> {
+        self.runtime.block_on(self.inner.update(id, body))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::triggers::Triggers::list_executions`] (Python `triggers.list_executions`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn list_executions(
+        &self,
+        trigger_id: &str,
+        params: &crate::gaos::models::ListTriggerExecutionsRequest,
+    ) -> crate::errors::Result<crate::gaos::types::triggers::ListTriggerExecutionsResponse> {
+        self.runtime
+            .block_on(self.inner.list_executions(trigger_id, params))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::triggers::Triggers::run`] (Python `triggers.run`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn run(
+        &self,
+        trigger_id: &str,
+    ) -> crate::errors::Result<crate::gaos::types::triggers::TriggerExecution> {
+        self.runtime.block_on(self.inner.run(trigger_id))?
+    }
+}
+
+/// Blocking wrapper for [`crate::gaos::resources::voices::Voices`] (`client.voices()`).
+pub struct Voices {
+    pub(crate) runtime: std::sync::Arc<crate::blocking::Runtime>,
+    pub(crate) inner: crate::gaos::resources::voices::Voices,
+}
+
+impl Voices {
+    pub(crate) fn new(
+        runtime: std::sync::Arc<crate::blocking::Runtime>,
+        inner: crate::gaos::resources::voices::Voices,
+    ) -> Self {
+        Self { runtime, inner }
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::voices::Voices::list`] (Python `voices.list`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn list(
+        &self,
+        params: &crate::gaos::models::ListVoicesRequest,
+    ) -> crate::errors::Result<crate::gaos::types::voices::ListVoicesResponse> {
+        self.runtime.block_on(self.inner.list(params))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::voices::Voices::create`] (Python `voices.create`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn create(
+        &self,
+        body: &crate::gaos::types::voices::CreateVoiceRequest,
+    ) -> crate::errors::Result<crate::gaos::types::voices::VoiceOutput> {
+        self.runtime.block_on(self.inner.create(body))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::voices::Voices::delete`] (Python `voices.delete`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn delete(
+        &self,
+        id: &str,
+    ) -> crate::errors::Result<crate::gaos::types::voices::DeleteVoiceResponse> {
+        self.runtime.block_on(self.inner.delete(id))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::voices::Voices::get`] (Python `voices.get`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn get(&self, id: &str) -> crate::errors::Result<crate::gaos::types::voices::VoiceOutput> {
+        self.runtime.block_on(self.inner.get(id))?
+    }
+}
+
+/// Blocking wrapper for [`crate::gaos::resources::webhooks::Webhooks`] (`client.webhooks()`).
+pub struct Webhooks {
+    pub(crate) runtime: std::sync::Arc<crate::blocking::Runtime>,
+    pub(crate) inner: crate::gaos::resources::webhooks::Webhooks,
+}
+
+impl Webhooks {
+    pub(crate) fn new(
+        runtime: std::sync::Arc<crate::blocking::Runtime>,
+        inner: crate::gaos::resources::webhooks::Webhooks,
+    ) -> Self {
+        Self { runtime, inner }
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::webhooks::Webhooks::list`] (Python `webhooks.list`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn list(
+        &self,
+        params: &crate::gaos::models::ListWebhooksRequest,
+    ) -> crate::errors::Result<crate::gaos::types::webhooks::WebhookListResponse> {
+        self.runtime.block_on(self.inner.list(params))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::webhooks::Webhooks::create`] (Python `webhooks.create`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn create(
+        &self,
+        body: &crate::gaos::types::webhooks::WebhookInput,
+    ) -> crate::errors::Result<crate::gaos::types::webhooks::Webhook> {
+        self.runtime.block_on(self.inner.create(body))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::webhooks::Webhooks::delete`] (Python `webhooks.delete`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn delete(
+        &self,
+        id: &str,
+    ) -> crate::errors::Result<crate::gaos::types::interactions::Empty> {
+        self.runtime.block_on(self.inner.delete(id))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::webhooks::Webhooks::get`] (Python `webhooks.get`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn get(&self, id: &str) -> crate::errors::Result<crate::gaos::types::webhooks::Webhook> {
+        self.runtime.block_on(self.inner.get(id))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::webhooks::Webhooks::update`] (Python `webhooks.update`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn update(
+        &self,
+        id: &str,
+        body: Option<&crate::gaos::types::webhooks::WebhookUpdate>,
+        params: &crate::gaos::models::UpdateWebhookRequest,
+    ) -> crate::errors::Result<crate::gaos::types::webhooks::Webhook> {
+        self.runtime.block_on(self.inner.update(id, body, params))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::webhooks::Webhooks::ping`] (Python `webhooks.ping`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn ping(
+        &self,
+        id: &str,
+        body: Option<&crate::gaos::types::webhooks::PingWebhookRequest>,
+    ) -> crate::errors::Result<crate::gaos::types::webhooks::WebhookPingResponse> {
+        self.runtime.block_on(self.inner.ping(id, body))?
+    }
+
+    /// Blocking wrapper for [`crate::gaos::resources::webhooks::Webhooks::rotate_signing_secret`] (Python `webhooks.rotate_signing_secret`).
+    ///
+    /// # Errors
+    /// See the async method, plus [`crate::Error::BlockingInsideRuntime`]
+    /// if called from inside an already-running Tokio runtime.
+    pub fn rotate_signing_secret(
+        &self,
+        id: &str,
+        body: Option<&crate::gaos::types::webhooks::RotateSigningSecretRequest>,
+    ) -> crate::errors::Result<crate::gaos::types::webhooks::WebhookRotateSigningSecretResponse>
+    {
+        self.runtime
+            .block_on(self.inner.rotate_signing_secret(id, body))?
     }
 }

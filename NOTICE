@@ -2,7 +2,7 @@ gemini-genai
 Copyright 2026 Daisuke ITO
 
 This product includes software derived from the Google Gen AI Python SDK
-("google-genai"), version 2.23.0. See docs/upstream-sync.md for the sync
+("google-genai"), version 2.28.0. See docs/upstream-sync.md for the sync
 history and any upstream changes deliberately not yet taken.
 
     https://github.com/googleapis/python-genai
@@ -19,13 +19,21 @@ comments.
     src/types/generated/
     src/converters/generated/
     src/blocking/generated.rs
+    src/gaos/
     tests/fixtures/converters/
+    tests/fixtures/gaos/
+    tests/gaos/generated_ops.rs
     docs/parity.md
     docs/parity.ja.md
 
 Each of those files carries the same notice in its own header, except for the
-JSON fixtures under tests/fixtures/converters/, which cannot carry comments;
+JSON fixtures under tests/fixtures/converters/ and tests/fixtures/gaos/, which cannot carry comments;
 see the README.md in that directory.
+
+The binary media files under tests/data/ (images, a PDF, an MP4 and an M4A
+sample) are copied unmodified from the upstream test suite's tests/data/
+directory, under the same Apache License, Version 2.0. They cannot carry a
+notice in their own header.
 
 Everything else in this repository -- including the HTTP and WebSocket
 transport layers, the error types, the streaming and pagination machinery,

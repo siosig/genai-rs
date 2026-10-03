@@ -9,7 +9,11 @@ use std::collections::HashMap;
 
 use serde_json::Value;
 
-use super::generated::{Blob, Content, FileData, FunctionCall, FunctionResponse, Part};
+use super::generated::{
+    Blob, Content, File, FileData, FunctionCall, FunctionResponse, FunctionResponseBlob,
+    FunctionResponseFileData, FunctionResponsePart, Part,
+};
+use crate::errors::{Error, Result};
 
 const ROLE_USER: &str = "user";
 const ROLE_MODEL: &str = "model";
@@ -49,6 +53,38 @@ impl Part {
                 ..Default::default()
             }),
             ..Default::default()
+        }
+    }
+
+    /// Like [`Part::from_uri`], but infers the MIME type from the URI's
+    /// extension, as Python's `Part.from_uri` does when `mime_type` is
+    /// omitted.
+    ///
+    /// # Errors
+    /// Returns [`Error::Validation`] if no MIME type can be inferred.
+    pub fn from_uri_inferred(uri: impl Into<String>) -> Result<Self> {
+        let uri = uri.into();
+        let mime_type = guess_mime_type(&uri)?;
+        Ok(Self::from_uri(uri, mime_type))
+    }
+
+    /// Builds a URI-addressed [`Part`] from an uploaded [`File`], requiring
+    /// both `uri` and `mime_type`. Mirrors Python's `t_part` coercion of a
+    /// `types.File` (`Part.from_uri(file.uri, file.mime_type)`), including
+    /// its `ValueError`; unlike [`From<&File>`](Part#impl-From%3C%26File%3E-for-Part)
+    /// it drops `display_name` and never builds a part the API would reject.
+    ///
+    /// # Errors
+    /// Returns [`Error::Validation`] if `file.uri` or `file.mime_type` is
+    /// missing or empty.
+    pub fn try_from_file(file: &File) -> Result<Self> {
+        match (file.uri.as_deref(), file.mime_type.as_deref()) {
+            (Some(uri), Some(mime_type)) if !uri.is_empty() && !mime_type.is_empty() => {
+                Ok(Self::from_uri(uri, mime_type))
+            }
+            _ => Err(Error::Validation(
+                "file uri and mime_type are required.".to_owned(),
+            )),
         }
     }
 
@@ -102,6 +138,69 @@ impl Part {
         let data = std::fs::read(path)?;
         let mime_type = mime_guess::from_path(path).first_or_octet_stream();
         Ok(Self::from_bytes(data, mime_type.essence_str()))
+    }
+}
+
+fn guess_mime_type(uri: &str) -> Result<String> {
+    mime_guess::from_path(uri)
+        .first()
+        .map(|mime| mime.essence_str().to_owned())
+        .ok_or_else(|| Error::Validation(format!("Failed to determine mime type for file: {uri}")))
+}
+
+impl FunctionResponsePart {
+    /// Builds a multimodal function-response part from inline bytes.
+    /// Mirrors Python's `FunctionResponsePart.from_bytes`.
+    #[must_use]
+    pub fn from_bytes(data: impl Into<Vec<u8>>, mime_type: impl Into<String>) -> Self {
+        Self {
+            inline_data: Some(FunctionResponseBlob {
+                data: Some(data.into()),
+                mime_type: Some(mime_type.into()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }
+    }
+
+    /// Builds a multimodal function-response part from a file URI and MIME
+    /// type. Mirrors Python's `FunctionResponsePart.from_uri`.
+    #[must_use]
+    pub fn from_uri(uri: impl Into<String>, mime_type: impl Into<String>) -> Self {
+        Self {
+            file_data: Some(FunctionResponseFileData {
+                file_uri: Some(uri.into()),
+                mime_type: Some(mime_type.into()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }
+    }
+
+    /// Like [`FunctionResponsePart::from_uri`], but infers the MIME type
+    /// from the URI's extension (Python's `mime_type=None` form).
+    ///
+    /// # Errors
+    /// Returns [`Error::Validation`] if no MIME type can be inferred.
+    pub fn from_uri_inferred(uri: impl Into<String>) -> Result<Self> {
+        let uri = uri.into();
+        let mime_type = guess_mime_type(&uri)?;
+        Ok(Self::from_uri(uri, mime_type))
+    }
+}
+
+/// Mirrors Python's `Part(File)` coercion: an uploaded [`File`] becomes a
+/// URI-addressed part carrying its MIME type and display name.
+impl From<&File> for Part {
+    fn from(file: &File) -> Self {
+        Self {
+            file_data: Some(FileData {
+                file_uri: file.uri.clone(),
+                mime_type: file.mime_type.clone(),
+                display_name: file.display_name.clone(),
+            }),
+            ..Default::default()
+        }
     }
 }
 
@@ -195,15 +294,47 @@ impl From<Vec<Content>> for Contents {
     }
 }
 
+/// Mirrors Python's `t_contents` accumulation over a list of parts: a run of
+/// user parts becomes one user [`Content`] and a run of function-call parts
+/// one model [`Content`], so a mixed list alternates between the two roles.
 impl From<Vec<Part>> for Contents {
     fn from(parts: Vec<Part>) -> Self {
-        Self(vec![Content::from(parts)])
+        let mut runs: Vec<Vec<Part>> = Vec::new();
+        for part in parts {
+            match runs.last_mut() {
+                Some(run) if run[0].is_model_turn() == part.is_model_turn() => run.push(part),
+                _ => runs.push(vec![part]),
+            }
+        }
+        Self(runs.into_iter().map(Content::from).collect())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn try_from_file_requires_uri_and_mime_type() {
+        let file = File {
+            uri: Some("https://example.test/files/a".to_owned()),
+            mime_type: Some("text/plain".to_owned()),
+            display_name: Some("dropped".to_owned()),
+            ..Default::default()
+        };
+        let data = Part::try_from_file(&file).unwrap().file_data.unwrap();
+        assert_eq!(data.mime_type.as_deref(), Some("text/plain"));
+        assert_eq!(data.display_name, None);
+
+        let no_mime = File {
+            mime_type: None,
+            ..file
+        };
+        assert!(matches!(
+            Part::try_from_file(&no_mime),
+            Err(Error::Validation(_))
+        ));
+    }
 
     #[test]
     fn str_becomes_a_single_user_content_with_one_text_part() {

@@ -8,5 +8,5 @@
     }
   },
   "expected": null,
-  "expected_error": "field `output_gcs_uri` is only supported by the Vertex AI backend"
+  "expected_error": "output_gcs_uri parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

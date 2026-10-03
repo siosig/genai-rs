@@ -1,0 +1,285 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is your name?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "candidateCount": 0
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": "400"
+      },
+      "name": "test_candidate_count_zero",
+      "parameters": {
+        "config": {
+          "candidateCount": 0
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is your name?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "maxOutputTokens": 0
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": "400"
+      },
+      "name": "test_max_output_tokens_zero",
+      "parameters": {
+        "config": {
+          "maxOutputTokens": 0
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is your name?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "logprobs": 0
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": "response_logprobs is true"
+      },
+      "name": "test_logprobs_zero",
+      "parameters": {
+        "config": {
+          "logprobs": 0
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is your name?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "logprobs": 0,
+                "responseLogprobs": true
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": "Logprobs is not enabled for models/gemini-2.5-flash"
+      },
+      "name": "test_logprobs_zero_with_response_logprobs_true",
+      "parameters": {
+        "config": {
+          "logprobs": 0,
+          "responseLogprobs": true
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is your name?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "presencePenalty": 0.0
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_presence_penalty_zero",
+      "parameters": {
+        "config": {
+          "presencePenalty": 0.0
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "What is your name?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "frequencyPenalty": 0.0
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_frequency_penalty_zero",
+      "parameters": {
+        "config": {
+          "frequencyPenalty": 0.0
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "What is your name?"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "models/test_generate_content_config_zero_value.py",
+  "test_method": "models.generate_content",
+  "upstream_version": "2.28.0"
+}

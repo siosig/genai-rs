@@ -1,15 +1,20 @@
 //! `client.chats()`: multi-turn chat sessions. Mirrors Python's `chats.py`.
 
 use std::{
+    collections::HashMap,
     pin::Pin,
+    sync::Arc,
     task::{Context, Poll},
 };
 
 use futures_core::Stream;
+use futures_util::StreamExt;
 
 use crate::{
+    automatic_function_calling_util::{FunctionTool, registered_tools_for},
     client::Client,
-    error::Result,
+    errors::Result,
+    extra_utils::{get_max_remote_calls_afc, should_disable_afc},
     types::{Content, Contents, GenerateContentConfig, GenerateContentResponse, Part},
 };
 
@@ -59,122 +64,6 @@ pub struct Chat {
 }
 
 impl Chat {
-    /// Sends `message` plus the accumulated curated history to the model
-    /// and returns its response. Mirrors Python's `Chat.send_message`.
-    ///
-    /// Automatic function calling applies here exactly as it does for
-    /// [`crate::models::Models::generate_content`], which this delegates
-    /// to: if `config.tools` contains a tool built by
-    /// [`crate::types::Tool::from_function`], the AFC loop runs and only
-    /// the final, post-tool-call response is recorded into history.
-    ///
-    /// # Divergence from Python: AFC turns are absent from the history
-    ///
-    /// Python's `Chat.send_message` disables `generate_content`'s own AFC
-    /// and re-implements the loop inside `chats.py`, calling
-    /// `record_history` once per remote call. Its history therefore
-    /// interleaves every intermediate turn:
-    ///
-    /// ```text
-    /// [user "..."], [model functionCall], [user functionResponse], [model "final text"]
-    /// ```
-    ///
-    /// This crate keeps the loop in one place ([`crate::afc`]) and delegates
-    /// to it, so after an AFC round-trip [`Self::get_history`] holds only
-    /// the two ends of the exchange:
-    ///
-    /// ```text
-    /// [user "..."], [model "final text"]
-    /// ```
-    ///
-    /// Nothing is lost: the intermediate `functionCall`/`functionResponse`
-    /// turns are returned on the response itself, as
-    /// `GenerateContentResponse.automatic_function_calling_history` (which
-    /// Python populates too), and they were still sent to the model within
-    /// the AFC loop, so the model saw the same conversation on the wire.
-    /// The difference is only in what a *subsequent* `send_message` replays
-    /// as history, and in what `get_history` returns. Pinned by
-    /// `send_message_with_afc_records_only_the_final_turn` in this module's
-    /// tests.
-    ///
-    /// # Errors
-    /// See [`crate::models::Models::generate_content`].
-    pub async fn send_message(
-        &mut self,
-        message: impl Into<Contents>,
-        config: Option<GenerateContentConfig>,
-    ) -> Result<GenerateContentResponse> {
-        let user_input = to_single_content(message.into());
-        let mut contents_to_model = self.curated_history.clone();
-        contents_to_model.push(user_input.clone());
-        let effective_config = config.or_else(|| self.config.clone());
-
-        let response = self
-            .client
-            .models()
-            .generate_content(&self.model, contents_to_model, effective_config)
-            .await?;
-
-        let model_output = first_candidate_content(&response).map_or_else(Vec::new, |c| vec![c]);
-        let is_valid = validate_response(&response);
-        self.record_history(user_input, model_output, is_valid);
-        Ok(response)
-    }
-
-    /// Sends `message` plus the accumulated curated history to the model,
-    /// streaming incremental response chunks. The returned [`ChatStream`]
-    /// borrows this [`Chat`] mutably and finalizes the model's turn into
-    /// history once it is fully drained. Mirrors Python's
-    /// `Chat.send_message_stream`.
-    ///
-    /// Unlike [`Self::send_message`], automatic function calling does
-    /// **not** run here: [`crate::models::Models::generate_content_stream`]
-    /// issues a single streaming request, matching Python, which likewise
-    /// only drives the AFC loop from the unary path. A `functionCall` part
-    /// is surfaced to the caller as-is.
-    ///
-    /// # Errors
-    /// See [`crate::models::Models::generate_content_stream`].
-    pub async fn send_message_stream(
-        &mut self,
-        message: impl Into<Contents>,
-        config: Option<GenerateContentConfig>,
-    ) -> Result<ChatStream<'_>> {
-        let user_input = to_single_content(message.into());
-        let mut contents_to_model = self.curated_history.clone();
-        contents_to_model.push(user_input.clone());
-        let effective_config = config.or_else(|| self.config.clone());
-
-        let inner = self
-            .client
-            .models()
-            .generate_content_stream(&self.model, contents_to_model, effective_config)
-            .await?;
-
-        Ok(ChatStream {
-            chat: self,
-            inner: Box::pin(inner),
-            user_input,
-            model_output: Vec::new(),
-            is_valid: true,
-            saw_finish_reason: false,
-            finished: false,
-        })
-    }
-
-    /// Returns the chat history: the curated (valid-only) history if
-    /// `curated` is `true`, otherwise the comprehensive history (every
-    /// turn, including invalid model outputs). Mirrors Python's
-    /// `Chat.get_history`.
-    #[must_use]
-    pub fn get_history(&self, curated: bool) -> &[Content] {
-        if curated {
-            &self.curated_history
-        } else {
-            &self.comprehensive_history
-        }
-    }
-
     /// Appends one exchange to both histories, mirroring Python's
     /// `_BaseChat.record_history`: the user turn and the model's output are
     /// always appended to the comprehensive history; they are appended to
@@ -199,6 +88,230 @@ impl Chat {
             self.curated_history.extend(output_contents);
         }
     }
+
+    /// Returns the chat history: the curated (valid-only) history if
+    /// `curated` is `true`, otherwise the comprehensive history (every
+    /// turn, including invalid model outputs). Mirrors Python's
+    /// `Chat.get_history`.
+    #[must_use]
+    pub fn get_history(&self, curated: bool) -> &[Content] {
+        if curated {
+            &self.curated_history
+        } else {
+            &self.comprehensive_history
+        }
+    }
+
+    /// Sends `message` plus the accumulated curated history to the model
+    /// and returns its response. Mirrors Python's `Chat.send_message`.
+    ///
+    /// Automatic function calling runs here when `config.tools` contains a
+    /// tool built by [`crate::types::Tool::from_function`] and AFC is not
+    /// disabled. As in Python's `chats.py`, the loop lives in the chat
+    /// itself so every intermediate turn is recorded into the history, one
+    /// exchange per remote call:
+    ///
+    /// ```text
+    /// [user "..."], [model functionCall], [user functionResponse], [model "final text"]
+    /// ```
+    ///
+    /// When `maximum_remote_calls` is exhausted, the functions of the last
+    /// request are not called (no request is left to send their result
+    /// with) and the turn ends on the model's unanswered `functionCall`.
+    /// The returned response carries no `automatic_function_calling_history`
+    /// because the history is on the chat, as in Python.
+    ///
+    /// # Errors
+    /// See [`crate::models::Models::generate_content`].
+    pub async fn send_message(
+        &mut self,
+        message: impl Into<Contents>,
+        config: Option<GenerateContentConfig>,
+    ) -> Result<GenerateContentResponse> {
+        let mut user_input = to_single_content(message.into());
+        let mut contents_to_model = self.curated_history.clone();
+        contents_to_model.push(user_input.clone());
+        let effective_config = config.or_else(|| self.config.clone());
+        let models = self.client.models();
+
+        let callables = registered_tools_for(effective_config.as_ref());
+        let afc_enabled = !callables.is_empty() && !should_disable_afc(effective_config.as_ref());
+        let mut remaining = if afc_enabled {
+            get_max_remote_calls_afc(effective_config.as_ref())?
+        } else {
+            1
+        };
+
+        loop {
+            let response = models
+                .generate_content_once(
+                    &self.model,
+                    contents_to_model.clone(),
+                    effective_config.clone(),
+                )
+                .await?;
+            remaining -= 1;
+
+            let call_content = first_candidate_content(&response)
+                .filter(|content| content.parts.as_ref().is_some_and(|p| !p.is_empty()));
+            let call_content = match call_content {
+                Some(content) if afc_enabled && remaining > 0 => content,
+                _ => {
+                    let model_output =
+                        first_candidate_content(&response).map_or_else(Vec::new, |c| vec![c]);
+                    let is_valid = validate_response(&response);
+                    self.record_history(user_input, model_output, is_valid);
+                    return Ok(response);
+                }
+            };
+
+            let response_parts = function_response_parts(&call_content, &callables).await?;
+            if response_parts.is_empty() {
+                let is_valid = validate_response(&response);
+                self.record_history(user_input, vec![call_content], is_valid);
+                return Ok(response);
+            }
+            let response_content = Content {
+                role: Some("user".to_owned()),
+                parts: Some(response_parts),
+            };
+            contents_to_model.push(call_content.clone());
+            contents_to_model.push(response_content.clone());
+            self.record_history(
+                std::mem::replace(&mut user_input, response_content),
+                vec![call_content],
+                validate_response(&response),
+            );
+        }
+    }
+
+    /// Sends `message` plus the accumulated curated history to the model,
+    /// streaming incremental response chunks. The returned [`ChatStream`]
+    /// borrows this [`Chat`] mutably and finalizes the model's turn into
+    /// history once it is fully drained. Mirrors Python's
+    /// `Chat.send_message_stream`.
+    ///
+    /// Automatic function calling runs across the stream as in Python: when
+    /// a round's chunks contain `functionCall` parts and AFC is enabled,
+    /// the functions are called once the round is drained and another
+    /// streaming request carries their results, all within the one
+    /// returned stream. Every chunk of every round is yielded. When
+    /// `maximum_remote_calls` is exhausted the last round's functions are
+    /// not called and the turn ends on the unanswered `functionCall`.
+    ///
+    /// # Errors
+    /// See [`crate::models::Models::generate_content_stream`]. A failure
+    /// of a later AFC round, or of a called function, is yielded as the
+    /// stream's last item.
+    pub async fn send_message_stream(
+        &mut self,
+        message: impl Into<Contents>,
+        config: Option<GenerateContentConfig>,
+    ) -> Result<ChatStream<'_>> {
+        let user_input = to_single_content(message.into());
+        let mut contents_to_model = self.curated_history.clone();
+        contents_to_model.push(user_input.clone());
+        let effective_config = config.or_else(|| self.config.clone());
+        let models = self.client.models();
+
+        let callables = registered_tools_for(effective_config.as_ref());
+        let afc_enabled = !callables.is_empty() && !should_disable_afc(effective_config.as_ref());
+        let remaining = if afc_enabled {
+            get_max_remote_calls_afc(effective_config.as_ref())?
+        } else {
+            1
+        };
+
+        // The first request is issued eagerly so that a failure to start it
+        // is this method's `Err`, not the stream's first item.
+        let first_round = Box::pin(models.generate_content_stream_once(
+            &self.model,
+            contents_to_model.clone(),
+            effective_config.clone(),
+        ))
+        .await?;
+
+        let model = self.model.clone();
+        let chat = self;
+        let inner = async_stream::stream! {
+            let mut user_input = user_input;
+            let mut remaining = remaining;
+            let mut first_round = Some(first_round);
+            let mut model_output: Vec<Content> = Vec::new();
+            let mut is_valid = true;
+            let mut saw_finish_reason = false;
+
+            while remaining > 0 {
+                let mut round = match first_round.take() {
+                    Some(round) => round,
+                    None => match models
+                        .generate_content_stream_once(
+                            &model,
+                            contents_to_model.clone(),
+                            effective_config.clone(),
+                        )
+                        .await
+                    {
+                        Ok(round) => round,
+                        Err(error) => {
+                            yield Err(error);
+                            return;
+                        }
+                    },
+                };
+                remaining -= 1;
+                let is_last_round = remaining == 0;
+
+                let mut state = RoundState::new();
+
+                while let Some(item) = round.next().await {
+                    let chunk = match item {
+                        Ok(chunk) => chunk,
+                        // A mid-stream failure does not finalize history
+                        // (the exchange never completed), as in Python.
+                        Err(error) => {
+                            yield Err(error);
+                            return;
+                        }
+                    };
+                    let tools = (afc_enabled && !is_last_round).then_some(&callables);
+                    if let Err(error) = state.absorb(&chunk, tools).await {
+                        yield Err(error);
+                        return;
+                    }
+                    yield Ok(chunk);
+                }
+                model_output = state.model_output;
+                is_valid = state.is_valid;
+                saw_finish_reason = state.saw_finish_reason;
+                let response_parts = state.response_parts;
+                let last_chunk_has_content = state.last_chunk_has_content;
+
+                if is_last_round || response_parts.is_empty() {
+                    break;
+                }
+                if last_chunk_has_content {
+                    let response_content = Content {
+                        role: Some("user".to_owned()),
+                        parts: Some(response_parts),
+                    };
+                    contents_to_model.extend(model_output.iter().cloned());
+                    contents_to_model.push(response_content.clone());
+                    chat.record_history(
+                        std::mem::replace(&mut user_input, response_content),
+                        std::mem::take(&mut model_output),
+                        is_valid,
+                    );
+                }
+            }
+
+            chat.record_history(user_input, model_output, is_valid && saw_finish_reason);
+        };
+
+        Ok(ChatStream {
+            inner: Box::pin(inner),
+        })
+    }
 }
 
 /// A stream of incremental [`GenerateContentResponse`] chunks returned by
@@ -206,58 +319,89 @@ impl Chat {
 /// whole lifetime; once the underlying HTTP stream is exhausted the
 /// accumulated model turn is recorded into the chat's history.
 pub struct ChatStream<'a> {
-    chat: &'a mut Chat,
-    inner: Pin<Box<dyn Stream<Item = Result<GenerateContentResponse>> + Send>>,
-    user_input: Content,
-    model_output: Vec<Content>,
-    is_valid: bool,
-    saw_finish_reason: bool,
-    finished: bool,
+    inner: Pin<Box<dyn Stream<Item = Result<GenerateContentResponse>> + Send + 'a>>,
 }
 
 impl Stream for ChatStream<'_> {
     type Item = Result<GenerateContentResponse>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        if self.finished {
-            return Poll::Ready(None);
-        }
-        match self.inner.as_mut().poll_next(cx) {
-            Poll::Ready(Some(Ok(chunk))) => {
-                if !validate_response(&chunk) {
-                    self.is_valid = false;
-                }
-                if let Some(content) = first_candidate_content(&chunk) {
-                    self.model_output.push(content);
-                }
-                if chunk
-                    .candidates
-                    .as_ref()
-                    .and_then(|c| c.first())
-                    .is_some_and(|c| c.finish_reason.is_some())
-                {
-                    self.saw_finish_reason = true;
-                }
-                Poll::Ready(Some(Ok(chunk)))
-            }
-            Poll::Ready(Some(Err(err))) => {
-                // Mirrors Python: a mid-stream failure does not finalize
-                // history (the exchange never completed).
-                self.finished = true;
-                Poll::Ready(Some(Err(err)))
-            }
-            Poll::Ready(None) => {
-                self.finished = true;
-                let is_valid =
-                    self.is_valid && !self.model_output.is_empty() && self.saw_finish_reason;
-                let user_input = std::mem::take(&mut self.user_input);
-                let model_output = std::mem::take(&mut self.model_output);
-                self.chat.record_history(user_input, model_output, is_valid);
-                Poll::Ready(None)
-            }
-            Poll::Pending => Poll::Pending,
+        self.inner.as_mut().poll_next(cx)
+    }
+}
+
+/// What one streaming round has produced so far, folded in chunk by chunk.
+struct RoundState {
+    /// The first candidate's content of every chunk that had one.
+    model_output: Vec<Content>,
+    /// Whether every chunk so far was a valid response.
+    is_valid: bool,
+    /// Whether any chunk carried a finish reason.
+    saw_finish_reason: bool,
+    /// The function responses for the calls seen so far.
+    response_parts: Vec<Part>,
+    /// Whether the most recent chunk had candidate content.
+    last_chunk_has_content: bool,
+}
+
+impl RoundState {
+    fn new() -> Self {
+        Self {
+            model_output: Vec::new(),
+            is_valid: true,
+            saw_finish_reason: false,
+            response_parts: Vec::new(),
+            last_chunk_has_content: false,
         }
     }
+
+    /// Folds `chunk` in. When `callables` is given, the functions the chunk
+    /// asks for are called and their responses collected.
+    ///
+    /// # Errors
+    /// See [`function_response_parts`].
+    async fn absorb(
+        &mut self,
+        chunk: &GenerateContentResponse,
+        callables: Option<&HashMap<String, Arc<dyn FunctionTool>>>,
+    ) -> Result<()> {
+        if !validate_response(chunk) {
+            self.is_valid = false;
+        }
+        let content = first_candidate_content(chunk);
+        if let (Some(callables), Some(content)) = (callables, content.as_ref()) {
+            self.response_parts
+                .extend(function_response_parts(content, callables).await?);
+        }
+        self.last_chunk_has_content = content.is_some();
+        self.model_output.extend(content);
+        if chunk
+            .candidates
+            .as_ref()
+            .and_then(|c| c.first())
+            .is_some_and(|c| c.finish_reason.is_some())
+        {
+            self.saw_finish_reason = true;
+        }
+        Ok(())
+    }
+}
+
+/// The `FunctionResponse` parts answering every `functionCall` part of
+/// `content`, one per call. Mirrors Python's
+/// `_extra_utils.get_function_response_parts_async`.
+///
+/// # Errors
+/// See [`crate::extra_utils::function_response_parts`].
+async fn function_response_parts(
+    content: &Content,
+    callables: &HashMap<String, Arc<dyn FunctionTool>>,
+) -> Result<Vec<Part>> {
+    crate::extra_utils::function_response_parts(
+        content.parts.as_deref().unwrap_or_default(),
+        callables,
+    )
+    .await
 }
 
 /// Collapses an `impl Into<Contents>` chat message into a single
@@ -504,27 +648,15 @@ mod tests {
         server.verify().await;
     }
 
-    /// Pins a **deliberate divergence from Python** (documented on
-    /// [`Chat::send_message`]): after an automatic-function-calling
-    /// round-trip, only the user's message and the final model answer land
-    /// in the chat history.
-    ///
-    /// Python's `chats.py` disables `generate_content`'s AFC and runs its
-    /// own loop, calling `record_history` once per remote call, so its
-    /// history would be four turns here:
+    /// Pins Python's `chats.py` behavior: after an automatic-function-calling
+    /// round-trip every turn lands in the chat history, one exchange per
+    /// remote call:
     ///
     /// ```text
     /// [user text], [model functionCall], [user functionResponse], [model text]
     /// ```
-    ///
-    /// This crate delegates to `crate::afc`'s loop instead and records one
-    /// exchange, so the history is two turns; the intermediate turns are
-    /// returned on the response as `automatic_function_calling_history`
-    /// (asserted below), and were still sent to the model inside the loop.
-    /// This is a design decision, not an oversight -- if it ever changes,
-    /// change the doc comment on [`Chat::send_message`] with it.
     #[tokio::test]
-    async fn send_message_with_afc_records_only_the_final_turn() {
+    async fn send_message_with_afc_records_every_turn() {
         /// Arguments of the demo tool registered by this test.
         #[derive(serde::Deserialize, schemars::JsonSchema)]
         struct WeatherArgs {
@@ -561,7 +693,7 @@ mod tests {
             .mount(&server)
             .await;
 
-        let tool = crate::afc::function_tool::<WeatherArgs, _, _, _>(
+        let tool = crate::automatic_function_calling_util::function_tool::<WeatherArgs, _, _, _>(
             "chats_afc_history_get_weather",
             "Gets the weather for a location.",
             |args: WeatherArgs| async move {
@@ -580,49 +712,29 @@ mod tests {
             .unwrap();
         assert_eq!(response.text().as_deref(), Some("It's sunny in NYC."));
 
-        // The intermediate turns are on the response, not in the history.
-        let afc_history = response
-            .automatic_function_calling_history
-            .as_ref()
-            .expect("the AFC loop records its own history");
-        assert_eq!(afc_history.len(), 2);
-        assert_eq!(afc_history[0].role.as_deref(), Some("model"));
+        // As in Python, the chat (not the response) carries the AFC turns.
+        assert!(response.automatic_function_calling_history.is_none());
+        let history = chat.get_history(false);
+        assert_eq!(history.len(), 4);
+        assert_eq!(history[0].role.as_deref(), Some("user"));
+        assert_eq!(history[1].role.as_deref(), Some("model"));
         assert!(
-            afc_history[0].parts.as_ref().unwrap()[0]
+            history[1].parts.as_ref().unwrap()[0]
                 .function_call
                 .is_some()
         );
-        assert_eq!(afc_history[1].role.as_deref(), Some("user"));
+        assert_eq!(history[2].role.as_deref(), Some("user"));
         assert!(
-            afc_history[1].parts.as_ref().unwrap()[0]
+            history[2].parts.as_ref().unwrap()[0]
                 .function_response
                 .is_some()
         );
-
-        // The chat history holds exactly the two ends of the exchange --
-        // Python would hold four turns here.
-        let comprehensive = chat.get_history(false);
-        assert_eq!(comprehensive.len(), 2);
-        assert_eq!(comprehensive[0].role.as_deref(), Some("user"));
+        assert_eq!(history[3].role.as_deref(), Some("model"));
         assert_eq!(
-            comprehensive[0].parts.as_ref().unwrap()[0].text.as_deref(),
-            Some("what's the weather in NYC?")
-        );
-        assert_eq!(comprehensive[1].role.as_deref(), Some("model"));
-        assert_eq!(
-            comprehensive[1].parts.as_ref().unwrap()[0].text.as_deref(),
+            history[3].parts.as_ref().unwrap()[0].text.as_deref(),
             Some("It's sunny in NYC.")
         );
-        // No functionCall/functionResponse part survives anywhere in it.
-        assert!(comprehensive.iter().all(|content| {
-            content
-                .parts
-                .iter()
-                .flatten()
-                .all(|part| part.function_call.is_none() && part.function_response.is_none())
-        }));
-        // The final response is valid, so the curated history matches.
-        assert_eq!(chat.get_history(true), comprehensive);
+        assert_eq!(chat.get_history(true), history);
 
         server.verify().await;
     }

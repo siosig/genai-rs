@@ -1,7 +1,7 @@
 # gemini-genai
 
 > **非公式。** [Google Gen AI Python SDK](https://github.com/googleapis/python-genai)
-> （`google-genai` 2.23.0 — 追従状況は [docs/upstream-sync.ja.md](docs/upstream-sync.ja.md)
+> （`google-genai` 2.28.0 — 追従状況は [docs/upstream-sync.ja.md](docs/upstream-sync.ja.md)
 > を参照）を **Gemini Developer API** 向けに Rust へ移植した
 > 独立プロジェクトであり、Google とは無関係で、Google による承認も後援も受けていない。
 > 一部は `google-genai`（Copyright 2025 Google LLC、Apache License 2.0）に由来する
@@ -179,7 +179,7 @@ let client = Client::builder()
 | `native-tls` | — | プラットフォーム標準の TLS スタックを使う。両方が混ざらないよう `default-features` は off にすること。 |
 | `live` | ✅ | `client.live()`：双方向リアルタイム（WebSocket）API と `client.live().music()`。 |
 | `blocking` | — | `gemini_genai::blocking`：Live を除く API 全体の同期版（`async fn` ではなく `fn`）ミラー。 |
-| `mcp` | — | `gemini_genai::mcp::mcp_tools`：MCP サーバーのツールを関数呼び出しツールとしてモデルに公開する。 |
+| `mcp` | — | `gemini_genai::mcp_utils::mcp_tools`：MCP サーバーのツールを関数呼び出しツールとしてモデルに公開する。 |
 
 デフォルトの `rustls` ではなく `native-tls` を使う場合。
 
@@ -341,7 +341,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 （`maximum_remote_calls`、既定 10 回まで）自動で回してから最終回答を返す。
 
 ```rust,no_run
-use gemini_genai::afc::function_tool;
+use gemini_genai::function_tool;
 use gemini_genai::types::{GenerateContentConfig, Tool};
 use gemini_genai::{Client, Result};
 
@@ -387,7 +387,7 @@ async fn main() -> Result<()> {
 > ただのシリアライズ可能な構造体で、`Arc<dyn FunctionTool>` を持たせる場所がないため。
 > 同じ名前で*別の*コーラブルを 2 つ登録すると、後勝ちで両方が同じ実装を指すことになる。
 > Python は呼び出しごとに `function_map` を組み直すのでこの結合はない。名前は必ずユニークに
-> つけること。起動時に一度だけツールを登録する運用ならそもそも踏まない。詳細は `afc`
+> つけること。起動時に一度だけツールを登録する運用ならそもそも踏まない。詳細は `automatic_function_calling_util`
 > モジュールのドキュメントを参照。
 
 `GenerateContentConfig::automatic_function_calling` に
@@ -538,17 +538,19 @@ fn retryable(error: &Error) -> bool {
 - [`docs/migrating-from-python.ja.md`](docs/migrating-from-python.ja.md) — イディオムの違い（設定
   構造体、`Contents` の変換、ストリーム、ページャ、エラー）についてのガイド。
 - [`docs/upstream-sync.ja.md`](docs/upstream-sync.ja.md) — 本クレートがどの
-  `google-genai` リリースにピンしているか、意図的にまだ取り込んでいない上流の
-  変更があればその理由と再開条件。
+  `google-genai` リリースにピンしているか、上流の各モジュールが本クレートのどこに
+  あるか、シンボル台帳とテスト目録の読み方、次のリリースを取り込む手順、既知のギャップ。
 
 未実装なもの: Vertex AI バックエンド、および Vertex 専用・Python 固有の API 面。
 `models.compute_tokens`・`models.generate_images`・`tunings.list` は存在するけれど
 常にエラーを返す。
 `models.edit_image` / `upscale_image` / `recontext_image` / `segment_image` と
 `tunings.validate_reward` は存在しない（Python でも Vertex AI 以外では `ValueError` になる）。
-`local_tokenizer`、NextGen の `interactions` / `agents` / `webhooks` / `triggers` /
-`environments` モジュール、replay / `DebugConfig` の仕組みは移植していない。詳細は
-[CHANGELOG.md](CHANGELOG.md) を参照。
+`local_tokenizer` と replay / `DebugConfig` の仕組みは移植していない。
+NextGen の `interactions` / `agents` / `environments` / `triggers` / `webhooks` /
+`voices` / `credentials` モジュールは移植済みで、`src/gaos/` に生成している。0.4.0 での
+モジュール移動は [CHANGELOG.md](CHANGELOG.md)、モジュール対応表は
+[docs/upstream-sync.ja.md](docs/upstream-sync.ja.md) を参照。
 
 ## サンプル
 
@@ -570,8 +572,8 @@ GOOGLE_API_KEY=... cargo run --example structured_output
 初回設定、5 つの品質ゲート、コード生成の手順、ピンした依存の更新方法。
 セキュリティ上の問題は [SECURITY.ja.md](SECURITY.ja.md) へ。
 
-`src/types/generated/`、`src/converters/generated/`、`src/blocking/generated.rs`、
-`tests/fixtures/` の大部分は、インストール済みの Python SDK から自動生成している。これらを手で
+`src/types/generated/`、`src/converters/generated/`、`src/gaos/`、
+`src/blocking/generated.rs`、`tests/fixtures/` の大部分は、インストール済みの Python SDK から自動生成している。これらを手で
 編集しないこと。ジェネレータ本体か `tools/codegen/` 配下のオーバーライドを変更して再生成する。
 
 ```sh
@@ -618,7 +620,7 @@ GEMINI_API_KEY=... GENAI_E2E_EXPENSIVE=1 \
 
 Apache-2.0 — 全文は [LICENSE](LICENSE) を参照。
 
-本クレートの一部は Google Gen AI Python SDK（`google-genai` 2.23.0、
+本クレートの一部は Google Gen AI Python SDK（`google-genai` 2.28.0、
 Copyright 2025 Google LLC、同じく Apache-2.0）に由来する。どのパスが該当し
 何を改変したかは [NOTICE](NOTICE) に記載している。
 

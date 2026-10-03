@@ -1,0 +1,16 @@
+{
+  "next_page_token": "sample-next_page_token",
+  "trigger_executions": [
+    {
+      "end_time": "2026-01-01T00:00:00Z",
+      "environment_id": "sample-environment_id",
+      "error": "sample-error",
+      "id": "sample-id",
+      "interaction_id": "sample-interaction_id",
+      "scheduled_time": "2026-01-01T00:00:00Z",
+      "start_time": "2026-01-01T00:00:00Z",
+      "status": "in_progress",
+      "trigger_id": "sample-trigger_id"
+    }
+  ]
+}

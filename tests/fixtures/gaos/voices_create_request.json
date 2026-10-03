@@ -1,0 +1,33 @@
+{
+  "store": true,
+  "voice": {
+    "accent": "sample-accent",
+    "context": "sample-context",
+    "description": "sample-description",
+    "display_name": "sample-display_name",
+    "gender": "sample-gender",
+    "language_code": "sample-language_code",
+    "model": "sample-model",
+    "persona": "sample-persona",
+    "pitch": "low",
+    "prompted": {
+      "input": "sample-input"
+    },
+    "region_code": "sample-region_code",
+    "replicated": {
+      "consent_audio": {
+        "data": "sample-data",
+        "mime_type": "sample-mime_type"
+      },
+      "source_audio": {
+        "data": "sample-data",
+        "mime_type": "sample-mime_type"
+      }
+    },
+    "sample_audio": {
+      "data": "sample-data",
+      "mime_type": "sample-mime_type"
+    },
+    "type": "replicated"
+  }
+}

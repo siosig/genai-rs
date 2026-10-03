@@ -1,0 +1,53 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": "Invalid batch job name",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_cancel_batch_job",
+      "parameters": {
+        "config": null,
+        "name": "6339625664542408704"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "POST",
+            "path": "/v1beta/batches/0yew7plxupyybd7appsrq5vw7w0lp3l79lab:cancel",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_cancel_batch_operation",
+      "parameters": {
+        "config": null,
+        "name": "batches/0yew7plxupyybd7appsrq5vw7w0lp3l79lab"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "Invalid batch job name",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_cancel_batch_job_with_invalid_name",
+      "parameters": {
+        "config": null,
+        "name": "invalid_name"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "batches/test_cancel.py",
+  "test_method": "batches.cancel",
+  "upstream_version": "2.28.0"
+}

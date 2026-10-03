@@ -4,5 +4,5 @@
     "operation_name": "operations/abc123"
   },
   "expected": null,
-  "expected_error": "field `operation_name` is only supported by the Vertex AI backend"
+  "expected_error": "operation_name parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

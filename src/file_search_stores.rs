@@ -1,6 +1,6 @@
 //! `client.file_search_stores()`: File Search store create/get/list/delete/import. Mirrors Python's `file_search_stores.py`.
 
-use std::{future::Future, pin::Pin, sync::Arc};
+use std::sync::Arc;
 
 use bytes::Bytes;
 use reqwest::Method;
@@ -9,8 +9,8 @@ use serde_json::{Map, Value};
 use crate::{
     client::Client,
     converters::generated::{file_search_stores as conv, operations_converters as ops_conv},
-    error::Result,
-    pager::{PagedItem, Pager},
+    errors::Result,
+    pagers::{FetchPage, Page, PagedItem, Pager},
     types::{
         CreateFileSearchStoreConfig, DeleteFileSearchStoreConfig, DownloadMediaConfig,
         FileSearchStore, GetFileSearchStoreConfig, ImportFileConfig, ImportFileOperation,
@@ -80,17 +80,6 @@ fn config_to_map<C: serde::Serialize>(config: Option<C>) -> Result<Map<String, V
     }
 }
 
-/// The boxed-closure type used to fetch subsequent pages in
-/// [`FileSearchStores::list`]. A type alias mainly to keep clippy's
-/// `type_complexity` lint quiet.
-type FetchListPage<T> = Arc<
-    dyn Fn(
-            Map<String, Value>,
-        ) -> Pin<Box<dyn Future<Output = Result<(Vec<T>, Option<String>)>> + Send>>
-        + Send
-        + Sync,
->;
-
 /// Handle for `client.file_search_stores()`. Cheap to construct; borrows
 /// nothing.
 #[derive(Clone)]
@@ -99,6 +88,15 @@ pub struct FileSearchStores {
 }
 
 impl FileSearchStores {
+    /// Document get/list/delete for a File Search store's Documents
+    /// (`client.file_search_stores().documents()`).
+    #[must_use]
+    pub fn documents(&self) -> crate::documents::Documents {
+        crate::documents::Documents {
+            client: self.client.clone(),
+        }
+    }
+
     /// Creates a File Search store. Mirrors Python's
     /// `FileSearchStores.create`.
     ///
@@ -163,61 +161,6 @@ impl FileSearchStores {
             .request(Method::DELETE, &path, query.as_deref(), None, None)
             .await?;
         Ok(())
-    }
-
-    /// Lists File Search stores. Mirrors Python's
-    /// `FileSearchStores.list`; iterate the returned [`Pager`] (or call
-    /// [`Pager::into_stream`]) to walk every page.
-    ///
-    /// # Errors
-    /// Returns [`crate::Error::Api`] for a non-2xx response.
-    pub async fn list(
-        &self,
-        config: Option<ListFileSearchStoresConfig>,
-    ) -> Result<Pager<FileSearchStore>> {
-        let config_map = config_to_map(config)?;
-        let client = self.client.clone();
-        let (page, next_token) = Self::fetch_list_page(&client, config_map.clone()).await?;
-        let fetch_client = client.clone();
-        let fetch: FetchListPage<FileSearchStore> = Arc::new(move |cfg: Map<String, Value>| {
-            let client = fetch_client.clone();
-            Box::pin(async move { Self::fetch_list_page(&client, cfg).await })
-        });
-        Ok(Pager::new(
-            PagedItem::FileSearchStores,
-            page,
-            config_map,
-            next_token,
-            fetch,
-        ))
-    }
-
-    async fn fetch_list_page(
-        client: &Client,
-        config_map: Map<String, Value>,
-    ) -> Result<(Vec<FileSearchStore>, Option<String>)> {
-        let config: ListFileSearchStoresConfig = serde_json::from_value(Value::Object(config_map))?;
-        let params = serde_json::json!({ "config": config });
-        let mut request = conv::list_file_search_stores_parameters_to_mldev(&params, None, None)?;
-        let query = build_query_string(&request);
-        strip_meta(&mut request);
-        let response = client
-            .http()
-            .request(
-                Method::GET,
-                "fileSearchStores",
-                query.as_deref(),
-                None,
-                None,
-            )
-            .await?;
-        let wire = parse_body(&response.body)?;
-        let mldev = conv::list_file_search_stores_response_from_mldev(&wire, None, None)?;
-        let parsed: ListFileSearchStoresResponse = serde_json::from_value(mldev)?;
-        Ok((
-            parsed.file_search_stores.unwrap_or_default(),
-            parsed.next_page_token,
-        ))
     }
 
     /// Imports a File (previously uploaded via `client.files()`) into a
@@ -286,12 +229,12 @@ impl FileSearchStores {
             .unwrap_or_else(|| file_search_store_name.to_owned());
         strip_meta(&mut request);
         let start_path = format!("upload/v1beta/{store_name}:uploadToFileSearchStore");
-        let body = crate::http::upload::resumable_upload(
+        let body = crate::api_client::upload::resumable_upload(
             self.client.http(),
             &start_path,
             request,
             mime_type,
-            crate::http::upload::UploadSourceData::Bytes(data.to_vec()),
+            crate::api_client::upload::UploadSourceData::Bytes(data.to_vec()),
         )
         .await?;
         let wire = parse_body(&body)?;
@@ -313,7 +256,7 @@ impl FileSearchStores {
     ) -> Result<Bytes> {
         let clean_id = media_id.trim_start_matches('/');
         if !clean_id.contains("/media/") {
-            return Err(crate::error::Error::Validation(format!(
+            return Err(crate::errors::Error::Validation(format!(
                 "invalid media_id format: `{media_id}`. Expected format: \
                  fileSearchStores/<store>/media/<blob_id>"
             )));
@@ -324,13 +267,62 @@ impl FileSearchStores {
             .await
     }
 
-    /// Document get/list/delete for a File Search store's Documents
-    /// (`client.file_search_stores().documents()`).
-    #[must_use]
-    pub fn documents(&self) -> crate::documents::Documents {
-        crate::documents::Documents {
-            client: self.client.clone(),
-        }
+    /// Lists File Search stores. Mirrors Python's
+    /// `FileSearchStores.list`; iterate the returned [`Pager`] (or call
+    /// [`Pager::into_stream`]) to walk every page.
+    ///
+    /// # Errors
+    /// Returns [`crate::Error::Api`] for a non-2xx response.
+    pub async fn list(
+        &self,
+        config: Option<ListFileSearchStoresConfig>,
+    ) -> Result<Pager<FileSearchStore>> {
+        let config_map = config_to_map(config)?;
+        let client = self.client.clone();
+        let first = Self::fetch_list_page(&client, config_map.clone()).await?;
+        let fetch_client = client.clone();
+        let fetch: FetchPage<FileSearchStore> = Arc::new(move |cfg: Map<String, Value>| {
+            let client = fetch_client.clone();
+            Box::pin(async move { Self::fetch_list_page(&client, cfg).await })
+        });
+        Ok(Pager::new(
+            PagedItem::FileSearchStores,
+            first,
+            config_map,
+            fetch,
+        ))
+    }
+
+    async fn fetch_list_page(
+        client: &Client,
+        config_map: Map<String, Value>,
+    ) -> Result<Page<FileSearchStore>> {
+        let config: ListFileSearchStoresConfig = serde_json::from_value(Value::Object(config_map))?;
+        let params = serde_json::json!({ "config": config });
+        let mut request = conv::list_file_search_stores_parameters_to_mldev(&params, None, None)?;
+        let query = build_query_string(&request);
+        strip_meta(&mut request);
+        let response = client
+            .http()
+            .request(
+                Method::GET,
+                "fileSearchStores",
+                query.as_deref(),
+                None,
+                None,
+            )
+            .await?;
+        let wire = parse_body(&response.body)?;
+        let mldev = conv::list_file_search_stores_response_from_mldev(&wire, None, None)?;
+        let parsed: ListFileSearchStoresResponse = serde_json::from_value(mldev)?;
+        // Python's generated `_list` does not attach the HTTP headers for
+        // file search stores, so `Pager.sdk_http_response` is only what the
+        // body carried.
+        Ok(Page {
+            items: parsed.file_search_stores.unwrap_or_default(),
+            next_page_token: parsed.next_page_token,
+            sdk_http_response: parsed.sdk_http_response,
+        })
     }
 }
 
@@ -620,6 +612,6 @@ mod tests {
             .download_media("fileSearchStores/abc123", None)
             .await
             .unwrap_err();
-        assert!(matches!(err, crate::error::Error::Validation(_)));
+        assert!(matches!(err, crate::errors::Error::Validation(_)));
     }
 }

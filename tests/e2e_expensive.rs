@@ -255,7 +255,7 @@ async fn test_e2e_live_session_audio_turn() {
 /// Gemini Developer API currently answers for `POST /v1beta/tunedModels`
 /// -- see this file's module doc. `tunings().list` is not used: it is
 /// Vertex-AI-only in the upstream SDK and this crate returns
-/// `UnsupportedByBackend` for it (`tests/tunings.rs` covers that), so the
+/// `UnsupportedMethod` for it (`tests/tunings/main.rs` covers that), so the
 /// created job is confirmed with `tunings().get` instead.
 #[tokio::test]
 #[ignore = "expensive: creates a tuned model; needs GENAI_E2E_EXPENSIVE=1"]

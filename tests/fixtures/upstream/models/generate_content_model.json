@@ -1,0 +1,194 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 300 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/projects/801452371447/locations/us-central1/endpoints/4095574160837705728:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": "404"
+      },
+      "name": "test_tuned_model",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 300 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "projects/801452371447/locations/us-central1/endpoints/4095574160837705728"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 50 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/publishers/google/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": "404"
+      },
+      "name": "test_start_with_publishers",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 50 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "publishers/google/models/gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 50 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_start_with_models",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 50 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "models/gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Tell me a story in 50 words."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/google/gemini-2.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": "404"
+      },
+      "name": "test_publisher_model",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 50 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "google/gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "model",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_empty_model",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 50 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": ""
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "models/test_generate_content_model.py",
+  "test_method": "models.generate_content",
+  "upstream_version": "2.28.0"
+}

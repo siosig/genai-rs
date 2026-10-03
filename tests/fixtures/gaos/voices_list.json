@@ -1,0 +1,41 @@
+{
+  "next_page_token": "sample-next_page_token",
+  "voices": [
+    {
+      "accent": "sample-accent",
+      "context": "sample-context",
+      "description": "sample-description",
+      "display_name": "sample-display_name",
+      "expire_time": "2026-01-01T00:00:00Z",
+      "gender": "sample-gender",
+      "id": "sample-id",
+      "key": "sample-key",
+      "language_code": "sample-language_code",
+      "model": "sample-model",
+      "persona": "sample-persona",
+      "pitch": "low",
+      "prompted": {
+        "input": "sample-input"
+      },
+      "region_code": "sample-region_code",
+      "sample_audio": {
+        "data": "sample-data",
+        "mime_type": "sample-mime_type"
+      },
+      "type": "replicated",
+      "usage": {
+        "cached_tokens_by_modality": [],
+        "grounding_tool_count": [],
+        "input_tokens_by_modality": [],
+        "output_tokens_by_modality": [],
+        "tool_use_tokens_by_modality": [],
+        "total_cached_tokens": 1,
+        "total_input_tokens": 1,
+        "total_output_tokens": 1,
+        "total_thought_tokens": 1,
+        "total_tokens": 1,
+        "total_tool_use_tokens": 1
+      }
+    }
+  ]
+}

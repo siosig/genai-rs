@@ -1,0 +1,18 @@
+{
+  "create_time": "2026-01-01T00:00:00Z",
+  "id": "sample-id",
+  "name": "sample-name",
+  "new_signing_secret": "sample-new_signing_secret",
+  "signing_secrets": [
+    {
+      "expire_time": "2026-01-01T00:00:00Z",
+      "truncated_secret": "sample-truncated_secret"
+    }
+  ],
+  "state": "enabled",
+  "subscribed_events": [
+    "batch.succeeded"
+  ],
+  "update_time": "2026-01-01T00:00:00Z",
+  "uri": "sample-uri"
+}

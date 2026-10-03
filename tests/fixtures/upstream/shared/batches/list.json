@@ -1,0 +1,33 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/batches",
+            "query": [
+              [
+                "pageSize",
+                "2"
+              ]
+            ]
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_list_batch_jobs",
+      "parameters": {
+        "config": {
+          "pageSize": 2
+        }
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "shared/batches/test_list.py",
+  "test_method": "batches.list",
+  "upstream_version": "2.28.0"
+}

@@ -1,0 +1,105 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "batch": {
+                "displayName": "test_batch",
+                "inputConfig": {
+                  "requests": {
+                    "requests": [
+                      {
+                        "request": {
+                          "content": {
+                            "parts": [
+                              {
+                                "text": "1"
+                              }
+                            ]
+                          },
+                          "outputDimensionality": 64
+                        }
+                      },
+                      {
+                        "request": {
+                          "content": {
+                            "parts": [
+                              {
+                                "text": "2"
+                              }
+                            ]
+                          },
+                          "outputDimensionality": 64
+                        }
+                      },
+                      {
+                        "request": {
+                          "content": {
+                            "parts": [
+                              {
+                                "text": "3"
+                              }
+                            ]
+                          },
+                          "outputDimensionality": 64
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-embedding-001:asyncBatchEmbedContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_from_inlined",
+      "parameters": {
+        "config": {
+          "displayName": "test_batch"
+        },
+        "model": "gemini-embedding-001",
+        "src": {
+          "inlinedRequests": {
+            "config": {
+              "outputDimensionality": 64
+            },
+            "contents": [
+              {
+                "parts": [
+                  {
+                    "text": "1"
+                  }
+                ]
+              },
+              {
+                "parts": [
+                  {
+                    "text": "2"
+                  }
+                ]
+              },
+              {
+                "parts": [
+                  {
+                    "text": "3"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "batches/test_embedding.py",
+  "test_method": "batches.create_embeddings",
+  "upstream_version": "2.28.0"
+}

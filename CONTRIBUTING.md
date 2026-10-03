@@ -68,6 +68,17 @@ RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features --locked
 python tools/codegen/generate.py && git diff --exit-code
 ```
 
+The last line needs the codegen venv described under
+[Generated code](#generated-code). CI's `codegen-check` job runs three more
+checks after it; run them when you touch `tools/codegen/`, a hand-written
+module that ports upstream code, or a test that ports an upstream test:
+
+```sh
+python tools/codegen/check_ledger.py            # every upstream symbol is accounted for
+python tools/codegen/check_upstream_tests.py    # every upstream test is mapped or excluded
+python -m unittest discover tools/codegen/tests
+```
+
 `--locked` is not optional: `Cargo.lock` is committed, so a build that would
 have to change it is a build against a different dependency graph than the one
 your change was written for.
@@ -114,19 +125,33 @@ These are produced by `tools/codegen/*.py` and **must not be hand-edited**:
 - `src/types/generated/`
 - `src/converters/generated/`
 - `src/blocking/generated.rs`
+- `src/gaos/`
 - `tests/fixtures/converters/`
+- `tests/fixtures/upstream/`
+- `tests/fixtures/gaos/`
+- `tools/codegen/ledger.toml`
 - `docs/parity.md`, `docs/parity.ja.md`
 
 Their inputs -- `tools/codegen/methods.toml`, `tools/codegen/parity-matrix.ja.md`,
-`tools/codegen/fixtures_cases.py` -- are tracked and hand-edited.
+`tools/codegen/fixtures_cases.py`, `tools/codegen/module_map.toml`,
+`tools/codegen/deviations.toml`, `tools/codegen/upstream_tests_rules.toml`,
+`tools/codegen/gaos_overrides.toml`, `tools/codegen/renames.toml` -- are tracked
+and hand-edited. So is `tools/codegen/upstream_tests.toml`, except that
+`check_upstream_tests.py --update` maintains its list of tests and keeps your
+edits to the `status`, `rust` and `reason` fields.
 
 Change the generator (or a `converter_overrides/<fn>.rs` file) and re-run:
 
 ```sh
-uv venv --python 3.12 --seed .venv-codegen
-.venv-codegen/bin/pip install --require-hashes -r tools/codegen/requirements.txt
-.venv-codegen/bin/python tools/codegen/generate.py   # or --only types,converters,…
+uv venv --python 3.12 target/codegen-venv
+uv pip install --python target/codegen-venv/bin/python --require-hashes -r tools/codegen/requirements.txt
+target/codegen-venv/bin/python tools/codegen/generate.py   # or --only types,converters,…
 ```
+
+The generators also read the upstream tag's sources (the wheel ships no tests),
+which `tools/codegen/upstream_src.py` shallow-clones into `target/upstream-src/`
+on first use, so the first run needs network access. Each tool is described in
+[tools/codegen/README.md](tools/codegen/README.md).
 
 **The interpreter version is part of the input.** `google.genai.types` exposes a
 different set of pydantic models depending on it -- 3.12 defines 464 including
@@ -177,7 +202,19 @@ Dependabot proposes most of them; these are the manual ones.
 
 This one is not a dependency bump; it regenerates the whole generated tree.
 Dependabot is configured to leave `google-genai` alone for that reason. The
-procedure is in the module docstring of `tools/codegen/upstream.py`.
+workflow, in short:
+
+1. `python tools/codegen/sync_diff.py --from <current pin>` lists only the
+   upstream symbols that changed, with their Rust counterpart.
+2. Bump `PINNED_VERSION` in `tools/codegen/upstream.py` and the `google-genai==`
+   pin in `requirements.in`, relock, and run `generate.py`.
+3. Port the listed hand-written items, run `check_upstream_tests.py` (new
+   upstream tests show up as `pending`) and the oracle corpus (`cargo test`),
+   then `check_ledger.py`.
+4. Update the pin table in `docs/upstream-sync.md` and add a CHANGELOG entry.
+
+[docs/upstream-sync.md](docs/upstream-sync.md) has the full procedure, the
+upstream-to-Rust module map, and how to read the ledger and the test inventory.
 
 ## Releasing
 

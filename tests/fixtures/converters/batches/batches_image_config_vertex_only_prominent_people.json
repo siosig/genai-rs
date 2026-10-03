@@ -6,5 +6,5 @@
     }
   },
   "expected": null,
-  "expected_error": "field `prominent_people` is only supported by the Vertex AI backend"
+  "expected_error": "prominent_people parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

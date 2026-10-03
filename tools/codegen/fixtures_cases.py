@@ -27,8 +27,8 @@ transpiled and are therefore the highest-divergence-risk spots.
 
 See tools/codegen/gen_converters.py's `render_dispatch_fn` for how a
 `converter` name here is resolved to a generated Rust function, and
-src/error.rs's `Error::UnsupportedByBackend` `Display` impl
-(`field \\`{field}\\` is only supported by the {backend} backend`) for the
+src/errors.rs's `Error::UnsupportedByBackend` `Display` impl
+(`{field} parameter is only supported in Gemini Enterprise Agent Platform mode, ...`) for the
 `expected_error` wording used below.
 
 Known Rust-vs-Python gaps deliberately *not* exercised here (each is
@@ -114,14 +114,15 @@ CASES: list[dict] = [
         },
     },
     {
-        "name": "generate_content_vertex_only_labels",
+        # google-genai 2.28.0 forwards `labels` for the Gemini Developer API
+        # too (2.23.0 rejected it as Vertex-only).
+        "name": "generate_content_labels",
         "converter": "_GenerateContentParameters_to_mldev",
         "input": {
             "model": "gemini-2.0-flash",
             "contents": [{"role": "user", "parts": [{"text": "hi"}]}],
             "config": {"labels": {"team": "x"}},
         },
-        "expected_error": "field `labels` is only supported by the Vertex AI backend",
     },
     # -- chats.send (delegates to models.generate_content; chats.py has no
     #    `_to_mldev`/`_from_mldev` converters of its own) -----------------
@@ -186,7 +187,7 @@ CASES: list[dict] = [
                 "system_instruction": {"role": "user", "parts": [{"text": "x"}]}
             },
         },
-        "expected_error": "field `system_instruction` is only supported by the Vertex AI backend",
+        "expected_error": "system_instruction parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     # -- files.upload / get / list / delete --------------------------------
     {
@@ -241,7 +242,7 @@ CASES: list[dict] = [
                 "kms_key_name": "projects/x/locations/y/keyRings/z/cryptoKeys/k",
             },
         },
-        "expected_error": "field `kms_key_name` is only supported by the Vertex AI backend",
+        "expected_error": "kms_key_name parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "caches_get_minimal",
@@ -286,7 +287,7 @@ CASES: list[dict] = [
             "src": {"file_name": "files/batch-input"},
             "config": {"dest": "files/batch-output"},
         },
-        "expected_error": "field `dest` is only supported by the Vertex AI backend",
+        "expected_error": "dest parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "batches_get_minimal",
@@ -446,7 +447,7 @@ CASES: list[dict] = [
             "contents": [{"role": "user", "parts": [{"text": "hi"}]}],
             "config": {"audio_timestamp": True},
         },
-        "expected_error": "field `audio_timestamp` is only supported by the Vertex AI backend",
+        "expected_error": "audio_timestamp parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "generate_content_vertex_only_routing_config",
@@ -456,7 +457,7 @@ CASES: list[dict] = [
             "contents": [{"role": "user", "parts": [{"text": "hi"}]}],
             "config": {"routing_config": {"auto_mode": {"model_routing_preference": "BALANCED"}}},
         },
-        "expected_error": "field `routing_config` is only supported by the Vertex AI backend",
+        "expected_error": "routing_config parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "generate_content_vertex_only_tool_retrieval",
@@ -466,7 +467,7 @@ CASES: list[dict] = [
             "contents": [{"role": "user", "parts": [{"text": "hi"}]}],
             "config": {"tools": [{"retrieval": {"vertex_ai_search": {"datastore": "ds"}}}]},
         },
-        "expected_error": "field `retrieval` is only supported by the Vertex AI backend",
+        "expected_error": "retrieval parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "generate_content_vertex_only_safety_setting_method",
@@ -484,7 +485,7 @@ CASES: list[dict] = [
                 ]
             },
         },
-        "expected_error": "field `method` is only supported by the Vertex AI backend",
+        "expected_error": "method parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     # -- models.generate_content response side --------------------------
     {
@@ -577,7 +578,7 @@ CASES: list[dict] = [
             "contents": [{"role": "user", "parts": [{"text": "hi"}]}],
             "config": {"mime_type": "text/plain"},
         },
-        "expected_error": "field `mime_type` is only supported by the Vertex AI backend",
+        "expected_error": "mime_type parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     # ================================================================
     # models.get / list / update / delete (`t_model`, `t_models_url`,
@@ -688,7 +689,7 @@ CASES: list[dict] = [
         "name": "image_to_mldev_vertex_only_gcs_uri",
         "converter": "_Image_to_mldev",
         "input": {"gcs_uri": "gs://bucket/in.png"},
-        "expected_error": "field `gcs_uri` is only supported by the Vertex AI backend",
+        "expected_error": "gcs_uri parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "image_config_to_mldev_minimal",
@@ -699,13 +700,13 @@ CASES: list[dict] = [
         "name": "image_config_to_mldev_vertex_only_person_generation",
         "converter": "_ImageConfig_to_mldev",
         "input": {"person_generation": "ALLOW_ADULT"},
-        "expected_error": "field `person_generation` is only supported by the Vertex AI backend",
+        "expected_error": "person_generation parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "image_config_to_mldev_vertex_only_output_mime_type",
         "converter": "_ImageConfig_to_mldev",
         "input": {"output_mime_type": "image/jpeg"},
-        "expected_error": "field `output_mime_type` is only supported by the Vertex AI backend",
+        "expected_error": "output_mime_type parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     # ================================================================
     # models.generate_videos + operations (previously zero coverage)
@@ -768,7 +769,7 @@ CASES: list[dict] = [
             "prompt": "a cat",
             "config": {"fps": 24},
         },
-        "expected_error": "field `fps` is only supported by the Vertex AI backend",
+        "expected_error": "fps parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "generate_videos_vertex_only_generate_audio",
@@ -778,7 +779,7 @@ CASES: list[dict] = [
             "prompt": "a cat",
             "config": {"generate_audio": True},
         },
-        "expected_error": "field `generate_audio` is only supported by the Vertex AI backend",
+        "expected_error": "generate_audio parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "generate_videos_vertex_only_output_gcs_uri",
@@ -788,7 +789,7 @@ CASES: list[dict] = [
             "prompt": "a cat",
             "config": {"output_gcs_uri": "gs://bucket/out"},
         },
-        "expected_error": "field `output_gcs_uri` is only supported by the Vertex AI backend",
+        "expected_error": "output_gcs_uri parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "video_generation_reference_image_to_mldev",
@@ -952,7 +953,7 @@ CASES: list[dict] = [
             "model": "gemini-2.0-flash-live-001",
             "config": {"explicit_vad_signal": True},
         },
-        "expected_error": "field `explicit_vad_signal` is only supported by the Vertex AI backend",
+        "expected_error": "explicit_vad_signal parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "live_client_content_kitchen_sink",
@@ -992,7 +993,7 @@ CASES: list[dict] = [
         "name": "live_client_setup_vertex_only_explicit_vad_signal",
         "converter": "_LiveClientSetup_to_mldev",
         "input": {"model": "models/x", "explicit_vad_signal": True},
-        "expected_error": "field `explicit_vad_signal` is only supported by the Vertex AI backend",
+        "expected_error": "explicit_vad_signal parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "live_client_message_kitchen_sink",
@@ -1008,11 +1009,6 @@ CASES: list[dict] = [
                 ]
             },
         },
-    },
-    {
-        "name": "live_client_realtime_input_text",
-        "converter": "_LiveClientRealtimeInput_to_mldev",
-        "input": {"text": "hello", "audio_stream_end": True},
     },
     {
         # Only the `text`/`activity_*` fields: an `audio`/`video` `Blob`
@@ -1076,7 +1072,7 @@ CASES: list[dict] = [
         "name": "session_resumption_config_vertex_only_transparent",
         "converter": "_SessionResumptionConfig_to_mldev",
         "input": {"handle": "h1", "transparent": True},
-        "expected_error": "field `transparent` is only supported by the Vertex AI backend",
+        "expected_error": "transparent parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "live_music_connect_minimal",
@@ -1114,17 +1110,6 @@ CASES: list[dict] = [
         },
     },
     {
-        "name": "live_blob_to_mldev_minimal",
-        "converter": "_Blob_to_mldev",
-        "input": {"data": "aGVsbG8=", "mime_type": "audio/pcm"},
-    },
-    {
-        "name": "live_blob_to_mldev_vertex_only_display_name",
-        "converter": "_Blob_to_mldev",
-        "input": {"data": "aGVsbG8=", "mime_type": "audio/pcm", "display_name": "clip"},
-        "expected_error": "field `display_name` is only supported by the Vertex AI backend",
-    },
-    {
         "name": "live_content_to_mldev_minimal",
         "converter": "_Content_to_mldev",
         "input": {
@@ -1145,7 +1130,7 @@ CASES: list[dict] = [
         "name": "live_function_call_vertex_only_will_continue",
         "converter": "_FunctionCall_to_mldev",
         "input": {"name": "lookup", "will_continue": True},
-        "expected_error": "field `will_continue` is only supported by the Vertex AI backend",
+        "expected_error": "will_continue parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "live_tool_to_mldev_google_search",
@@ -1156,7 +1141,7 @@ CASES: list[dict] = [
         "name": "live_tool_vertex_only_enterprise_web_search",
         "converter": "_Tool_to_mldev",
         "input": {"enterprise_web_search": {}},
-        "expected_error": "field `enterprise_web_search` is only supported by the Vertex AI backend",
+        "expected_error": "enterprise_web_search parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "live_auth_config_to_mldev_minimal",
@@ -1167,24 +1152,19 @@ CASES: list[dict] = [
         "name": "live_auth_config_vertex_only_auth_type",
         "converter": "_AuthConfig_to_mldev",
         "input": {"auth_type": "API_KEY_AUTH"},
-        "expected_error": "field `auth_type` is only supported by the Vertex AI backend",
+        "expected_error": "auth_type parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "live_google_search_vertex_only_exclude_domains",
         "converter": "_GoogleSearch_to_mldev",
         "input": {"exclude_domains": ["example.com"]},
-        "expected_error": "field `exclude_domains` is only supported by the Vertex AI backend",
+        "expected_error": "exclude_domains parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "live_google_maps_vertex_only_grounding_types",
         "converter": "_GoogleMaps_to_mldev",
         "input": {"grounding_types": ["PLACE_ID"]},
-        "expected_error": "field `grounding_types` is only supported by the Vertex AI backend",
-    },
-    {
-        "name": "live_file_data_to_mldev_minimal",
-        "converter": "_FileData_to_mldev",
-        "input": {"file_uri": "files/abc", "mime_type": "image/png"},
+        "expected_error": "grounding_types parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "live_safety_setting_to_mldev_minimal",
@@ -1312,7 +1292,7 @@ CASES: list[dict] = [
         "name": "embed_content_config_vertex_only_auto_truncate",
         "converter": "_EmbedContentConfig_to_mldev",
         "input": {"auto_truncate": True},
-        "expected_error": "field `auto_truncate` is only supported by the Vertex AI backend",
+        "expected_error": "auto_truncate parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "batches_create_inlined_requests",
@@ -1340,7 +1320,7 @@ CASES: list[dict] = [
         "name": "batch_job_source_vertex_only_gcs_uri",
         "converter": "_BatchJobSource_to_mldev",
         "input": {"gcs_uri": ["gs://bucket/in.jsonl"]},
-        "expected_error": "field `gcs_uri` is only supported by the Vertex AI backend",
+        "expected_error": "gcs_uri parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "batches_cancel_minimal",
@@ -1415,7 +1395,7 @@ CASES: list[dict] = [
         "name": "batches_list_vertex_only_filter",
         "converter": "_ListBatchJobsParameters_to_mldev",
         "input": {"config": {"page_size": 5, "filter": "state=RUNNING"}},
-        "expected_error": "field `filter` is only supported by the Vertex AI backend",
+        "expected_error": "filter parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "delete_resource_job_from_mldev",
@@ -1447,7 +1427,7 @@ CASES: list[dict] = [
         "name": "batches_image_config_vertex_only_prominent_people",
         "converter": "_ImageConfig_to_mldev",
         "input": {"prominent_people": {"people": []}},
-        "expected_error": "field `prominent_people` is only supported by the Vertex AI backend",
+        "expected_error": "prominent_people parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     # ================================================================
     # caches -- delete/list, plus the remaining response converters
@@ -1652,13 +1632,13 @@ CASES: list[dict] = [
             "training_dataset": {"examples": [{"text_input": "in", "output": "out"}]},
             "config": {"adapter_size": "ADAPTER_SIZE_ONE"},
         },
-        "expected_error": "field `adapter_size` is only supported by the Vertex AI backend",
+        "expected_error": "adapter_size parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "tuning_dataset_vertex_only_gcs_uri",
         "converter": "_TuningDataset_to_mldev",
         "input": {"gcs_uri": "gs://bucket/train.jsonl"},
-        "expected_error": "field `gcs_uri` is only supported by the Vertex AI backend",
+        "expected_error": "gcs_uri parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "tunings_cancel_minimal",
@@ -1822,10 +1802,11 @@ CASES: list[dict] = [
         "input": {"text": "hello"},
     },
     {
-        "name": "part_to_mldev_vertex_only_inline_data_display_name",
+        # google-genai 2.28.0 passes the blob through unchanged, so
+        # `display_name` is no longer rejected for the Gemini Developer API.
+        "name": "part_to_mldev_inline_data_display_name",
         "converter": "_Part_to_mldev",
         "input": {"inline_data": {"data": "aGVsbG8=", "mime_type": "image/png", "display_name": "x"}},
-        "expected_error": "field `display_name` is only supported by the Vertex AI backend",
     },
     {
         "name": "tool_config_to_mldev_kitchen_sink",
@@ -1846,7 +1827,7 @@ CASES: list[dict] = [
         "name": "function_calling_config_vertex_only_stream_function_call_arguments",
         "converter": "_FunctionCallingConfig_to_mldev",
         "input": {"mode": "AUTO", "stream_function_call_arguments": True},
-        "expected_error": "field `stream_function_call_arguments` is only supported by the Vertex AI backend",
+        "expected_error": "stream_function_call_arguments parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         # Every field of `_FetchPredictOperationParameters_to_mldev` is
@@ -1854,13 +1835,13 @@ CASES: list[dict] = [
         "name": "fetch_predict_operation_vertex_only_operation_name",
         "converter": "_FetchPredictOperationParameters_to_mldev",
         "input": {"operation_name": "operations/abc123"},
-        "expected_error": "field `operation_name` is only supported by the Vertex AI backend",
+        "expected_error": "operation_name parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "fetch_predict_operation_vertex_only_resource_name",
         "converter": "_FetchPredictOperationParameters_to_mldev",
         "input": {"resource_name": "projects/p/locations/l/publishers/google/models/m"},
-        "expected_error": "field `resource_name` is only supported by the Vertex AI backend",
+        "expected_error": "resource_name parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "files_internal_register_minimal",
@@ -1883,7 +1864,7 @@ CASES: list[dict] = [
             "contents": [{"role": "user", "parts": [{"text": "hi"}]}],
             "config": {"tools": [{"google_search": {}}]},
         },
-        "expected_error": "field `tools` is only supported by the Vertex AI backend",
+        "expected_error": "tools parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "count_tokens_vertex_only_generation_config",
@@ -1893,7 +1874,7 @@ CASES: list[dict] = [
             "contents": [{"role": "user", "parts": [{"text": "hi"}]}],
             "config": {"generation_config": {"temperature": 0.1}},
         },
-        "expected_error": "field `generation_config` is only supported by the Vertex AI backend",
+        "expected_error": "generation_config parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode.",
     },
     {
         "name": "count_tokens_kitchen_sink",

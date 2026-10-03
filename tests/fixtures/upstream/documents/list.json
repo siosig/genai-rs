@@ -1,0 +1,54 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/fileSearchStores/gzn7kdl2wpxl-4z2yqvuxbcxw/documents",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_list_default",
+      "parameters": {
+        "config": null,
+        "parent": "fileSearchStores/gzn7kdl2wpxl-4z2yqvuxbcxw"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/fileSearchStores/gzn7kdl2wpxl-4z2yqvuxbcxw/documents",
+            "query": [
+              [
+                "pageSize",
+                "2"
+              ]
+            ]
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_list_with_page_size",
+      "parameters": {
+        "config": {
+          "pageSize": 2
+        },
+        "parent": "fileSearchStores/gzn7kdl2wpxl-4z2yqvuxbcxw"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "documents/test_list.py",
+  "test_method": "file_search_stores.documents.list",
+  "upstream_version": "2.28.0"
+}

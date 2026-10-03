@@ -69,8 +69,10 @@ def header(doc: str) -> str:
         f"{doc}"
         "#![allow(clippy::all, clippy::pedantic, missing_docs, non_snake_case, dead_code, unused_imports, unused_variables, unused_mut, reason = \"1:1 generated port of google-genai's _to_mldev/_from_mldev converters; several are Vertex-AI-only and unused by this Gemini Developer API port, and pedantic-tier style lints don't apply to mechanically transpiled code\")]\n\n"
         "use serde_json::{Map, Value};\n\n"
-        "use crate::converters::{getv, setv, vertex_only_error};\n"
-        "use crate::error::Result;\n"
+        "use crate::common::{getv, setv};\n"
+        "use crate::converters::vertex_only_error;\n"
+        "use crate::errors::Result;\n"
+        "use crate::base_transformers as base_t;\n"
         "use crate::transformers as t;\n\n"
     )
 
@@ -246,7 +248,10 @@ class FunctionTranspiler:
             assert isinstance(func, ast.Attribute)
             args = drop_leading_api_client(list(node.args))
             rust_args = ", ".join(self.transpile_value_producing_expr(a) for a in args)
-            return f"t::{to_snake(func.attr)}({rust_args})?"
+            # Keep the upstream module alias (`t` / `base_t`) so the Rust call
+            # site names the same module as the Python one.
+            assert isinstance(func.value, ast.Name)
+            return f"{func.value.id}::{to_snake(func.attr)}({rust_args})?"
 
         if is_nested_converter_call(node):
             return self.transpile_nested_converter_call(node)
@@ -585,7 +590,7 @@ def render_dispatch_fn(entries: list[tuple[str, str, str]]) -> str:
         "pub(crate) fn dispatch(name: &str, input: &Value) -> Result<Value> {\n"
         "    match name {\n"
         f"{arms_body}\n"
-        "        _ => Err(crate::error::Error::Validation(format!(\n"
+        "        _ => Err(crate::errors::Error::Validation(format!(\n"
         '            "converters::generated::dispatch: unknown converter `{name}`"\n'
         "        ))),\n"
         "    }\n"
@@ -666,7 +671,7 @@ def main(sdk_dir: pathlib.Path | None = None) -> None:
             continue
         dispatch_entries.append((python_name, rust_name, canonical_module))
 
-    mod_lines.append("\nuse serde_json::Value;\n\nuse crate::error::Result;\n")
+    mod_lines.append("\nuse serde_json::Value;\n\nuse crate::errors::Result;\n")
     mod_lines.append(render_dispatch_fn(dispatch_entries))
 
     (OUT_DIR / "mod.rs").write_text("".join(mod_lines), encoding="utf-8")

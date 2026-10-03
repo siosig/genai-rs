@@ -1,0 +1,94 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/tunedModels/generatenum5443-ekrw7ie9wis23zbeogbw6jq8",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_get_mldev_tuned_model",
+      "parameters": {
+        "config": null,
+        "model": "tunedModels/generatenum5443-ekrw7ie9wis23zbeogbw6jq8"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1/models/gemini-2.5-flash",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_get_mldev_base_model_with_http_options_in_method",
+      "parameters": {
+        "config": {
+          "httpOptions": {
+            "apiVersion": "v1",
+            "headers": {
+              "test": "headers"
+            }
+          }
+        },
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/models/gemini-2.5-flash",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_get_base_model",
+      "parameters": {
+        "config": null,
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/models/gemini-2.5-flash",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_get_base_model_with_models_prefix",
+      "parameters": {
+        "config": null,
+        "model": "models/gemini-2.5-flash"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "models/test_get.py",
+  "test_method": "models.get",
+  "upstream_version": "2.28.0"
+}

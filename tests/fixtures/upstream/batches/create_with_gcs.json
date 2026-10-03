@@ -1,0 +1,84 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": "not supported in Gemini API",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_union_generate_content_with_gcs",
+      "parameters": {
+        "config": null,
+        "model": "gemini-2.5-flash",
+        "src": "gs://unified-genai-tests/batches/input/generate_content_requests.jsonl"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "not supported in Gemini API",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_union_embedding_with_gcs",
+      "parameters": {
+        "config": {
+          "dest": "gs://unified-genai-tests/batches/output",
+          "displayName": "test_batch"
+        },
+        "model": "text-embedding-004",
+        "src": "gs://unified-genai-tests/batches/input/embedding_requests.jsonl"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "not supported in Gemini API",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_union_with_http_options",
+      "parameters": {
+        "config": {
+          "httpOptions": {
+            "apiVersion": "v1",
+            "headers": {
+              "test": "headers"
+            }
+          }
+        },
+        "model": "gemini-2.5-flash",
+        "src": "gs://unified-genai-tests/batches/input/generate_content_requests.jsonl"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "one of",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_generate_content_with_gcs",
+      "parameters": {
+        "config": {
+          "dest": {
+            "format": "jsonl",
+            "gcsUri": "gs://unified-genai-tests/batches/output"
+          },
+          "displayName": "test_batch"
+        },
+        "model": "gemini-2.5-flash",
+        "src": {
+          "format": "jsonl",
+          "gcsUri": [
+            "gs://unified-genai-tests/batches/input/generate_content_requests.jsonl"
+          ]
+        }
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "batches/test_create_with_gcs.py",
+  "test_method": "batches.create",
+  "upstream_version": "2.28.0"
+}

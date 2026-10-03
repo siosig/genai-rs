@@ -8,5 +8,5 @@
     }
   },
   "expected": null,
-  "expected_error": "field `generate_audio` is only supported by the Vertex AI backend"
+  "expected_error": "generate_audio parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

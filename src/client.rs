@@ -2,21 +2,33 @@
 //! per-module handles (`models()`, `chats()`, ...). Mirrors Python's
 //! `client.py`.
 
-use std::{env, sync::Arc};
+use std::{
+    env,
+    sync::{Arc, Once},
+};
 
 use secrecy::SecretString;
 
-pub use crate::error::Backend;
+pub use crate::errors::Backend;
 use crate::{
-    error::{Error, Result},
-    http::HttpClient,
+    api_client::HttpClient,
+    base_url,
+    errors::{Error, Result},
     types::HttpOptions,
 };
 
 const GOOGLE_API_KEY_VAR: &str = "GOOGLE_API_KEY";
 const GEMINI_API_KEY_VAR: &str = "GEMINI_API_KEY";
 const USE_VERTEXAI_VAR: &str = "GOOGLE_GENAI_USE_VERTEXAI";
-const BASE_URL_VAR: &str = "GOOGLE_GEMINI_BASE_URL";
+
+/// Logs, once per process, that `resource` is experimental upstream (Python
+/// emits the same one-time `UserWarning` from `client.agents`, `.triggers`,
+/// `.environments` and `.credentials`).
+fn warn_experimental_once(once: &Once, resource: &str) {
+    once.call_once(|| {
+        tracing::warn!("{resource} usage is experimental and may change in future versions.");
+    });
+}
 
 #[derive(Debug)]
 pub(crate) struct ClientInner {
@@ -116,6 +128,56 @@ impl Client {
         }
     }
 
+    /// Agent create/get/list/delete (`client.agents()...`).
+    #[must_use]
+    pub fn agents(&self) -> crate::gaos::resources::agents::Agents {
+        static WARNED: Once = Once::new();
+        warn_experimental_once(&WARNED, "Agents");
+        crate::gaos::resources::agents::Agents::new(self.clone())
+    }
+
+    /// Environment create/get/list/delete and file listing (`client.environments()...`).
+    #[must_use]
+    pub fn environments(&self) -> crate::gaos::resources::environments::Environments {
+        static WARNED: Once = Once::new();
+        warn_experimental_once(&WARNED, "Environments");
+        crate::gaos::resources::environments::Environments::new(self.clone())
+    }
+
+    /// Trigger create/get/list/update/delete/run and execution listing (`client.triggers()...`).
+    #[must_use]
+    pub fn triggers(&self) -> crate::gaos::resources::triggers::Triggers {
+        static WARNED: Once = Once::new();
+        warn_experimental_once(&WARNED, "Triggers");
+        crate::gaos::resources::triggers::Triggers::new(self.clone())
+    }
+
+    /// Webhook create/get/list/update/delete/ping and signing-secret rotation (`client.webhooks()...`).
+    #[must_use]
+    pub fn webhooks(&self) -> crate::gaos::resources::webhooks::Webhooks {
+        crate::gaos::resources::webhooks::Webhooks::new(self.clone())
+    }
+
+    /// Custom voice create/get/list/delete (`client.voices()...`).
+    #[must_use]
+    pub fn voices(&self) -> crate::gaos::resources::voices::Voices {
+        crate::gaos::resources::voices::Voices::new(self.clone())
+    }
+
+    /// Credential create/get/list/update/delete (`client.credentials()...`). Experimental upstream.
+    #[must_use]
+    pub fn credentials(&self) -> crate::gaos::resources::credentials::Credentials {
+        static WARNED: Once = Once::new();
+        warn_experimental_once(&WARNED, "Credentials");
+        crate::gaos::resources::credentials::Credentials::new(self.clone())
+    }
+
+    /// Interactions create (optionally streaming)/get/cancel/delete (`client.interactions()...`).
+    #[must_use]
+    pub fn interactions(&self) -> crate::gaos::resources::interactions::Interactions {
+        crate::gaos::resources::interactions::Interactions::new(self.clone())
+    }
+
     /// File Search store create/get/list/delete/import
     /// (`client.file_search_stores()...`).
     #[must_use]
@@ -128,8 +190,8 @@ impl Client {
     /// Ephemeral auth token creation for the Live API
     /// (`client.auth_tokens()...`).
     #[must_use]
-    pub fn auth_tokens(&self) -> crate::auth_tokens::AuthTokens {
-        crate::auth_tokens::AuthTokens {
+    pub fn auth_tokens(&self) -> crate::tokens::AuthTokens {
+        crate::tokens::AuthTokens {
             client: self.clone(),
         }
     }
@@ -206,12 +268,12 @@ impl ClientBuilder {
             return Err(Error::UnsupportedBackend("vertexai"));
         }
 
-        let api_key = resolve_api_key(self.api_key)?;
+        // Like Python's `BaseApiClient.__init__`, surrounding whitespace
+        // (e.g. a trailing newline from a secrets file) is not part of the key.
+        let api_key = resolve_api_key(self.api_key)?.trim().to_owned();
 
         let mut http_options = self.http_options;
-        if http_options.base_url.is_none() {
-            http_options.base_url = env::var(BASE_URL_VAR).ok();
-        }
+        http_options.base_url = base_url::get_base_url(Some(&http_options));
 
         let http = HttpClient::new(SecretString::from(api_key), &http_options)?;
         Ok(Client {
@@ -255,13 +317,12 @@ fn resolve_api_key(explicit: Option<String>) -> Result<String> {
     reason = "std::env::set_var/remove_var are unsafe in a multi-threaded process; tests serialize via ENV_LOCK"
 )]
 mod tests {
-    use std::sync::Mutex;
-
-    use super::{BASE_URL_VAR, Client, GEMINI_API_KEY_VAR, GOOGLE_API_KEY_VAR, USE_VERTEXAI_VAR};
+    use super::{Client, GEMINI_API_KEY_VAR, GOOGLE_API_KEY_VAR, USE_VERTEXAI_VAR};
 
     // Environment variables are process-global, so tests that touch them
-    // must not run concurrently with each other.
-    static ENV_LOCK: Mutex<()> = Mutex::new(());
+    // must not run concurrently with each other (or with `base_url`'s, which
+    // share this lock).
+    use crate::base_url::{GOOGLE_GEMINI_BASE_URL as BASE_URL_VAR, TEST_ENV_LOCK as ENV_LOCK};
 
     fn clear_env() {
         for var in [
@@ -323,21 +384,6 @@ mod tests {
         }
         let err = Client::new().unwrap_err();
         assert!(matches!(err, crate::Error::UnsupportedBackend("vertexai")));
-        clear_env();
-    }
-
-    #[test]
-    fn base_url_env_var_overrides_default() {
-        let _guard = ENV_LOCK
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner);
-        clear_env();
-        unsafe {
-            std::env::set_var(GOOGLE_API_KEY_VAR, "k");
-            std::env::set_var(BASE_URL_VAR, "https://example.test/");
-        }
-        let client = Client::new().unwrap();
-        assert_eq!(client.http().base_url(), "https://example.test/");
         clear_env();
     }
 }

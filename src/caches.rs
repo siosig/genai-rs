@@ -1,7 +1,7 @@
 //! `client.caches()`: context cache create/get/list/update/delete. Mirrors
 //! Python's `caches.py` `Caches`.
 
-use std::{future::Future, pin::Pin, sync::Arc};
+use std::sync::Arc;
 
 use reqwest::Method;
 use serde_json::{Map, Value};
@@ -9,24 +9,14 @@ use serde_json::{Map, Value};
 use crate::{
     client::Client,
     converters::generated::caches as conv,
-    error::Result,
-    pager::{PagedItem, Pager},
+    errors::Result,
+    pagers::{FetchPage, Page, PagedItem, Pager},
     types::{
         CachedContent, CreateCachedContentConfig, DeleteCachedContentConfig,
         DeleteCachedContentResponse, GetCachedContentConfig, ListCachedContentsConfig,
         UpdateCachedContentConfig,
     },
 };
-
-/// The page-fetch closure type backing a `caches().list(...)` [`Pager`].
-type CachedContentPageFetch = Arc<
-    dyn Fn(
-            Map<String, Value>,
-        )
-            -> Pin<Box<dyn Future<Output = Result<(Vec<CachedContent>, Option<String>)>> + Send>>
-        + Send
-        + Sync,
->;
 
 /// Handle for `client.caches()`. Cheap to construct; borrows nothing.
 #[derive(Clone)]
@@ -52,7 +42,13 @@ impl Caches {
         let response = self
             .client
             .http()
-            .request(Method::POST, "cachedContents", None, Some(request), None)
+            .request(
+                Method::POST,
+                "cachedContents",
+                None,
+                Some(request),
+                config.as_ref().and_then(|c| c.http_options.as_ref()),
+            )
             .await?;
         let wire: Value = serde_json::from_slice(&response.body)?;
         Ok(serde_json::from_value(wire)?)
@@ -76,58 +72,6 @@ impl Caches {
             .client
             .http()
             .request(Method::GET, &name_path, None, None, None)
-            .await?;
-        let wire: Value = serde_json::from_slice(&response.body)?;
-        Ok(serde_json::from_value(wire)?)
-    }
-
-    /// Lists cached contents, returning a [`Pager`] that fetches subsequent
-    /// pages on demand. Mirrors Python's `Caches.list`.
-    ///
-    /// # Errors
-    /// Returns [`crate::Error::Api`] for a non-2xx response.
-    pub async fn list(
-        &self,
-        config: Option<ListCachedContentsConfig>,
-    ) -> Result<Pager<CachedContent>> {
-        let config_map = serde_json::to_value(&config)?
-            .as_object()
-            .cloned()
-            .unwrap_or_default();
-        let (page, next_page_token) = fetch_list_page(&self.client, config_map.clone()).await?;
-
-        let client = self.client.clone();
-        let fetch: CachedContentPageFetch = Arc::new(move |page_config: Map<String, Value>| {
-            let client = client.clone();
-            Box::pin(async move { fetch_list_page(&client, page_config).await })
-        });
-
-        Ok(Pager::new(
-            PagedItem::CachedContents,
-            page,
-            config_map,
-            next_page_token,
-            fetch,
-        ))
-    }
-
-    /// Updates a cached content's `ttl`/`expire_time`. Mirrors Python's
-    /// `Caches.update`.
-    ///
-    /// # Errors
-    /// Returns [`crate::Error::Api`] for a non-2xx response.
-    pub async fn update(
-        &self,
-        name: &str,
-        config: Option<UpdateCachedContentConfig>,
-    ) -> Result<CachedContent> {
-        let params = serde_json::json!({ "name": name, "config": config });
-        let mut request = conv::update_cached_content_parameters_to_mldev(&params, None, None)?;
-        let name_path = take_url_name(&mut request, "update_cached_content_parameters_to_mldev");
-        let response = self
-            .client
-            .http()
-            .request(Method::PATCH, &name_path, None, Some(request), None)
             .await?;
         let wire: Value = serde_json::from_slice(&response.body)?;
         Ok(serde_json::from_value(wire)?)
@@ -157,7 +101,60 @@ impl Caches {
             serde_json::from_slice(&response.body)?
         };
         let mldev = conv::delete_cached_content_response_from_mldev(&wire, None, None)?;
-        Ok(serde_json::from_value(mldev)?)
+        let mut parsed: DeleteCachedContentResponse = serde_json::from_value(mldev)?;
+        parsed.sdk_http_response = Some(response.to_sdk_http_response());
+        Ok(parsed)
+    }
+
+    /// Updates a cached content's `ttl`/`expire_time`. Mirrors Python's
+    /// `Caches.update`.
+    ///
+    /// # Errors
+    /// Returns [`crate::Error::Api`] for a non-2xx response.
+    pub async fn update(
+        &self,
+        name: &str,
+        config: Option<UpdateCachedContentConfig>,
+    ) -> Result<CachedContent> {
+        let params = serde_json::json!({ "name": name, "config": config });
+        let mut request = conv::update_cached_content_parameters_to_mldev(&params, None, None)?;
+        let name_path = take_url_name(&mut request, "update_cached_content_parameters_to_mldev");
+        let response = self
+            .client
+            .http()
+            .request(Method::PATCH, &name_path, None, Some(request), None)
+            .await?;
+        let wire: Value = serde_json::from_slice(&response.body)?;
+        Ok(serde_json::from_value(wire)?)
+    }
+
+    /// Lists cached contents, returning a [`Pager`] that fetches subsequent
+    /// pages on demand. Mirrors Python's `Caches.list`.
+    ///
+    /// # Errors
+    /// Returns [`crate::Error::Api`] for a non-2xx response.
+    pub async fn list(
+        &self,
+        config: Option<ListCachedContentsConfig>,
+    ) -> Result<Pager<CachedContent>> {
+        let config_map = serde_json::to_value(&config)?
+            .as_object()
+            .cloned()
+            .unwrap_or_default();
+        let first = fetch_list_page(&self.client, config_map.clone()).await?;
+
+        let client = self.client.clone();
+        let fetch: FetchPage<CachedContent> = Arc::new(move |page_config: Map<String, Value>| {
+            let client = client.clone();
+            Box::pin(async move { fetch_list_page(&client, page_config).await })
+        });
+
+        Ok(Pager::new(
+            PagedItem::CachedContents,
+            first,
+            config_map,
+            fetch,
+        ))
     }
 }
 
@@ -185,7 +182,7 @@ fn take_url_name(request: &mut Value, converter_name: &'static str) -> String {
 async fn fetch_list_page(
     client: &Client,
     config: Map<String, Value>,
-) -> Result<(Vec<CachedContent>, Option<String>)> {
+) -> Result<Page<CachedContent>> {
     let params = serde_json::json!({ "config": Value::Object(config) });
     let mut request = conv::list_cached_contents_parameters_to_mldev(&params, None, None)?;
     let request_obj = crate::converters::as_object_mut(&mut request);
@@ -214,7 +211,11 @@ async fn fetch_list_page(
         .get("next_page_token")
         .and_then(Value::as_str)
         .map(str::to_owned);
-    Ok((items, next_page_token))
+    Ok(Page {
+        items,
+        next_page_token,
+        sdk_http_response: Some(response.to_sdk_http_response()),
+    })
 }
 
 /// Builds a `key=value&...` query string from a `_query`-shaped JSON
@@ -397,7 +398,7 @@ mod tests {
         assert_eq!(second[0].name.as_deref(), Some("cachedContents/b"));
 
         let err = pager.next_page().await.unwrap_err();
-        assert!(matches!(err, crate::error::Error::NoMorePages));
+        assert!(matches!(err, crate::errors::Error::NoMorePages));
         server.verify().await;
     }
 
@@ -461,8 +462,50 @@ mod tests {
             .await;
 
         let deleted = caches(&server).delete("abc123", None).await.unwrap();
-        assert_eq!(deleted.sdk_http_response, None);
+        assert!(deleted.sdk_http_response.is_some());
         server.verify().await;
+    }
+
+    #[tokio::test]
+    async fn delete_exposes_the_response_headers_as_sdk_http_response() {
+        let server = MockServer::start().await;
+        Mock::given(method("DELETE"))
+            .and(path("/v1beta/cachedContents/abc123"))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .insert_header("x-test-header", "delete-1")
+                    .set_body_string(""),
+            )
+            .mount(&server)
+            .await;
+
+        let deleted = caches(&server).delete("abc123", None).await.unwrap();
+        let headers = deleted.sdk_http_response.unwrap().headers.unwrap();
+        assert_eq!(
+            headers.get("x-test-header").map(String::as_str),
+            Some("delete-1")
+        );
+    }
+
+    #[tokio::test]
+    async fn list_pager_exposes_the_first_pages_response_headers() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/v1beta/cachedContents"))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .insert_header("x-test-header", "list-1")
+                    .set_body_json(serde_json::json!({"cachedContents": []})),
+            )
+            .mount(&server)
+            .await;
+
+        let pager = caches(&server).list(None).await.unwrap();
+        let headers = pager.sdk_http_response().unwrap().headers.as_ref().unwrap();
+        assert_eq!(
+            headers.get("x-test-header").map(String::as_str),
+            Some("list-1")
+        );
     }
 
     #[tokio::test]
@@ -477,7 +520,7 @@ mod tests {
 
         let err = caches(&server).delete("abc123", None).await.unwrap_err();
         match err {
-            crate::error::Error::Api(api_err) => assert_eq!(api_err.code, 404),
+            crate::errors::Error::Api(api_err) => assert_eq!(api_err.code, 404),
             other => panic!("expected Error::Api, got {other:?}"),
         }
     }

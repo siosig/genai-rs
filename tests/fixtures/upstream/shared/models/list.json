@@ -1,0 +1,33 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/models",
+            "query": [
+              [
+                "pageSize",
+                "1"
+              ]
+            ]
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_list",
+      "parameters": {
+        "config": {
+          "pageSize": 1
+        }
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "shared/models/test_list.py",
+  "test_method": "models.list",
+  "upstream_version": "2.28.0"
+}

@@ -6,5 +6,5 @@
     ]
   },
   "expected": null,
-  "expected_error": "field `exclude_domains` is only supported by the Vertex AI backend"
+  "expected_error": "exclude_domains parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

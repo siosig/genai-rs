@@ -277,6 +277,10 @@ fn a_pager_kind_wrapper_also_errors_instead_of_panicking_when_nested() {
 /// from, and `gen_parity.py` generates `docs/parity.md` from.
 const METHODS_TOML: &str = include_str!("../tools/codegen/methods.toml");
 
+/// The `_gaos` surface's inventory, written by `tools/codegen/gen_gaos.py`
+/// and merged with [`METHODS_TOML`] by the blocking and parity generators.
+const METHODS_GAOS_TOML: &str = include_str!("../tools/codegen/methods_gaos.toml");
+
 /// The generated blocking wrappers.
 const BLOCKING_GENERATED: &str = include_str!("../src/blocking/generated.rs");
 
@@ -302,7 +306,35 @@ const ASYNC_SOURCES: &[(&str, &str)] = &[
         include_str!("../src/file_search_stores.rs"),
     ),
     ("documents", include_str!("../src/documents.rs")),
-    ("auth_tokens", include_str!("../src/auth_tokens.rs")),
+    ("auth_tokens", include_str!("../src/tokens.rs")),
+    (
+        "gaos/resources/agents",
+        include_str!("../src/gaos/resources/agents.rs"),
+    ),
+    (
+        "gaos/resources/credentials",
+        include_str!("../src/gaos/resources/credentials.rs"),
+    ),
+    (
+        "gaos/resources/environments",
+        include_str!("../src/gaos/resources/environments.rs"),
+    ),
+    (
+        "gaos/resources/interactions",
+        include_str!("../src/gaos/resources/interactions.rs"),
+    ),
+    (
+        "gaos/resources/triggers",
+        include_str!("../src/gaos/resources/triggers.rs"),
+    ),
+    (
+        "gaos/resources/voices",
+        include_str!("../src/gaos/resources/voices.rs"),
+    ),
+    (
+        "gaos/resources/webhooks",
+        include_str!("../src/gaos/resources/webhooks.rs"),
+    ),
 ];
 
 /// One `[[method]]` row of `methods.toml`. Only the fields this check
@@ -322,6 +354,20 @@ struct LedgerMethod {
 struct Ledger {
     #[serde(default)]
     method: Vec<LedgerMethod>,
+}
+
+/// The union of `methods.toml` and `methods_gaos.toml`, as the generators
+/// see it.
+#[expect(
+    clippy::expect_used,
+    reason = "test helper: an invalid ledger file should fail the test"
+)]
+fn load_ledger() -> Ledger {
+    let mut ledger: Ledger = toml::from_str(METHODS_TOML).expect("methods.toml is not valid TOML");
+    let gaos: Ledger =
+        toml::from_str(METHODS_GAOS_TOML).expect("methods_gaos.toml is not valid TOML");
+    ledger.method.extend(gaos.method);
+    ledger
 }
 
 impl LedgerMethod {
@@ -417,7 +463,7 @@ fn inherent_fns(source: &str, prefix: &str) -> HashSet<(String, String)> {
 /// *missing* method. This can.
 #[test]
 fn every_ledger_method_has_a_blocking_counterpart() {
-    let ledger: Ledger = toml::from_str(METHODS_TOML).expect("methods.toml is not valid TOML");
+    let ledger = load_ledger();
 
     let mut blocking = inherent_fns(BLOCKING_GENERATED, "pub fn ");
     blocking.extend(inherent_fns(BLOCKING_MANUAL, "pub fn "));
@@ -465,7 +511,7 @@ fn every_ledger_method_has_a_blocking_counterpart() {
 /// a blocking wrapper.
 #[test]
 fn every_async_public_method_is_listed_in_the_ledger() {
-    let ledger: Ledger = toml::from_str(METHODS_TOML).expect("methods.toml is not valid TOML");
+    let ledger = load_ledger();
     let listed: HashSet<(String, String)> = ledger
         .method
         .iter()

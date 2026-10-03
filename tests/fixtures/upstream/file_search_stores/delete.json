@@ -1,0 +1,54 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "DELETE",
+            "path": "/v1beta/fileSearchStores/acxjj7m366ln-aw6xyp94icll",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_delete_with_name",
+      "parameters": {
+        "config": null,
+        "name": "fileSearchStores/acxjj7m366ln-aw6xyp94icll"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "DELETE",
+            "path": "/v1beta/fileSearchStores/7igesc9r2zw9-0mpxpsqubv7s",
+            "query": [
+              [
+                "force",
+                "true"
+              ]
+            ]
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_delete_with_name_and_force",
+      "parameters": {
+        "config": {
+          "force": true
+        },
+        "name": "fileSearchStores/7igesc9r2zw9-0mpxpsqubv7s"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "file_search_stores/test_delete.py",
+  "test_method": "file_search_stores.delete",
+  "upstream_version": "2.28.0"
+}

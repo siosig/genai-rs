@@ -22,7 +22,7 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 TOOLS_DIR = REPO_ROOT / "tools" / "codegen"
 sys.path.insert(0, str(TOOLS_DIR))
 
-TARGETS = ("types", "converters", "fixtures", "blocking", "parity")
+TARGETS = ("types", "converters", "fixtures", "cases", "gaos", "blocking", "parity", "ledger")
 
 
 def run_types() -> None:
@@ -43,6 +43,23 @@ def run_fixtures() -> None:
     gen_fixtures.main()
 
 
+def run_cases() -> None:
+    # A subprocess: the case generator swaps `google.genai` for the upstream
+    # checkout (it needs upstream's `tests` package), which must not leak into
+    # the other targets of this process.
+    subprocess.run(
+        [sys.executable, str(TOOLS_DIR / "gen_upstream_cases.py")],
+        cwd=TOOLS_DIR,
+        check=True,
+    )
+
+
+def run_gaos() -> None:
+    import gen_gaos  # noqa: PLC0415
+
+    gen_gaos.main()
+
+
 def run_blocking() -> None:
     import gen_blocking  # noqa: PLC0415
 
@@ -53,6 +70,12 @@ def run_parity() -> None:
     import gen_parity  # noqa: PLC0415
 
     gen_parity.main()
+
+
+def run_ledger() -> None:
+    import gen_ledger  # noqa: PLC0415
+
+    gen_ledger.main()
 
 
 def main() -> None:
@@ -83,10 +106,16 @@ def main() -> None:
         run_converters()
     if "fixtures" in requested:
         run_fixtures()
+    if "cases" in requested:
+        run_cases()
+    if "gaos" in requested:
+        run_gaos()
     if "blocking" in requested:
         run_blocking()
     if "parity" in requested:
         run_parity()
+    if "ledger" in requested:
+        run_ledger()
 
     fmt = subprocess.run(
         ["cargo", "fmt", "--all"],

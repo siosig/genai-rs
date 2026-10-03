@@ -5,7 +5,7 @@
      SPDX-FileCopyrightText: 2026 Daisuke ITO
      SPDX-License-Identifier: Apache-2.0
 
-     Derived from the Google Gen AI Python SDK (google-genai 2.23.0),
+     Derived from the Google Gen AI Python SDK (google-genai 2.28.0),
      https://github.com/googleapis/python-genai
      Copyright 2025 Google LLC, licensed under the Apache License, Version 2.0.
 
@@ -19,7 +19,7 @@
 
 # Python → Rust parity table
 
-**Baseline**: google-genai 2.23.0 | **Crate**: `gemini-genai` (`gemini_genai`) | **Source of truth**: `tools/codegen/parity-matrix.ja.md`
+**Baseline**: google-genai 2.28.0 | **Crate**: `gemini-genai` (`gemini_genai`) | **Source of truth**: `tools/codegen/parity-matrix.ja.md`
 
 Japanese version: [parity.ja.md](parity.ja.md)
 
@@ -42,13 +42,20 @@ Japanese version: [parity.ja.md](parity.ja.md)
   - [auth_tokens](#auth_tokens)
   - [live](#live)
   - [live_music](#live_music)
+  - [agents](#agents)
+  - [credentials](#credentials)
+  - [environments](#environments)
+  - [interactions](#interactions)
+  - [triggers](#triggers)
+  - [voices](#voices)
+  - [webhooks](#webhooks)
 - [Client construction](#client-construction)
 - [Types](#types)
 - [Out of scope (with rationale)](#out-of-scope-with-rationale)
 
 ## Overview
 
-Coverage of the **74** public methods that google-genai 2.23.0 (Python) exposes for the Gemini Developer API, plus the Rust-specific accessors. **66** are implemented, **3** are Vertex AI-only and ship as stubs returning `UnsupportedByBackend`, and **5** are Vertex AI-only and not ported at all. A test function was found automatically for **69** of them.
+Coverage of the **112** public methods that google-genai 2.28.0 (Python) exposes for the Gemini Developer API, plus the Rust-specific accessors. **104** are implemented, **3** are Vertex AI-only and ship as stubs returning `UnsupportedByBackend`, and **5** are Vertex AI-only and not ported at all. A test function was found automatically for **107** of them.
 
 This table is generated from `tools/codegen/methods.toml` (the method ledger) and `tools/codegen/parity-matrix.ja.md` (the agreed source of truth). If an entry the parity matrix marks ✅ is missing from the ledger, `gen_parity.py` exits non-zero and CI's `codegen-check` fails.
 
@@ -90,7 +97,14 @@ The "Test(s)" column comes from scanning `tests/**.rs` and the `#[cfg(test)]` mo
 | [auth_tokens](#auth_tokens) | 1 | 1 | 0 | 0 | 1 |
 | [live](#live) | 7 | 7 | 0 | 0 | 7 |
 | [live_music](#live_music) | 10 | 10 | 0 | 0 | 10 |
-| **Total** | **74** | **66** | **3** | **5** | **69** |
+| [agents](#agents) | 4 | 4 | 0 | 0 | 4 |
+| [credentials](#credentials) | 5 | 5 | 0 | 0 | 5 |
+| [environments](#environments) | 5 | 5 | 0 | 0 | 5 |
+| [interactions](#interactions) | 6 | 6 | 0 | 0 | 6 |
+| [triggers](#triggers) | 7 | 7 | 0 | 0 | 7 |
+| [voices](#voices) | 4 | 4 | 0 | 0 | 4 |
+| [webhooks](#webhooks) | 7 | 7 | 0 | 0 | 7 |
+| **Total** | **112** | **104** | **3** | **5** | **107** |
 
 ## Method mapping
 
@@ -98,17 +112,17 @@ The "Test(s)" column comes from scanning `tests/**.rs` and the `#[cfg(test)]` mo
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `models.generate_content` | `models::Models::generate_content` | ✅ Implemented | `src/models.rs::generate_content_deserializes_unknown_response_fields_without_failing`<br>`src/models.rs::generate_content_maps_a_client_error_to_api_error`<br>`src/models.rs::generate_content_posts_to_the_model_generate_content_path`<br>and 29 more |
-| `models.generate_content_stream` | `models::Models::generate_content_stream` | ✅ Implemented | `src/models.rs::generate_content_stream_yields_chunks_in_order`<br>`tests/blocking_parity.rs::generate_content_stream_yields_chunks_via_iterator`<br>`tests/e2e.rs::test_e2e_generate_content_stream` |
-| `models.embed_content` | `models::Models::embed_content` | ✅ Implemented | `src/models.rs::embed_content_posts_to_batch_embed_contents`<br>`tests/e2e.rs::test_e2e_embed_content` |
-| `models.count_tokens` | `models::Models::count_tokens` | ✅ Implemented | `src/models.rs::count_tokens_posts_and_parses_total`<br>`tests/e2e.rs::test_e2e_count_tokens` |
-| `models.compute_tokens` | `models::Models::compute_tokens` | ⚠️ `UnsupportedByBackend` (Vertex AI only) | `src/models.rs::compute_tokens_is_unsupported_on_the_gemini_api_backend` |
-| `models.get` | `models::Models::get` | ✅ Implemented | `src/models.rs::get_fetches_a_model_by_resource_name` |
-| `models.list` | `models::Models::list` | ✅ Implemented | `src/models.rs::list_defaults_query_base_to_true_and_pages`<br>`src/models.rs::list_uses_tuned_models_collection_when_query_base_is_false`<br>`tests/blocking_parity.rs::list_paginates_via_the_blocking_pager`<br>and 2 more |
-| `models.update` | `models::Models::update` | ✅ Implemented | `src/models.rs::update_patches_a_tuned_model` |
-| `models.delete` | `models::Models::delete` | ✅ Implemented | `src/models.rs::delete_removes_a_tuned_model`<br>`tests/e2e_expensive.rs::test_e2e_tuning_create_get_and_delete_tuned_model` |
-| `models.generate_images` | `models::Models::generate_images` | ⚠️ `UnsupportedByBackend` (Vertex AI only) | `src/models.rs::generate_images_is_unsupported_by_the_gemini_developer_api_backend` |
-| `models.generate_videos` | `models::Models::generate_videos` | ✅ Implemented | `src/models.rs::generate_videos_posts_to_predict_long_running_and_parses_operation`<br>`tests/e2e_expensive.rs::test_e2e_generate_videos_and_poll_operation`<br>`tests/operations.rs::generate_videos_then_operations_get_returns_the_completed_operation` |
+| `models.generate_content` | `models::Models::generate_content` | ✅ Implemented | `src/models.rs::generate_content_deserializes_unknown_response_fields_without_failing`<br>`src/models.rs::generate_content_maps_a_client_error_to_api_error`<br>`src/models.rs::generate_content_posts_to_the_model_generate_content_path`<br>and 70 more |
+| `models.generate_content_stream` | `models::Models::generate_content_stream` | ✅ Implemented | `src/models.rs::generate_content_stream_yields_chunks_in_order`<br>`tests/afc/get_max_remote_calls_for_afc.rs::test_generate_content_stream_spent_budget_does_not_run_functions`<br>`tests/blocking_parity.rs::generate_content_stream_yields_chunks_via_iterator`<br>and 12 more |
+| `models.embed_content` | `models::Models::embed_content` | ✅ Implemented | `src/models.rs::embed_content_posts_to_batch_embed_contents`<br>`tests/e2e.rs::test_e2e_embed_content`<br>`tests/sdk_http_response.rs::models_embed_content_sets_sdk_http_response_headers`<br>and 3 more |
+| `models.count_tokens` | `models::Models::count_tokens` | ✅ Implemented | `src/models.rs::count_tokens_posts_and_parses_total`<br>`tests/e2e.rs::test_e2e_count_tokens`<br>`tests/sdk_http_response.rs::models_count_tokens_sets_sdk_http_response_headers`<br>and 3 more |
+| `models.compute_tokens` | `models::Models::compute_tokens` | ⚠️ `UnsupportedByBackend` (Vertex AI only) | `src/models.rs::compute_tokens_is_unsupported_on_the_gemini_api_backend`<br>`tests/models/compute_tokens.rs::test_async` |
+| `models.get` | `models::Models::get` | ✅ Implemented | `src/models.rs::get_fetches_a_model_by_resource_name`<br>`tests/models/get.rs::test_async_get_model`<br>`tests/models/get.rs::test_async_get_tuned_model`<br>and 1 more |
+| `models.list` | `models::Models::list` | ✅ Implemented | `src/models.rs::list_defaults_query_base_to_true_and_pages`<br>`src/models.rs::list_uses_tuned_models_collection_when_query_base_is_false`<br>`tests/blocking_parity.rs::list_paginates_via_the_blocking_pager`<br>and 5 more |
+| `models.update` | `models::Models::update` | ✅ Implemented | `src/models.rs::update_patches_a_tuned_model`<br>`tests/models/update.rs::test_async_update_model` |
+| `models.delete` | `models::Models::delete` | ✅ Implemented | `src/models.rs::delete_removes_a_tuned_model`<br>`tests/e2e_expensive.rs::test_e2e_tuning_create_get_and_delete_tuned_model`<br>`tests/models/delete.rs::test_async_delete_model`<br>and 3 more |
+| `models.generate_images` | `models::Models::generate_images` | ⚠️ `UnsupportedByBackend` (Vertex AI only) | `src/models.rs::generate_images_is_unsupported_by_the_gemini_developer_api_backend`<br>`tests/models/generate_images.rs::test_simple_prompt_async` |
+| `models.generate_videos` | `models::Models::generate_videos` | ✅ Implemented | `src/models.rs::generate_videos_posts_to_predict_long_running_and_parses_operation`<br>`tests/e2e_expensive.rs::test_e2e_generate_videos_and_poll_operation`<br>`tests/operations/main.rs::generate_videos_then_operations_get_returns_the_completed_operation`<br>and 1 more |
 | `models.edit_image` | — | ⏭ Not ported (Vertex AI only) | — |
 | `models.recontext_image` | — | ⏭ Not ported (Vertex AI only) | — |
 | `models.segment_image` | — | ⏭ Not ported (Vertex AI only) | — |
@@ -118,115 +132,188 @@ The "Test(s)" column comes from scanning `tests/**.rs` and the `#[cfg(test)]` mo
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `chats.create` | `chats::Chats::create` | ✅ Implemented (sync variant is hand-written) | `tests/chats.rs::create_with_history_seeds_the_chat_before_any_send`<br>`src/chats.rs::send_message_excludes_an_invalid_response_from_curated_history_only`<br>`src/chats.rs::send_message_records_both_turns_and_replays_curated_history`<br>and 7 more |
-| `chats.Chat.send_message` | `chats::Chat::send_message` | ✅ Implemented (sync variant is hand-written) | `src/chats.rs::send_message_excludes_an_invalid_response_from_curated_history_only`<br>`src/chats.rs::send_message_records_both_turns_and_replays_curated_history`<br>`src/chats.rs::send_message_with_afc_records_only_the_final_turn` |
-| `chats.Chat.send_message_stream` | `chats::Chat::send_message_stream` | ✅ Implemented (sync variant is hand-written) | `tests/blocking_parity.rs::chat_send_message_and_send_message_stream_record_history`<br>`tests/chats.rs::streaming_send_records_the_accumulated_model_reply_once_drained` |
-| `chats.Chat.get_history` | `chats::Chat::get_history` | ✅ Implemented (sync variant is hand-written) | `src/chats.rs::send_message_excludes_an_invalid_response_from_curated_history_only`<br>`src/chats.rs::send_message_records_both_turns_and_replays_curated_history`<br>`src/chats.rs::send_message_with_afc_records_only_the_final_turn` |
+| `chats.create` | `chats::Chats::create` | ✅ Implemented (sync variant is hand-written) | `tests/chats/main.rs::create_with_history_seeds_the_chat_before_any_send`<br>`tests/chats/test_get_history.rs::test_async_chat_create`<br>`tests/chats/test_get_history.rs::test_async_chat_create_with_history_dict`<br>and 32 more |
+| `chats.Chat.send_message` | `chats::Chat::send_message` | ✅ Implemented (sync variant is hand-written) | `src/chats.rs::send_message_excludes_an_invalid_response_from_curated_history_only`<br>`src/chats.rs::send_message_records_both_turns_and_replays_curated_history`<br>`src/chats.rs::send_message_with_afc_records_every_turn` |
+| `chats.Chat.send_message_stream` | `chats::Chat::send_message_stream` | ✅ Implemented (sync variant is hand-written) | `tests/blocking_parity.rs::chat_send_message_and_send_message_stream_record_history`<br>`tests/shared_chats/test_send_message_stream.rs::test_send_message_stream`<br>`tests/chats/main.rs::streaming_send_records_the_accumulated_model_reply_once_drained`<br>and 4 more |
+| `chats.Chat.get_history` | `chats::Chat::get_history` | ✅ Implemented (sync variant is hand-written) | `src/chats.rs::send_message_excludes_an_invalid_response_from_curated_history_only`<br>`src/chats.rs::send_message_records_both_turns_and_replays_curated_history`<br>`src/chats.rs::send_message_with_afc_records_every_turn` |
 | `chats.Chat.record_history` | `chats::Chat::record_history` | ✅ Implemented (private helper, sync variant is hand-written) | `tests/blocking_parity.rs::chat_send_message_and_send_message_stream_record_history` |
 
 ### files
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `files.upload` | `files::Files::upload` | ✅ Implemented | `src/files.rs::upload_bytes_source_does_not_touch_the_filesystem`<br>`tests/files.rs::upload_a_nine_mebibyte_payload_sends_exactly_two_chunks`<br>`tests/files.rs::upload_bytes_source_never_touches_the_filesystem`<br>and 3 more |
-| `files.get` | `files::Files::get` | ✅ Implemented | `src/files.rs::get_requests_the_files_name_path`<br>`tests/files.rs::get_returns_the_files_metadata`<br>`tests/e2e.rs::test_e2e_files_upload_get_delete` |
-| `files.list` | `files::Files::list` | ✅ Implemented | `tests/files.rs::list_returns_a_pager_that_fetches_the_next_page` |
-| `files.delete` | `files::Files::delete` | ✅ Implemented | `tests/files.rs::delete_sends_a_delete_request_to_the_files_name_path`<br>`tests/e2e.rs::test_e2e_files_upload_get_delete` |
-| `files.download` | `files::Files::download` | ✅ Implemented | `tests/files.rs::download_requests_alt_media_and_returns_raw_bytes` |
-| `files.download` | `files::Files::download_stream` | ✅ Implemented | `tests/files.rs::download_stream_accepts_a_downloadable_file_object`<br>`tests/files.rs::download_stream_does_not_pre_validate_a_bare_name`<br>`tests/files.rs::download_stream_rejects_a_file_with_no_download_uri_before_sending_anything`<br>and 5 more |
-| `files.download` | `files::Files::download_to_path` | ✅ Implemented | `tests/files.rs::download_to_path_creates_no_file_when_the_connection_fails_up_front`<br>`tests/files.rs::download_to_path_writes_the_same_bytes_the_server_sent` |
-| `files._register_files` | `files::Files::register_files` | ✅ Implemented | `tests/files.rs::register_files_posts_the_uris_and_parses_the_returned_files` |
+| `files.upload` | `files::Files::upload` | ✅ Implemented | `src/files.rs::upload_bytes_source_does_not_touch_the_filesystem`<br>`tests/client/upload_errors.rs::test_async_upload_fd_error_httpx`<br>`tests/client/upload_errors.rs::test_async_upload_url_rewrite_httpx`<br>and 11 more |
+| `files.get` | `files::Files::get` | ✅ Implemented | `src/files.rs::get_requests_the_files_name_path`<br>`tests/e2e.rs::test_e2e_files_upload_get_delete`<br>`tests/files/main.rs::get_returns_the_files_metadata`<br>and 2 more |
+| `files.list` | `files::Files::list` | ✅ Implemented | `tests/files/main.rs::list_returns_a_pager_that_fetches_the_next_page`<br>`tests/sdk_http_response.rs::files_list_pager_sets_sdk_http_response_headers`<br>`tests/files/test_list.rs::test_async_pager`<br>and 1 more |
+| `files.delete` | `files::Files::delete` | ✅ Implemented | `tests/e2e.rs::test_e2e_files_upload_get_delete`<br>`tests/files/main.rs::delete_sends_a_delete_request_to_the_files_name_path`<br>`tests/sdk_http_response.rs::files_delete_sets_sdk_http_response_headers` |
+| `files.download` | `files::Files::download` | ✅ Implemented | `tests/files/main.rs::download_requests_alt_media_and_returns_raw_bytes`<br>`tests/files/test_download.rs::test_basic_download` |
+| `files.download` | `files::Files::download_stream` | ✅ Implemented | `tests/files/main.rs::download_stream_accepts_a_downloadable_file_object`<br>`tests/files/main.rs::download_stream_does_not_pre_validate_a_bare_name`<br>`tests/files/main.rs::download_stream_rejects_a_file_with_no_download_uri_before_sending_anything`<br>and 5 more |
+| `files.download` | `files::Files::download_to_path` | ✅ Implemented | `tests/files/main.rs::download_to_path_creates_no_file_when_the_connection_fails_up_front`<br>`tests/files/main.rs::download_to_path_writes_the_same_bytes_the_server_sent`<br>`tests/files/test_download.rs::test_basic_download_async`<br>and 3 more |
+| `files._register_files` | `files::Files::register_files` | ✅ Implemented | `tests/files/main.rs::register_files_posts_the_uris_and_parses_the_returned_files`<br>`tests/files/test_register_table.rs::test_async` |
 
 ### caches
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `caches.create` | `caches::Caches::create` | ✅ Implemented | `src/caches.rs::create_posts_to_cached_contents_with_the_flattened_config_body`<br>`src/caches.rs::create_sends_ttl_and_contents_in_the_request_body`<br>`tests/caches.rs::create_posts_the_flattened_config_body_to_cached_contents`<br>and 2 more |
-| `caches.get` | `caches::Caches::get` | ✅ Implemented | `src/caches.rs::get_fetches_by_normalized_resource_name`<br>`tests/caches.rs::get_fetches_by_normalized_resource_name`<br>`tests/caches.rs::get_maps_a_client_error_to_api_error`<br>and 1 more |
-| `caches.list` | `caches::Caches::list` | ✅ Implemented | `src/caches.rs::list_returns_a_pager_that_fetches_subsequent_pages`<br>`src/caches.rs::list_sends_page_size_as_a_query_parameter`<br>`tests/caches.rs::list_returns_a_pager_that_fetches_subsequent_pages`<br>and 1 more |
-| `caches.update` | `caches::Caches::update` | ✅ Implemented | `src/caches.rs::update_patches_by_name_with_the_ttl_body`<br>`tests/caches.rs::update_patches_by_name_with_the_ttl_body`<br>`tests/e2e.rs::test_e2e_cached_content_update_and_delete` |
-| `caches.delete` | `caches::Caches::delete` | ✅ Implemented | `src/caches.rs::delete_maps_a_client_error_to_api_error`<br>`src/caches.rs::delete_removes_by_name_and_deserializes_the_empty_response`<br>`tests/caches.rs::delete_deserializes_the_sdk_http_response_alias`<br>and 3 more |
+| `caches.create` | `caches::Caches::create` | ✅ Implemented | `src/caches.rs::create_posts_to_cached_contents_with_the_flattened_config_body`<br>`src/caches.rs::create_sends_ttl_and_contents_in_the_request_body`<br>`tests/caches/create.rs::test_async_googleai_file_create`<br>and 5 more |
+| `caches.get` | `caches::Caches::get` | ✅ Implemented | `src/caches.rs::get_fetches_by_normalized_resource_name`<br>`tests/caches/get.rs::test_async_get`<br>`tests/caches/main.rs::get_fetches_by_normalized_resource_name`<br>and 7 more |
+| `caches.list` | `caches::Caches::list` | ✅ Implemented | `src/caches.rs::list_pager_exposes_the_first_pages_response_headers`<br>`src/caches.rs::list_returns_a_pager_that_fetches_subsequent_pages`<br>`src/caches.rs::list_sends_page_size_as_a_query_parameter`<br>and 4 more |
+| `caches.update` | `caches::Caches::update` | ✅ Implemented | `src/caches.rs::update_patches_by_name_with_the_ttl_body`<br>`tests/caches/main.rs::update_patches_by_name_with_the_ttl_body`<br>`tests/caches/update.rs::test_async_update`<br>and 2 more |
+| `caches.delete` | `caches::Caches::delete` | ✅ Implemented | `src/caches.rs::delete_exposes_the_response_headers_as_sdk_http_response`<br>`src/caches.rs::delete_maps_a_client_error_to_api_error`<br>`src/caches.rs::delete_removes_by_name_and_deserializes_the_empty_response`<br>and 6 more |
 
 ### tunings
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `tunings.tune` | `tunings::Tunings::tune` | ✅ Implemented | `src/tunings.rs::tune_falls_back_to_the_operation_name_when_metadata_has_no_tuned_model`<br>`src/tunings.rs::tune_posts_to_tuned_models_and_synthesizes_a_queued_job`<br>`src/tunings.rs::tune_rejects_a_vertex_only_config_field`<br>and 4 more |
-| `tunings.get` | `tunings::Tunings::get` | ✅ Implemented | `src/tunings.rs::get_fetches_the_job_by_name`<br>`src/tunings.rs::get_maps_a_client_error_to_api_error`<br>`tests/tunings.rs::get_fetches_a_tuning_job_by_resource_name`<br>and 1 more |
-| `tunings.list` | `tunings::Tunings::list` | ⚠️ `UnsupportedByBackend` (Vertex AI only) | `src/tunings.rs::list_is_unsupported_by_the_gemini_developer_api_backend`<br>`tests/tunings.rs::list_is_unsupported_by_the_gemini_developer_api_backend` |
-| `tunings.cancel` | `tunings::Tunings::cancel` | ✅ Implemented | `src/tunings.rs::cancel_posts_to_the_cancel_suffix`<br>`tests/tunings.rs::cancel_maps_a_not_found_response_to_an_api_error`<br>`tests/tunings.rs::cancel_posts_to_the_cancel_suffix_and_succeeds_on_an_empty_response` |
+| `tunings.tune` | `tunings::Tunings::tune` | ✅ Implemented | `src/tunings.rs::tune_falls_back_to_the_operation_name_when_metadata_has_no_tuned_model`<br>`src/tunings.rs::tune_posts_to_tuned_models_and_synthesizes_a_queued_job`<br>`src/tunings.rs::tune_rejects_a_vertex_only_config_field`<br>and 5 more |
+| `tunings.get` | `tunings::Tunings::get` | ✅ Implemented | `src/tunings.rs::get_fetches_the_job_by_name`<br>`src/tunings.rs::get_maps_a_client_error_to_api_error`<br>`tests/e2e_expensive.rs::test_e2e_tuning_create_get_and_delete_tuned_model`<br>and 3 more |
+| `tunings.list` | `tunings::Tunings::list` | ⚠️ `UnsupportedByBackend` (Vertex AI only) | `src/tunings.rs::list_is_unsupported_by_the_gemini_developer_api_backend`<br>`tests/tunings/main.rs::list_is_unsupported_by_the_gemini_developer_api_backend` |
+| `tunings.cancel` | `tunings::Tunings::cancel` | ✅ Implemented | `src/tunings.rs::cancel_posts_to_the_cancel_suffix`<br>`tests/sdk_http_response.rs::tunings_cancel_sets_sdk_http_response_headers`<br>`tests/tunings/main.rs::cancel_maps_a_not_found_response_to_an_api_error`<br>and 1 more |
 | `tunings.validate_reward` | — | ⏭ Not ported (Vertex AI only) | — |
 
 ### batches
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `batches.create` | `batches::Batches::create` | ✅ Implemented | `tests/batches.rs::create_rejects_a_source_with_neither_inlined_requests_nor_file_name`<br>`tests/batches.rs::create_with_a_vertex_only_dest_field_is_rejected`<br>`tests/batches.rs::create_with_file_name_sends_the_file_name_input_config`<br>and 2 more |
-| `batches.create_embeddings` | `batches::Batches::create_embeddings` | ✅ Implemented | `tests/batches.rs::create_embeddings_sends_the_async_batch_embed_content_path` |
-| `batches.get` | `batches::Batches::get` | ✅ Implemented | `tests/batches.rs::get_normalizes_the_batch_state_and_the_resource_name`<br>`tests/batches.rs::get_rejects_a_name_that_is_not_a_batches_resource_name`<br>`tests/e2e_expensive.rs::test_e2e_batch_create_get_cancel` |
-| `batches.cancel` | `batches::Batches::cancel` | ✅ Implemented | `tests/batches.rs::cancel_posts_to_the_cancel_suffixed_path`<br>`tests/e2e_expensive.rs::test_e2e_batch_create_get_cancel` |
-| `batches.delete` | `batches::Batches::delete` | ✅ Implemented | `tests/batches.rs::delete_sends_a_delete_request_and_parses_the_resource_job` |
-| `batches.list` | `batches::Batches::list` | ✅ Implemented | `tests/batches.rs::list_returns_a_pager_over_the_batch_jobs_page`<br>`tests/batches.rs::list_sends_page_size_as_a_query_parameter_and_pages_forward` |
+| `batches.create` | `batches::Batches::create` | ✅ Implemented | `tests/batches/create_with_bigquery.rs::test_async_create`<br>`tests/batches/create_with_file.rs::test_async_create`<br>`tests/batches/create_with_gcs.rs::test_async_create`<br>and 8 more |
+| `batches.create_embeddings` | `batches::Batches::create_embeddings` | ✅ Implemented | `tests/batches/main.rs::create_embeddings_sends_the_async_batch_embed_content_path`<br>`tests/batches/embedding.rs::create_response`<br>`tests/batches/embedding.rs::test_async_from_inline` |
+| `batches.get` | `batches::Batches::get` | ✅ Implemented | `tests/batches/get.rs::test_async_get`<br>`tests/batches/main.rs::get_normalizes_the_batch_state_and_the_resource_name`<br>`tests/batches/main.rs::get_rejects_a_name_that_is_not_a_batches_resource_name`<br>and 4 more |
+| `batches.cancel` | `batches::Batches::cancel` | ✅ Implemented | `tests/batches/cancel.rs::test_async_cancel`<br>`tests/batches/main.rs::cancel_posts_to_the_cancel_suffixed_path`<br>`tests/e2e_expensive.rs::test_e2e_batch_create_get_cancel`<br>and 1 more |
+| `batches.delete` | `batches::Batches::delete` | ✅ Implemented | `tests/batches/delete.rs::test_async_delete`<br>`tests/batches/main.rs::delete_sends_a_delete_request_and_parses_the_resource_job`<br>`tests/sdk_http_response.rs::batches_delete_sets_sdk_http_response_headers`<br>and 1 more |
+| `batches.list` | `batches::Batches::list` | ✅ Implemented | `tests/batches/main.rs::list_returns_a_pager_over_the_batch_jobs_page`<br>`tests/batches/main.rs::list_sends_page_size_as_a_query_parameter_and_pages_forward`<br>`tests/sdk_http_response.rs::batches_list_pager_sets_sdk_http_response_headers`<br>and 2 more |
 
 ### operations
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `operations.get` | `operations::Operations::get` | ✅ Implemented (sync variant is hand-written) | `src/operations.rs::get_polls_the_operation_by_name_and_returns_the_updated_value`<br>`src/operations.rs::get_rejects_an_operation_without_a_name`<br>`tests/operations.rs::generate_videos_then_operations_get_returns_the_completed_operation`<br>and 5 more |
+| `operations.get` | `operations::Operations::get` | ✅ Implemented (sync variant is hand-written) | `src/operations.rs::get_polls_the_operation_by_name_and_returns_the_updated_value`<br>`src/operations.rs::get_rejects_an_operation_without_a_name`<br>`tests/operations/main.rs::generate_videos_then_operations_get_returns_the_completed_operation`<br>and 7 more |
 
 ### file_search_stores
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `file_search_stores.create` | `file_search_stores::FileSearchStores::create` | ✅ Implemented | `src/file_search_stores.rs::create_posts_to_file_search_stores` |
-| `file_search_stores.get` | `file_search_stores::FileSearchStores::get` | ✅ Implemented | `src/file_search_stores.rs::get_fetches_by_name` |
-| `file_search_stores.delete` | `file_search_stores::FileSearchStores::delete` | ✅ Implemented | `src/file_search_stores.rs::delete_sends_force_query_param` |
-| `file_search_stores.list` | `file_search_stores::FileSearchStores::list` | ✅ Implemented | `src/file_search_stores.rs::list_paginates_through_two_pages` |
-| `file_search_stores.import_file` | `file_search_stores::FileSearchStores::import_file` | ✅ Implemented | `src/file_search_stores.rs::import_file_posts_to_the_import_file_action`<br>`src/file_search_stores.rs::import_file_with_config_sends_custom_metadata_and_parses_response`<br>`tests/file_search_stores.rs::import_file_returns_a_long_running_operation` |
-| `file_search_stores.upload_to_file_search_store` | `file_search_stores::FileSearchStores::upload_to_file_search_store` | ✅ Implemented | `src/file_search_stores.rs::upload_to_file_search_store_performs_a_resumable_upload`<br>`tests/file_search_stores.rs::upload_to_file_search_store_runs_the_resumable_upload_protocol` |
-| `file_search_stores.download_media` | `file_search_stores::FileSearchStores::download_media` | ✅ Implemented | `src/file_search_stores.rs::download_media_gets_with_alt_media`<br>`src/file_search_stores.rs::download_media_rejects_an_invalid_media_id`<br>`tests/file_search_stores.rs::download_media_returns_raw_bytes` |
-| — (Rust-specific accessor) | `file_search_stores::FileSearchStores::documents` | ✅ Implemented (sync variant is hand-written) | `tests/file_search_stores.rs::documents_get_list_and_delete` |
+| `file_search_stores.create` | `file_search_stores::FileSearchStores::create` | ✅ Implemented | `src/file_search_stores.rs::create_posts_to_file_search_stores`<br>`tests/file_search_stores/test_create.rs::test_async_basic`<br>`tests/file_search_stores/test_create.rs::test_async_display_name` |
+| `file_search_stores.get` | `file_search_stores::FileSearchStores::get` | ✅ Implemented | `src/file_search_stores.rs::get_fetches_by_name`<br>`tests/file_search_stores/test_get.rs::test_async_get` |
+| `file_search_stores.delete` | `file_search_stores::FileSearchStores::delete` | ✅ Implemented | `src/file_search_stores.rs::delete_sends_force_query_param`<br>`tests/file_search_stores/test_delete.rs::test_async_delete`<br>`tests/file_search_stores/test_delete.rs::test_async_force_delete` |
+| `file_search_stores.list` | `file_search_stores::FileSearchStores::list` | ✅ Implemented | `src/file_search_stores.rs::list_paginates_through_two_pages`<br>`tests/sdk_http_response.rs::file_search_stores_list_pager_has_no_sdk_http_response_like_python`<br>`tests/file_search_stores/test_list.rs::test_async_pager` |
+| `file_search_stores.import_file` | `file_search_stores::FileSearchStores::import_file` | ✅ Implemented | `src/file_search_stores.rs::import_file_posts_to_the_import_file_action`<br>`src/file_search_stores.rs::import_file_with_config_sends_custom_metadata_and_parses_response`<br>`tests/file_search_stores/main.rs::import_file_returns_a_long_running_operation` |
+| `file_search_stores.upload_to_file_search_store` | `file_search_stores::FileSearchStores::upload_to_file_search_store` | ✅ Implemented | `src/file_search_stores.rs::upload_to_file_search_store_performs_a_resumable_upload`<br>`tests/file_search_stores/main.rs::upload_to_file_search_store_runs_the_resumable_upload_protocol` |
+| `file_search_stores.download_media` | `file_search_stores::FileSearchStores::download_media` | ✅ Implemented | `src/file_search_stores.rs::download_media_gets_with_alt_media`<br>`src/file_search_stores.rs::download_media_rejects_an_invalid_media_id`<br>`tests/file_search_stores/main.rs::download_media_returns_raw_bytes` |
+| — (Rust-specific accessor) | `file_search_stores::FileSearchStores::documents` | ✅ Implemented (sync variant is hand-written) | `tests/file_search_stores/main.rs::documents_get_list_and_delete`<br>`tests/sdk_http_response.rs::documents_list_pager_has_no_sdk_http_response_like_python`<br>`tests/documents/test_delete.rs::test_async_delete`<br>and 1 more |
 
 ### documents
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `documents.get` | `documents::Documents::get` | ✅ Implemented | `src/documents.rs::get_fetches_by_name` |
-| `documents.delete` | `documents::Documents::delete` | ✅ Implemented | `src/documents.rs::delete_sends_force_query_param` |
-| `documents.list` | `documents::Documents::list` | ✅ Implemented | `src/documents.rs::list_fetches_documents_under_the_parent_store` |
+| `documents.get` | `documents::Documents::get` | ✅ Implemented | `src/documents.rs::get_fetches_by_name`<br>`tests/documents/test_get.rs::test_async_get` |
+| `documents.delete` | `documents::Documents::delete` | ✅ Implemented | `src/documents.rs::delete_sends_force_query_param`<br>`tests/documents/test_delete.rs::test_async_delete` |
+| `documents.list` | `documents::Documents::list` | ✅ Implemented | `src/documents.rs::list_fetches_documents_under_the_parent_store`<br>`tests/sdk_http_response.rs::documents_list_pager_has_no_sdk_http_response_like_python` |
 
 ### auth_tokens
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `tokens.create` | `auth_tokens::AuthTokens::create` | ✅ Implemented | `src/auth_tokens.rs::create_posts_uses_and_expire_time`<br>`src/auth_tokens.rs::create_with_live_connect_constraints_locks_the_whole_setup`<br>`tests/auth_tokens.rs::create_posts_uses_expire_time_and_returns_the_token_name`<br>and 1 more |
+| `tokens.create` | `tokens::AuthTokens::create` | ✅ Implemented | `src/tokens.rs::create_posts_uses_and_expire_time`<br>`src/tokens.rs::create_with_live_connect_constraints_locks_the_whole_setup`<br>`tests/tokens/create.rs::test_async_create_no_lock`<br>and 2 more |
 
 ### live
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `live.connect` | `live::Live::connect` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::connect_rejects_vertex_only_config_field`<br>`tests/live.rs::connect_uses_query_key_and_sends_setup_first`<br>`tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>and 10 more |
-| `live.AsyncSession.send_client_content` | `live::LiveSession::send_client_content` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>`tests/live.rs::session_sends_client_content_realtime_input_and_tool_response`<br>`tests/e2e_expensive.rs::test_e2e_live_session_audio_turn` |
-| `live.AsyncSession.send_realtime_input` | `live::LiveSession::send_realtime_input` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::session_sends_client_content_realtime_input_and_tool_response` |
-| `live.AsyncSession.send_tool_response` | `live::LiveSession::send_tool_response` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::send_tool_response_without_id_is_a_validation_error`<br>`tests/live.rs::session_sends_client_content_realtime_input_and_tool_response` |
-| `live.AsyncSession.receive` | `live::LiveSession::receive` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::receive_turn_can_be_called_repeatedly_for_consecutive_turns`<br>`tests/live.rs::receive_turn_ends_on_idle_interaction_status_even_without_turn_complete`<br>`tests/live.rs::receive_turn_falls_back_to_turn_complete_when_interaction_status_is_absent`<br>and 4 more |
-| `live.AsyncSession.receive` | `live::LiveSession::receive_turn` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::receive_turn_can_be_called_repeatedly_for_consecutive_turns`<br>`tests/live.rs::receive_turn_ends_on_idle_interaction_status_even_without_turn_complete`<br>`tests/live.rs::receive_turn_falls_back_to_turn_complete_when_interaction_status_is_absent`<br>and 1 more |
-| `live.AsyncSession.close` | `live::LiveSession::close` | ✅ Implemented (async only, no sync variant) | `tests/live.rs::receive_yields_server_messages_in_order_and_ends_on_server_close`<br>`tests/live.rs::sending_after_the_server_closes_the_connection_fails`<br>`tests/live.rs::connect_uses_query_key_and_sends_setup_first`<br>and 9 more |
+| `live.connect` | `live::Live::connect` | ✅ Implemented (async only, no sync variant) | `tests/live/main.rs::connect_rejects_vertex_only_config_field`<br>`tests/live/main.rs::connect_uses_api_key_header_and_sends_setup_first`<br>`tests/live/main.rs::sending_after_the_server_closes_the_connection_fails`<br>and 15 more |
+| `live.AsyncSession.send_client_content` | `live::LiveSession::send_client_content` | ✅ Implemented (async only, no sync variant) | `tests/e2e_expensive.rs::test_e2e_live_session_audio_turn`<br>`tests/live/main.rs::sending_after_the_server_closes_the_connection_fails`<br>`tests/live/main.rs::session_sends_client_content_realtime_input_and_tool_response` |
+| `live.AsyncSession.send_realtime_input` | `live::LiveSession::send_realtime_input` | ✅ Implemented (async only, no sync variant) | `tests/live/main.rs::session_sends_client_content_realtime_input_and_tool_response` |
+| `live.AsyncSession.send_tool_response` | `live::LiveSession::send_tool_response` | ✅ Implemented (async only, no sync variant) | `tests/live/main.rs::send_tool_response_without_id_is_a_validation_error`<br>`tests/live/main.rs::session_sends_client_content_realtime_input_and_tool_response` |
+| `live.AsyncSession.receive` | `live::LiveSession::receive` | ✅ Implemented (async only, no sync variant) | `tests/live/main.rs::receive_turn_can_be_called_repeatedly_for_consecutive_turns`<br>`tests/live/main.rs::receive_turn_ends_on_idle_interaction_status_even_without_turn_complete`<br>`tests/live/main.rs::receive_turn_falls_back_to_turn_complete_when_interaction_status_is_absent`<br>and 4 more |
+| `live.AsyncSession.receive` | `live::LiveSession::receive_turn` | ✅ Implemented (async only, no sync variant) | `tests/live/main.rs::receive_turn_can_be_called_repeatedly_for_consecutive_turns`<br>`tests/live/main.rs::receive_turn_ends_on_idle_interaction_status_even_without_turn_complete`<br>`tests/live/main.rs::receive_turn_falls_back_to_turn_complete_when_interaction_status_is_absent`<br>and 1 more |
+| `live.AsyncSession.close` | `live::LiveSession::close` | ✅ Implemented (async only, no sync variant) | `tests/live/main.rs::receive_yields_server_messages_in_order_and_ends_on_server_close`<br>`tests/live/main.rs::sending_after_the_server_closes_the_connection_fails`<br>`tests/live/test_live.rs::test_async_session_close`<br>and 14 more |
 
 ### live_music
 
 | Python | Rust | Status | Test(s) |
 |---|---|---|---|
-| `live.music` | `live::Live::music` | ✅ Implemented (async only, no sync variant) | `src/live/mod.rs::websocket_endpoint_uses_music_method_verbatim`<br>`tests/live_music.rs::connect_sends_setup_and_waits_for_setup_complete`<br>`tests/live_music.rs::receive_yields_server_messages_and_ends_on_server_close`<br>and 1 more |
-| `live.music.connect` | `live::music::LiveMusic::connect` | ✅ Implemented (async only, no sync variant) | `tests/live_music.rs::connect_sends_setup_and_waits_for_setup_complete`<br>`tests/live_music.rs::receive_yields_server_messages_and_ends_on_server_close`<br>`tests/live_music.rs::session_sends_weighted_prompts_config_and_playback_control` |
-| `live.music.set_weighted_prompts` | `live::music::LiveMusicSession::set_weighted_prompts` | ✅ Implemented (async only, no sync variant) | `tests/live_music.rs::session_sends_weighted_prompts_config_and_playback_control` |
-| `live.music.set_music_generation_config` | `live::music::LiveMusicSession::set_music_generation_config` | ✅ Implemented (async only, no sync variant) | `tests/live_music.rs::session_sends_weighted_prompts_config_and_playback_control` |
-| `live.music.play` | `live::music::LiveMusicSession::play` | ✅ Implemented (async only, no sync variant) | `tests/live_music.rs::session_sends_weighted_prompts_config_and_playback_control` |
-| `live.music.pause` | `live::music::LiveMusicSession::pause` | ✅ Implemented (async only, no sync variant) | `tests/live_music.rs::session_sends_weighted_prompts_config_and_playback_control` |
-| `live.music.stop` | `live::music::LiveMusicSession::stop` | ✅ Implemented (async only, no sync variant) | `tests/live_music.rs::session_sends_weighted_prompts_config_and_playback_control` |
-| `live.music.reset_context` | `live::music::LiveMusicSession::reset_context` | ✅ Implemented (async only, no sync variant) | `tests/live_music.rs::session_sends_weighted_prompts_config_and_playback_control` |
-| `live.music.receive` | `live::music::LiveMusicSession::receive` | ✅ Implemented (async only, no sync variant) | `tests/live_music.rs::receive_yields_server_messages_and_ends_on_server_close` |
-| `live.music.close` | `live::music::LiveMusicSession::close` | ✅ Implemented (async only, no sync variant) | `tests/live_music.rs::receive_yields_server_messages_and_ends_on_server_close`<br>`tests/live_music.rs::connect_sends_setup_and_waits_for_setup_complete`<br>`tests/live_music.rs::session_sends_weighted_prompts_config_and_playback_control` |
+| `live.music` | `live::Live::music` | ✅ Implemented (async only, no sync variant) | `src/live.rs::websocket_endpoint_uses_music_method_verbatim`<br>`tests/live/test_live_music.rs::test_async_session_close`<br>`tests/live/test_live_music.rs::test_async_session_receive`<br>and 7 more |
+| `live.music.connect` | `live_music::LiveMusic::connect` | ✅ Implemented (async only, no sync variant) | `tests/live/test_live_music.rs::test_connect_uses_header_auth_without_query_key`<br>`tests/live_music/main.rs::connect_sends_setup_and_waits_for_setup_complete`<br>`tests/live/test_live_music.rs::test_async_session_close`<br>and 6 more |
+| `live.music.set_weighted_prompts` | `live_music::LiveMusicSession::set_weighted_prompts` | ✅ Implemented (async only, no sync variant) | `tests/live_music/main.rs::session_sends_weighted_prompts_config_and_playback_control` |
+| `live.music.set_music_generation_config` | `live_music::LiveMusicSession::set_music_generation_config` | ✅ Implemented (async only, no sync variant) | `tests/live_music/main.rs::session_sends_weighted_prompts_config_and_playback_control` |
+| `live.music.play` | `live_music::LiveMusicSession::play` | ✅ Implemented (async only, no sync variant) | `tests/live_music/main.rs::session_sends_weighted_prompts_config_and_playback_control` |
+| `live.music.pause` | `live_music::LiveMusicSession::pause` | ✅ Implemented (async only, no sync variant) | `tests/live_music/main.rs::session_sends_weighted_prompts_config_and_playback_control` |
+| `live.music.stop` | `live_music::LiveMusicSession::stop` | ✅ Implemented (async only, no sync variant) | `tests/live_music/main.rs::session_sends_weighted_prompts_config_and_playback_control` |
+| `live.music.reset_context` | `live_music::LiveMusicSession::reset_context` | ✅ Implemented (async only, no sync variant) | `tests/live_music/main.rs::session_sends_weighted_prompts_config_and_playback_control` |
+| `live.music.receive` | `live_music::LiveMusicSession::receive` | ✅ Implemented (async only, no sync variant) | `tests/live/test_live_music.rs::test_async_session_receive`<br>`tests/live/test_live_music.rs::test_async_session_receive_error`<br>`tests/live_music/main.rs::receive_yields_server_messages_and_ends_on_server_close` |
+| `live.music.close` | `live_music::LiveMusicSession::close` | ✅ Implemented (async only, no sync variant) | `tests/live/test_live_music.rs::test_async_session_close`<br>`tests/live_music/main.rs::receive_yields_server_messages_and_ends_on_server_close`<br>`tests/live/test_live_music.rs::test_async_session_receive`<br>and 6 more |
+
+### agents
+
+| Python | Rust | Status | Test(s) |
+|---|---|---|---|
+| `agents.list` | `gaos::resources::agents::Agents::list` | ✅ Implemented | `tests/gaos/generated_ops.rs::agents_list_sends_get_and_decodes_response` |
+| `agents.create` | `gaos::resources::agents::Agents::create` | ✅ Implemented | `tests/gaos/generated_ops.rs::agents_create_sends_post_and_decodes_response` |
+| `agents.delete` | `gaos::resources::agents::Agents::delete` | ✅ Implemented | `tests/gaos/generated_ops.rs::agents_delete_sends_delete_and_decodes_response` |
+| `agents.get` | `gaos::resources::agents::Agents::get` | ✅ Implemented | `tests/gaos/generated_ops.rs::agents_get_sends_get_and_decodes_response` |
+
+### credentials
+
+| Python | Rust | Status | Test(s) |
+|---|---|---|---|
+| `credentials.list` | `gaos::resources::credentials::Credentials::list` | ✅ Implemented | `tests/gaos/generated_ops.rs::credentials_list_sends_get_and_decodes_response`<br>`tests/gaos/test_credentials_lifecycle.rs::test_python_credentials_with_raw_response` |
+| `credentials.create` | `gaos::resources::credentials::Credentials::create` | ✅ Implemented | `tests/gaos/generated_ops.rs::credentials_create_sends_post_and_decodes_response` |
+| `credentials.delete` | `gaos::resources::credentials::Credentials::delete` | ✅ Implemented | `tests/gaos/generated_ops.rs::credentials_delete_sends_delete_and_decodes_response` |
+| `credentials.get` | `gaos::resources::credentials::Credentials::get` | ✅ Implemented | `tests/gaos/generated_ops.rs::credentials_get_sends_get_and_decodes_response` |
+| `credentials.update` | `gaos::resources::credentials::Credentials::update` | ✅ Implemented | `tests/gaos/generated_ops.rs::credentials_update_sends_patch_and_decodes_response` |
+
+### environments
+
+| Python | Rust | Status | Test(s) |
+|---|---|---|---|
+| `environments.list_environments` | `gaos::resources::environments::Environments::list_environments` | ✅ Implemented | `tests/gaos/generated_ops.rs::environments_list_environments_sends_get_and_decodes_response` |
+| `environments.create_environment` | `gaos::resources::environments::Environments::create_environment` | ✅ Implemented | `tests/gaos/generated_ops.rs::environments_create_environment_sends_post_and_decodes_response`<br>`tests/gaos/test_environments_lifecycle.rs::test_python_environments_async_create_with_from_environment` |
+| `environments.delete_environment` | `gaos::resources::environments::Environments::delete_environment` | ✅ Implemented | `tests/gaos/generated_ops.rs::environments_delete_environment_sends_delete_and_decodes_response` |
+| `environments.get_environment` | `gaos::resources::environments::Environments::get_environment` | ✅ Implemented | `tests/gaos/generated_ops.rs::environments_get_environment_sends_get_and_decodes_response` |
+| `environments.files.list` | `gaos::resources::environments::Environments::files_list` | ✅ Implemented | `tests/gaos/generated_ops.rs::environments_files_list_sends_get_and_decodes_response` |
+
+### interactions
+
+| Python | Rust | Status | Test(s) |
+|---|---|---|---|
+| `interactions.create` | `gaos::resources::interactions::Interactions::create` | ✅ Implemented | `tests/gaos/generated_ops.rs::interactions_create_sends_post_and_decodes_response`<br>`tests/interactions/normalize.rs::typed_create_wraps_a_content_list_input` |
+| `interactions.create` | `gaos::resources::interactions::Interactions::create_stream` | ✅ Implemented | `tests/gaos/generated_ops.rs::interactions_create_stream_sends_post_and_decodes_response` |
+| `interactions.delete` | `gaos::resources::interactions::Interactions::delete` | ✅ Implemented | `tests/gaos/generated_ops.rs::interactions_delete_sends_delete_and_decodes_response` |
+| `interactions.get` | `gaos::resources::interactions::Interactions::get` | ✅ Implemented | `tests/gaos/generated_ops.rs::interactions_get_sends_get_and_decodes_response` |
+| `interactions.get` | `gaos::resources::interactions::Interactions::get_stream` | ✅ Implemented | `tests/gaos/generated_ops.rs::interactions_get_stream_sends_get_and_decodes_response` |
+| `interactions.cancel` | `gaos::resources::interactions::Interactions::cancel` | ✅ Implemented | `tests/gaos/generated_ops.rs::interactions_cancel_sends_post_and_decodes_response` |
+
+### triggers
+
+| Python | Rust | Status | Test(s) |
+|---|---|---|---|
+| `triggers.list` | `gaos::resources::triggers::Triggers::list` | ✅ Implemented | `tests/gaos/generated_ops.rs::triggers_list_sends_get_and_decodes_response` |
+| `triggers.create` | `gaos::resources::triggers::Triggers::create` | ✅ Implemented | `tests/gaos/generated_ops.rs::triggers_create_sends_post_and_decodes_response` |
+| `triggers.delete` | `gaos::resources::triggers::Triggers::delete` | ✅ Implemented | `tests/gaos/generated_ops.rs::triggers_delete_sends_delete_and_decodes_response` |
+| `triggers.get` | `gaos::resources::triggers::Triggers::get` | ✅ Implemented | `tests/gaos/generated_ops.rs::triggers_get_sends_get_and_decodes_response` |
+| `triggers.update` | `gaos::resources::triggers::Triggers::update` | ✅ Implemented | `tests/gaos/generated_ops.rs::triggers_update_sends_patch_and_decodes_response` |
+| `triggers.list_executions` | `gaos::resources::triggers::Triggers::list_executions` | ✅ Implemented | `tests/gaos/generated_ops.rs::triggers_list_executions_sends_get_and_decodes_response` |
+| `triggers.run` | `gaos::resources::triggers::Triggers::run` | ✅ Implemented | `tests/gaos/generated_ops.rs::triggers_run_sends_post_and_decodes_response` |
+
+### voices
+
+| Python | Rust | Status | Test(s) |
+|---|---|---|---|
+| `voices.list` | `gaos::resources::voices::Voices::list` | ✅ Implemented | `tests/gaos/generated_ops.rs::voices_list_sends_get_and_decodes_response`<br>`tests/gaos/test_voices_lifecycle.rs::test_python_voices_async_lifecycle`<br>`tests/gaos/test_voices_lifecycle.rs::test_python_voices_lifecycle_routes_through_google_genai_client`<br>and 1 more |
+| `voices.create` | `gaos::resources::voices::Voices::create` | ✅ Implemented | `tests/gaos/generated_ops.rs::voices_create_sends_post_and_decodes_response`<br>`tests/gaos/test_voices_lifecycle.rs::test_python_voices_async_lifecycle`<br>`tests/gaos/test_voices_lifecycle.rs::test_python_voices_lifecycle_routes_through_google_genai_client` |
+| `voices.delete` | `gaos::resources::voices::Voices::delete` | ✅ Implemented | `tests/gaos/generated_ops.rs::voices_delete_sends_delete_and_decodes_response`<br>`tests/gaos/test_voices_lifecycle.rs::test_python_voices_async_lifecycle`<br>`tests/gaos/test_voices_lifecycle.rs::test_python_voices_lifecycle_routes_through_google_genai_client` |
+| `voices.get` | `gaos::resources::voices::Voices::get` | ✅ Implemented | `tests/gaos/generated_ops.rs::voices_get_sends_get_and_decodes_response`<br>`tests/gaos/test_voices_lifecycle.rs::test_python_voices_async_lifecycle`<br>`tests/gaos/test_voices_lifecycle.rs::test_python_voices_lifecycle_routes_through_google_genai_client` |
+
+### webhooks
+
+| Python | Rust | Status | Test(s) |
+|---|---|---|---|
+| `webhooks.list` | `gaos::resources::webhooks::Webhooks::list` | ✅ Implemented | `tests/gaos/generated_ops.rs::webhooks_list_sends_get_and_decodes_response` |
+| `webhooks.create` | `gaos::resources::webhooks::Webhooks::create` | ✅ Implemented | `tests/gaos/generated_ops.rs::webhooks_create_sends_post_and_decodes_response` |
+| `webhooks.delete` | `gaos::resources::webhooks::Webhooks::delete` | ✅ Implemented | `tests/gaos/generated_ops.rs::webhooks_delete_sends_delete_and_decodes_response` |
+| `webhooks.get` | `gaos::resources::webhooks::Webhooks::get` | ✅ Implemented | `tests/gaos/generated_ops.rs::webhooks_get_sends_get_and_decodes_response` |
+| `webhooks.update` | `gaos::resources::webhooks::Webhooks::update` | ✅ Implemented | `tests/gaos/generated_ops.rs::webhooks_update_sends_patch_and_decodes_response` |
+| `webhooks.ping` | `gaos::resources::webhooks::Webhooks::ping` | ✅ Implemented | `tests/gaos/generated_ops.rs::webhooks_ping_sends_post_and_decodes_response` |
+| `webhooks.rotate_signing_secret` | `gaos::resources::webhooks::Webhooks::rotate_signing_secret` | ✅ Implemented | `tests/gaos/generated_ops.rs::webhooks_rotate_signing_secret_sends_post_and_decodes_response` |
 
 ## Client construction
 
@@ -245,7 +332,7 @@ Building a `Client` and picking a backend are not individual methods, so they fa
 
 ## Types
 
-`tools/codegen/gen_types.py` turns `google.genai.types` into **412 structs / 81 enums** (`src/types/generated/structs.rs`, `src/types/generated/enums.rs`). Type and field names match Python one for one (snake_case), so the mapping is 1:1 and is not listed here.
+`tools/codegen/gen_types.py` turns `google.genai.types` into **413 structs / 81 enums** (`src/types/generated/structs.rs`, `src/types/generated/enums.rs`). Type and field names match Python one for one (snake_case), so the mapping is 1:1 and is not listed here.
 
 Parity on the type side is `gen_types.py`'s own job: the moment it meets an annotation missing from its mapping table it prints the class and field name and exits non-zero, so anything overlooked surfaces in CI's `codegen-check` (see "gen_types.py" in `specs/001-port-genai-rust/contracts/codegen.md`).
 
@@ -258,8 +345,8 @@ Parity on the type side is `gen_types.py`'s own job: the moment it meets an anno
 | `models.segment_image` | `models.py::segment_image` carries the same `vertexai` guard. Vertex AI only. |
 | `models.upscale_image` | `models.py::_upscale_image` carries the same `vertexai` guard. Vertex AI only. |
 | `tunings.validate_reward` | `tunings.py::validate_reward` carries the same `vertexai` guard. Vertex AI only (reward model validation is a Vertex AI tuning feature). |
-| `errors` (row in the source of truth) | The `APIError` family are types, not methods. Rust implements them as the `crate::error::Error` enum (`Api` / `Function*` / `UnknownApiResponse` and friends), verified by the `#[cfg(test)]` tests in `src/error.rs`. |
-| `pagers` (row in the source of truth) | `Pager` / `AsyncPager` are types, not methods. Rust implements them as `crate::pager::Pager<T>` (`page()` / `name()` / `page_size()` / `config()` / `next_page()`), verified by the `#[cfg(test)]` tests in `src/pager.rs` and by the tests for each `list` method. |
+| `errors` (row in the source of truth) | The `APIError` family are types, not methods. Rust implements them as the `crate::errors::Error` enum (`Api` / `Function*` / `UnknownApiResponse` and friends), verified by the `#[cfg(test)]` tests in `src/errors.rs`. |
+| `pagers` (row in the source of truth) | `Pager` / `AsyncPager` are types, not methods. Rust implements them as `crate::pagers::Pager<T>` (`page()` / `name()` / `page_size()` / `config()` / `next_page()`), verified by the `#[cfg(test)]` tests in `src/pagers.rs` and by the tests for each `list` method. |
 | `models.compute_tokens` | ⚠️ stub (always errors) (per the source of truth) |
 | `models.generate_images` | ⚠️ stub (always errors) (per the source of truth) |
 | `models.edit_image` | ⏭ later (Vertex AI) (per the source of truth) |

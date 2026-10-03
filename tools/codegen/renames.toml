@@ -1,0 +1,121 @@
+# Public Rust path changes made by feature 008 (structure alignment with
+# upstream google-genai). One [[rename]] per moved/renamed public item (or
+# module). `old`/`new` are `gemini_genai::...` paths; `note` is optional.
+# Consumed by tools/codegen/gen_migration.py to build the "Migration from 0.3.x"
+# table in CHANGELOG.md. Hand-maintained: do not reorder entries by hand-edit
+# elsewhere; append new moves at the end of the relevant section.
+
+[[rename]]
+old = "gemini_genai::http"
+new = "gemini_genai::api_client"
+note = "crate-private module (pub(crate)); recorded for traceability"
+
+[[rename]]
+old = "gemini_genai::error"
+new = "gemini_genai::errors"
+
+[[rename]]
+old = "gemini_genai::error::Error"
+new = "gemini_genai::errors::Error"
+note = "still re-exported as gemini_genai::Error"
+
+[[rename]]
+old = "gemini_genai::error::Result"
+new = "gemini_genai::errors::Result"
+note = "still re-exported as gemini_genai::Result"
+
+[[rename]]
+old = "gemini_genai::error::ApiError"
+new = "gemini_genai::errors::ApiError"
+note = "still re-exported as gemini_genai::ApiError"
+
+[[rename]]
+old = "gemini_genai::error::Backend"
+new = "gemini_genai::errors::Backend"
+note = "still re-exported as gemini_genai::Backend"
+
+[[rename]]
+old = "gemini_genai::error::FunctionCallError"
+new = "gemini_genai::errors::FunctionCallError"
+
+[[rename]]
+old = "gemini_genai::pager"
+new = "gemini_genai::pagers"
+
+[[rename]]
+old = "gemini_genai::pager::Pager"
+new = "gemini_genai::pagers::Pager"
+note = "still re-exported as gemini_genai::Pager"
+
+[[rename]]
+old = "gemini_genai::pager::PagedItem"
+new = "gemini_genai::pagers::PagedItem"
+
+[[rename]]
+old = "gemini_genai::auth_tokens"
+new = "gemini_genai::tokens"
+note = "accessor Client::auth_tokens() is unchanged"
+
+[[rename]]
+old = "gemini_genai::auth_tokens::AuthTokens"
+new = "gemini_genai::tokens::AuthTokens"
+
+[[rename]]
+old = "gemini_genai::mcp"
+new = "gemini_genai::mcp_utils"
+note = "feature = 'mcp'"
+
+[[rename]]
+old = "gemini_genai::mcp::mcp_tools"
+new = "gemini_genai::mcp_utils::mcp_tools"
+note = "feature = 'mcp'"
+
+[[rename]]
+old = "gemini_genai::live::music"
+new = "gemini_genai::live_music"
+note = "feature = 'live'"
+
+[[rename]]
+old = "gemini_genai::live::music::LiveMusic"
+new = "gemini_genai::live_music::LiveMusic"
+note = "feature = 'live'"
+
+[[rename]]
+old = "gemini_genai::live::music::LiveMusicSession"
+new = "gemini_genai::live_music::LiveMusicSession"
+note = "feature = 'live'"
+
+[[rename]]
+old = "gemini_genai::afc"
+new = "gemini_genai::automatic_function_calling_util"
+note = "split of afc.rs; the loop moved to the crate-private extra_utils"
+
+[[rename]]
+old = "gemini_genai::afc::FunctionTool"
+new = "gemini_genai::automatic_function_calling_util::FunctionTool"
+note = "also re-exported as gemini_genai::FunctionTool"
+
+[[rename]]
+old = "gemini_genai::afc::function_tool"
+new = "gemini_genai::automatic_function_calling_util::function_tool"
+note = "also re-exported as gemini_genai::function_tool"
+
+[[rename]]
+old = "gemini_genai::afc::generate_content"
+new = "gemini_genai::extra_utils::generate_content"
+note = "crate-private (pub(crate)); recorded for traceability"
+
+[[rename]]
+old = "gemini_genai::converters::getv"
+new = "gemini_genai::common::getv"
+note = "crate-private (pub(crate)); recorded for traceability"
+
+[[rename]]
+old = "gemini_genai::converters::setv"
+new = "gemini_genai::common::setv"
+note = "crate-private (pub(crate)); recorded for traceability"
+
+[[rename]]
+old = "gemini_genai::transformers::t_bytes"
+new = "gemini_genai::base_transformers::t_bytes"
+note = "crate-private (pub(crate)); recorded for traceability"

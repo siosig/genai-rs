@@ -1,0 +1,145 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "The quick brown fox jumps over the lazy dog."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ]
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-3.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_generate_content",
+      "parameters": {
+        "config": null,
+        "contents": "The quick brown fox jumps over the lazy dog.",
+        "model": "gemini-3.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Return a summary of the passage."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "responseMimeType": "application/json",
+                "responseSchema": {
+                  "properties": {
+                    "summary": {
+                      "type": "STRING"
+                    }
+                  },
+                  "type": "OBJECT"
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-3.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_generate_content_with_config_schema",
+      "parameters": {
+        "config": {
+          "responseMimeType": "application/json",
+          "responseSchema": {
+            "properties": {
+              "summary": {
+                "type": "STRING"
+              }
+            },
+            "type": "OBJECT"
+          }
+        },
+        "contents": "Return a summary of the passage.",
+        "model": "gemini-3.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Return a JSON summary."
+                    }
+                  ],
+                  "role": "user"
+                }
+              ],
+              "generationConfig": {
+                "responseJsonSchema": {
+                  "properties": {
+                    "summary": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "responseMimeType": "application/json"
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-3.5-flash:generateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_generate_content_with_config_json_schema",
+      "parameters": {
+        "config": {
+          "responseJsonSchema": {
+            "properties": {
+              "summary": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "responseMimeType": "application/json"
+        },
+        "contents": "Return a JSON summary.",
+        "model": "gemini-3.5-flash"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "shared/models/test_generate_content.py",
+  "test_method": "models.generate_content",
+  "upstream_version": "2.28.0"
+}

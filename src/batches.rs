@@ -6,8 +6,8 @@ use serde_json::{Map, Value};
 use crate::{
     client::Client,
     converters::generated::batches as conv,
-    error::Result,
-    pager::{PagedItem, Pager},
+    errors::Result,
+    pagers::{Page, PagedItem, Pager},
     types::{
         BatchJob, BatchJobSource, CancelBatchJobConfig, CreateBatchJobConfig,
         CreateEmbeddingsBatchJobConfig, DeleteBatchJobConfig, DeleteResourceJob,
@@ -15,11 +15,6 @@ use crate::{
         ListBatchJobsResponse,
     },
 };
-
-/// The boxed future returned while fetching one `batches().list(...)` page.
-type BatchJobsPageFuture = std::pin::Pin<
-    Box<dyn std::future::Future<Output = Result<(Vec<BatchJob>, Option<String>)>> + Send>,
->;
 
 /// Parses a response body as JSON, treating an empty body as `{}` (mirrors
 /// Python's `{} if not response.body else json.loads(response.body)`).
@@ -74,6 +69,88 @@ pub struct Batches {
 }
 
 impl Batches {
+    /// Gets a batch job's current status. Mirrors Python's `Batches.get`.
+    ///
+    /// # Errors
+    /// Returns [`crate::Error::Validation`] if `name` is not a
+    /// `batches/{id}` resource name, or [`crate::Error::Api`] for a
+    /// non-2xx response.
+    pub async fn get(&self, name: &str, config: Option<GetBatchJobConfig>) -> Result<BatchJob> {
+        let http_options = config.as_ref().and_then(|c| c.http_options.clone());
+        let params = serde_json::json!({ "name": name, "config": config });
+        let mut request = conv::get_batch_job_parameters_to_mldev(&params, None, None)?;
+        let name_id = take_url_field(&mut request, "name", "get_batch_job_parameters_to_mldev");
+        let path = format!("batches/{name_id}");
+        let response = self
+            .client
+            .http()
+            .request(Method::GET, &path, None, None, http_options.as_ref())
+            .await?;
+        let wire = response_json(&response.body)?;
+        let mldev = conv::batch_job_from_mldev(&wire, None, None)?;
+        Ok(serde_json::from_value(mldev)?)
+    }
+
+    /// Cancels a running or pending batch job. Mirrors Python's
+    /// `Batches.cancel`.
+    ///
+    /// # Errors
+    /// Returns [`crate::Error::Validation`] if `name` is not a
+    /// `batches/{id}` resource name, or [`crate::Error::Api`] for a
+    /// non-2xx response.
+    pub async fn cancel(&self, name: &str, config: Option<CancelBatchJobConfig>) -> Result<()> {
+        let http_options = config.as_ref().and_then(|c| c.http_options.clone());
+        let params = serde_json::json!({ "name": name, "config": config });
+        let mut request = conv::cancel_batch_job_parameters_to_mldev(&params, None, None)?;
+        let name_id = take_url_field(&mut request, "name", "cancel_batch_job_parameters_to_mldev");
+        let path = format!("batches/{name_id}:cancel");
+        self.client
+            .http()
+            .request(
+                Method::POST,
+                &path,
+                None,
+                Some(request),
+                http_options.as_ref(),
+            )
+            .await?;
+        Ok(())
+    }
+
+    /// Deletes a batch job. Mirrors Python's `Batches.delete`.
+    ///
+    /// # Errors
+    /// Returns [`crate::Error::Validation`] if `name` is not a
+    /// `batches/{id}` resource name, or [`crate::Error::Api`] for a
+    /// non-2xx response.
+    pub async fn delete(
+        &self,
+        name: &str,
+        config: Option<DeleteBatchJobConfig>,
+    ) -> Result<DeleteResourceJob> {
+        let http_options = config.as_ref().and_then(|c| c.http_options.clone());
+        let params = serde_json::json!({ "name": name, "config": config });
+        let mut request = conv::delete_batch_job_parameters_to_mldev(&params, None, None)?;
+        let name_id = take_url_field(&mut request, "name", "delete_batch_job_parameters_to_mldev");
+        let path = format!("batches/{name_id}");
+        let response = self
+            .client
+            .http()
+            .request(
+                Method::DELETE,
+                &path,
+                None,
+                Some(request),
+                http_options.as_ref(),
+            )
+            .await?;
+        let wire = response_json(&response.body)?;
+        let mldev = conv::delete_resource_job_from_mldev(&wire, None, None)?;
+        let mut parsed: DeleteResourceJob = serde_json::from_value(mldev)?;
+        parsed.sdk_http_response = Some(response.to_sdk_http_response());
+        Ok(parsed)
+    }
+
     /// Creates a batch job. Mirrors Python's `Batches.create`.
     ///
     /// # Errors
@@ -157,86 +234,6 @@ impl Batches {
         Ok(serde_json::from_value(mldev)?)
     }
 
-    /// Gets a batch job's current status. Mirrors Python's `Batches.get`.
-    ///
-    /// # Errors
-    /// Returns [`crate::Error::Validation`] if `name` is not a
-    /// `batches/{id}` resource name, or [`crate::Error::Api`] for a
-    /// non-2xx response.
-    pub async fn get(&self, name: &str, config: Option<GetBatchJobConfig>) -> Result<BatchJob> {
-        let http_options = config.as_ref().and_then(|c| c.http_options.clone());
-        let params = serde_json::json!({ "name": name, "config": config });
-        let mut request = conv::get_batch_job_parameters_to_mldev(&params, None, None)?;
-        let name_id = take_url_field(&mut request, "name", "get_batch_job_parameters_to_mldev");
-        let path = format!("batches/{name_id}");
-        let response = self
-            .client
-            .http()
-            .request(Method::GET, &path, None, None, http_options.as_ref())
-            .await?;
-        let wire = response_json(&response.body)?;
-        let mldev = conv::batch_job_from_mldev(&wire, None, None)?;
-        Ok(serde_json::from_value(mldev)?)
-    }
-
-    /// Cancels a running or pending batch job. Mirrors Python's
-    /// `Batches.cancel`.
-    ///
-    /// # Errors
-    /// Returns [`crate::Error::Validation`] if `name` is not a
-    /// `batches/{id}` resource name, or [`crate::Error::Api`] for a
-    /// non-2xx response.
-    pub async fn cancel(&self, name: &str, config: Option<CancelBatchJobConfig>) -> Result<()> {
-        let http_options = config.as_ref().and_then(|c| c.http_options.clone());
-        let params = serde_json::json!({ "name": name, "config": config });
-        let mut request = conv::cancel_batch_job_parameters_to_mldev(&params, None, None)?;
-        let name_id = take_url_field(&mut request, "name", "cancel_batch_job_parameters_to_mldev");
-        let path = format!("batches/{name_id}:cancel");
-        self.client
-            .http()
-            .request(
-                Method::POST,
-                &path,
-                None,
-                Some(request),
-                http_options.as_ref(),
-            )
-            .await?;
-        Ok(())
-    }
-
-    /// Deletes a batch job. Mirrors Python's `Batches.delete`.
-    ///
-    /// # Errors
-    /// Returns [`crate::Error::Validation`] if `name` is not a
-    /// `batches/{id}` resource name, or [`crate::Error::Api`] for a
-    /// non-2xx response.
-    pub async fn delete(
-        &self,
-        name: &str,
-        config: Option<DeleteBatchJobConfig>,
-    ) -> Result<DeleteResourceJob> {
-        let http_options = config.as_ref().and_then(|c| c.http_options.clone());
-        let params = serde_json::json!({ "name": name, "config": config });
-        let mut request = conv::delete_batch_job_parameters_to_mldev(&params, None, None)?;
-        let name_id = take_url_field(&mut request, "name", "delete_batch_job_parameters_to_mldev");
-        let path = format!("batches/{name_id}");
-        let response = self
-            .client
-            .http()
-            .request(
-                Method::DELETE,
-                &path,
-                None,
-                Some(request),
-                http_options.as_ref(),
-            )
-            .await?;
-        let wire = response_json(&response.body)?;
-        let mldev = conv::delete_resource_job_from_mldev(&wire, None, None)?;
-        Ok(serde_json::from_value(mldev)?)
-    }
-
     /// Lists batch jobs, oldest request first. Mirrors Python's
     /// `Batches.list`.
     ///
@@ -252,34 +249,26 @@ impl Batches {
             },
             None => Map::new(),
         };
-        let (page, next_page_token) = self.fetch_batch_jobs_page(&config_map).await?;
+        let first = self.fetch_batch_jobs_page(&config_map).await?;
 
         let client = self.client.clone();
         let fetch = std::sync::Arc::new(move |updated_config: Map<String, Value>| {
             let batches = Batches {
                 client: client.clone(),
             };
-            let fut: BatchJobsPageFuture =
-                Box::pin(async move { batches.fetch_batch_jobs_page(&updated_config).await });
+            let fut: std::pin::Pin<
+                Box<dyn std::future::Future<Output = Result<Page<BatchJob>>> + Send>,
+            > = Box::pin(async move { batches.fetch_batch_jobs_page(&updated_config).await });
             fut
         });
 
-        Ok(Pager::new(
-            PagedItem::BatchJobs,
-            page,
-            config_map,
-            next_page_token,
-            fetch,
-        ))
+        Ok(Pager::new(PagedItem::BatchJobs, first, config_map, fetch))
     }
 
     /// Fetches a single page of `batches.list`, given the `config` fields
     /// (`snake_case`, as produced by serializing [`ListBatchJobsConfig`])
     /// with `page_token` already updated for the page being requested.
-    async fn fetch_batch_jobs_page(
-        &self,
-        config: &Map<String, Value>,
-    ) -> Result<(Vec<BatchJob>, Option<String>)> {
+    async fn fetch_batch_jobs_page(&self, config: &Map<String, Value>) -> Result<Page<BatchJob>> {
         let http_options = config
             .get("http_options")
             .and_then(|v| serde_json::from_value::<HttpOptions>(v.clone()).ok());
@@ -300,9 +289,10 @@ impl Batches {
         let wire = response_json(&response.body)?;
         let mldev = conv::list_batch_jobs_response_from_mldev(&wire, None, None)?;
         let parsed: ListBatchJobsResponse = serde_json::from_value(mldev)?;
-        Ok((
-            parsed.batch_jobs.unwrap_or_default(),
-            parsed.next_page_token,
-        ))
+        Ok(Page {
+            items: parsed.batch_jobs.unwrap_or_default(),
+            next_page_token: parsed.next_page_token,
+            sdk_http_response: Some(response.to_sdk_http_response()),
+        })
     }
 }

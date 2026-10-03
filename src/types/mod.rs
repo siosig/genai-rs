@@ -10,8 +10,12 @@ mod conversions;
 mod ext;
 pub mod generated;
 mod http;
+pub(crate) mod wire_base64;
 
 pub use conversions::Contents;
-pub use ext::JsonSchemaTypeOrList;
+pub use ext::{
+    JOB_STATES_ENDED, JOB_STATES_ENDED_MLDEV, JOB_STATES_ENDED_VERTEX, JOB_STATES_SUCCEEDED,
+    JOB_STATES_SUCCEEDED_MLDEV, JOB_STATES_SUCCEEDED_VERTEX, JsonSchemaTypeOrList, Operation,
+};
 pub use generated::*;
 pub use http::{HttpOptions, HttpResponse, HttpRetryOptions};

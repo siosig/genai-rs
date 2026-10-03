@@ -1,8 +1,8 @@
 //! In-process mock WebSocket server for the Live API integration tests
-//! (`tests/live.rs`, `tests/live_music.rs`): binds an OS-assigned
+//! (`tests/live/main.rs`, `tests/live_music/main.rs`): binds an OS-assigned
 //! localhost port, accepts a single connection, and hands the upgraded
 //! stream plus the raw HTTP handshake request (URI/headers, for asserting
-//! on `?key=...` / `Authorization`) to a caller-supplied async handler.
+//! on `x-goog-api-key` / `Authorization`) to a caller-supplied async handler.
 
 #![allow(
     dead_code,
@@ -24,7 +24,7 @@ use tokio_tungstenite::{
 #[derive(Debug, Clone)]
 pub struct HandshakeRequest {
     /// The request URI, including path and query string (e.g.
-    /// `/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=test-key`).
+    /// `/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent`).
     pub uri: String,
     /// All request headers as `(name, value)` pairs (non-UTF-8 values are
     /// reported as an empty string).

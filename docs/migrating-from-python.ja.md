@@ -52,6 +52,22 @@ Vertex AI は移植していない。Vertex 専用の *型* は残っている�
 Vertex 専用の *フィールド* はリクエスト時点で `Error::UnsupportedByBackend` として弾かれるし、
 そもそも Vertex バックエンドを要求した時点で `Error::UnsupportedBackend` で失敗する。
 
+0.4.0 からは、クレートのモジュール構成が Python パッケージと対応している。`google.genai` から
+import していたモジュールには、同名の Rust モジュールがある。
+
+| Python | Rust |
+|---|---|
+| `google.genai.errors` | `gemini_genai::errors`（`Error`・`Result`・`ApiError` はクレートルートからも使える） |
+| `google.genai.pagers` | `gemini_genai::pagers`（`Pager` はクレートルートからも使える） |
+| `google.genai.tokens` | `gemini_genai::tokens`（アクセサは従来どおり `client.auth_tokens()`） |
+| `google.genai.live`、`live_music` | `gemini_genai::live`、`gemini_genai::live_music` |
+| `google.genai._mcp_utils` | `gemini_genai::mcp_utils` |
+| `google.genai.types` | `gemini_genai::types` |
+| `agents`、`environments`、`triggers`、`webhooks`、`voices`、`credentials`、`interactions` | 同名のモジュール |
+
+完全な対応表は [docs/upstream-sync.ja.md](upstream-sync.ja.md#モジュール対応表)、移動した
+全パスの一覧は [CHANGELOG.md](../CHANGELOG.md) の 0.4.0 にある。
+
 ## クライアントの生成
 
 ```python
@@ -272,7 +288,7 @@ Python の例外階層との対応。
 | `UnsupportedFunctionError` / `UnknownFunctionCallArgumentError` / `FunctionInvocationError` | `Error::FunctionCall(FunctionCallError::…)` |
 | `pager.next_page()` の `IndexError` | `Error::NoMorePages` |
 | `httpx` のネットワーク／タイムアウト例外 | `Error::Http(reqwest::Error)` |
-| — | `Error::Stream` / `Error::Upload` / `Error::UnsupportedBackend` / `Error::BlockingInsideRuntime` / `Error::Io` |
+| — | `Error::Stream` / `Error::Upload` / `Error::UnsupportedBackend` / `Error::UnsupportedMethod` / `Error::BlockingInsideRuntime` / `Error::Io` |
 
 `ApiError` は `code` / `status` / `message` / `details` / `response_headers` を保持するので、
 Python が公開していた情報は失われない。
@@ -368,7 +384,7 @@ config = types.GenerateContentConfig(tools=[get_weather])
 ```
 
 ```rust,no_run
-use gemini_genai::afc::function_tool;
+use gemini_genai::function_tool;
 use gemini_genai::types::{GenerateContentConfig, Tool};
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
@@ -432,7 +448,7 @@ Python は呼び出しごとに `config.tools` から `function_map` を組み�
 公開ツールをすべて AFC ツールとしてラップする。
 
 ```rust,ignore
-let tools = gemini_genai::mcp::mcp_tools(&peer).await?;
+let tools = gemini_genai::mcp_utils::mcp_tools(&peer).await?;
 let config = GenerateContentConfig { tools: Some(tools), ..Default::default() };
 ```
 
@@ -505,7 +521,7 @@ Python で deprecated な `AsyncSession.send` と `start_stream` は移植して
 | `client.http_options` | 読み取り可能な属性 | 非公開 | 0.2.0 ではアクセサを最小限に保つ |
 | 生成 enum | 厳密 | `Unknown(String)` バリアントを追加 | サーバー追加値への前方互換 |
 | `local_tokenizer` | あり | 未移植 | sentencepiece バインディングが必要 |
-| `interactions` / `agents` / `webhooks` / `triggers` / `environments` | プレビューの NextGen SDK | 未移植 | 上流で独立に生成されている別 SDK |
+| `interactions` の出力ヘルパ | 派生プロパティ `output_text` / `output_image` | 未実装。出力アイテムを直接読む | [既知のギャップ](upstream-sync.ja.md#既知のギャップ)に記載 |
 | replay / `DebugConfig` | あり | 未移植 | このクレートは golden JSON フィクスチャ＋`wiremock` でテストする |
 
 ## 完全な対応表

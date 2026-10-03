@@ -1,0 +1,81 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": "only supported in",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_compute_tokens",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 300 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "only supported in",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_compute_tokens_mldev_custom_url",
+      "parameters": {
+        "config": {
+          "httpOptions": {
+            "apiVersion": "v1beta",
+            "baseUrl": "https://generativelanguage.googleapis.com/"
+          }
+        },
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "Tell me a story in 300 words."
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": "only supported in",
+        "requests": [],
+        "server_error": null
+      },
+      "name": "test_compute_tokens_unicode",
+      "parameters": {
+        "config": null,
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": "\u8fd9\u662f\u4e00\u6761unicode\u6d4b\u8bd5\ud83e\udd2a\u2764\u2605"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "model": "gemini-2.5-flash"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "models/test_compute_tokens.py",
+  "test_method": "models.compute_tokens",
+  "upstream_version": "2.28.0"
+}

@@ -220,7 +220,7 @@ async fn test_e2e_automatic_function_calling() {
     }
 
     let client = client_or_skip!();
-    let tool = Tool::from_function(gemini_genai::afc::function_tool(
+    let tool = Tool::from_function(gemini_genai::function_tool(
         "get_weather",
         "Returns the current weather for a city.",
         |args: WeatherArgs| async move {

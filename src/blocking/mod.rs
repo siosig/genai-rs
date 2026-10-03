@@ -45,7 +45,7 @@
 //! failing fast at the actual mistake.
 //!
 //! Streams (`Stream<Item = Result<T>>`) become [`BlockingStream<T>`], an
-//! [`Iterator<Item = Result<T>>`]; pagers ([`crate::pager::Pager<T>`])
+//! [`Iterator<Item = Result<T>>`]; pagers ([`crate::pagers::Pager<T>`])
 //! become [`Pager<T>`]. Both hold the same `Arc<Runtime>` as the [`Client`]
 //! they were created from, so they keep working after the [`Client`] that
 //! produced them is dropped.
@@ -74,13 +74,13 @@ use std::{future::Future, sync::Arc};
 
 use futures_util::StreamExt;
 
-use crate::error::{Error, Result};
+use crate::errors::{Error, Result};
 
 mod generated;
 
 pub use generated::{
-    AuthTokens, Batches, Caches, Chats, Documents, FileSearchStores, Files, Models, Operations,
-    Tunings,
+    Agents, AuthTokens, Batches, Caches, Chats, Credentials, Documents, Environments,
+    FileSearchStores, Files, Interactions, Models, Operations, Triggers, Tunings, Voices, Webhooks,
 };
 
 /// A dedicated single-threaded Tokio runtime backing one [`Client`] (and
@@ -226,6 +226,48 @@ impl Client {
     pub fn auth_tokens(&self) -> AuthTokens {
         AuthTokens::new(Arc::clone(&self.runtime), self.inner.auth_tokens())
     }
+
+    /// Agent resources (`client.agents()...`).
+    #[must_use]
+    pub fn agents(&self) -> Agents {
+        Agents::new(Arc::clone(&self.runtime), self.inner.agents())
+    }
+
+    /// Credential resources (experimental upstream) (`client.credentials()...`).
+    #[must_use]
+    pub fn credentials(&self) -> Credentials {
+        Credentials::new(Arc::clone(&self.runtime), self.inner.credentials())
+    }
+
+    /// Environment resources, including `files()` (`client.environments()...`).
+    #[must_use]
+    pub fn environments(&self) -> Environments {
+        Environments::new(Arc::clone(&self.runtime), self.inner.environments())
+    }
+
+    /// Interactions API (`client.interactions()...`).
+    #[must_use]
+    pub fn interactions(&self) -> Interactions {
+        Interactions::new(Arc::clone(&self.runtime), self.inner.interactions())
+    }
+
+    /// Trigger resources (`client.triggers()...`).
+    #[must_use]
+    pub fn triggers(&self) -> Triggers {
+        Triggers::new(Arc::clone(&self.runtime), self.inner.triggers())
+    }
+
+    /// Voice resources (`client.voices()...`).
+    #[must_use]
+    pub fn voices(&self) -> Voices {
+        Voices::new(Arc::clone(&self.runtime), self.inner.voices())
+    }
+
+    /// Webhook resources (`client.webhooks()...`).
+    #[must_use]
+    pub fn webhooks(&self) -> Webhooks {
+        Webhooks::new(Arc::clone(&self.runtime), self.inner.webhooks())
+    }
 }
 
 /// Builder for [`Client`]. See [`Client::builder`] and
@@ -335,7 +377,7 @@ impl<T> Iterator for BlockingStream<T> {
     }
 }
 
-/// A blocking wrapper around [`crate::pager::Pager<T>`]: [`next_page`] /
+/// A blocking wrapper around [`crate::pagers::Pager<T>`]: [`next_page`] /
 /// [`page`] / [`page_size`] / [`config`] / [`name`] mirror the async
 /// pager's methods synchronously, and [`into_stream`] returns a
 /// [`BlockingStream<T>`] walking every item across every page. Returned by
@@ -349,7 +391,7 @@ impl<T> Iterator for BlockingStream<T> {
 /// [`into_stream`]: Pager::into_stream
 pub struct Pager<T> {
     runtime: Arc<Runtime>,
-    inner: crate::pager::Pager<T>,
+    inner: crate::pagers::Pager<T>,
 }
 
 impl<T: std::fmt::Debug> std::fmt::Debug for Pager<T> {
@@ -361,38 +403,45 @@ impl<T: std::fmt::Debug> std::fmt::Debug for Pager<T> {
 }
 
 impl<T> Pager<T> {
-    pub(crate) fn new(runtime: Arc<Runtime>, inner: crate::pager::Pager<T>) -> Self {
+    pub(crate) fn new(runtime: Arc<Runtime>, inner: crate::pagers::Pager<T>) -> Self {
         Self { runtime, inner }
     }
 
     /// Which resource kind this pager lists. See
-    /// [`crate::pager::Pager::name`].
+    /// [`crate::pagers::Pager::name`].
     #[must_use]
-    pub fn name(&self) -> crate::pager::PagedItem {
+    pub fn name(&self) -> crate::pagers::PagedItem {
         self.inner.name()
     }
 
-    /// The current page's items. See [`crate::pager::Pager::page`].
+    /// The current page's items. See [`crate::pagers::Pager::page`].
     #[must_use]
     pub fn page(&self) -> &[T] {
         self.inner.page()
     }
 
-    /// The current page's size. See [`crate::pager::Pager::page_size`].
+    /// The current page's size. See [`crate::pagers::Pager::page_size`].
     #[must_use]
     pub fn page_size(&self) -> usize {
         self.inner.page_size()
     }
 
+    /// The HTTP response (headers) behind the current page. See
+    /// [`crate::pagers::Pager::sdk_http_response`].
+    #[must_use]
+    pub fn sdk_http_response(&self) -> Option<&crate::types::HttpResponse> {
+        self.inner.sdk_http_response()
+    }
+
     /// The request config used to fetch the current page. See
-    /// [`crate::pager::Pager::config`].
+    /// [`crate::pagers::Pager::config`].
     #[must_use]
     pub fn config(&self) -> &serde_json::Map<String, serde_json::Value> {
         self.inner.config()
     }
 
     /// Fetches and returns the next page, replacing the current one. See
-    /// [`crate::pager::Pager::next_page`].
+    /// [`crate::pagers::Pager::next_page`].
     ///
     /// # Errors
     /// Returns [`crate::Error::NoMorePages`] if there
@@ -405,7 +454,7 @@ impl<T> Pager<T> {
 
     /// Consumes this pager, returning a [`BlockingStream`] of every item
     /// across every page (including the current one). See
-    /// [`crate::pager::Pager::into_stream`].
+    /// [`crate::pagers::Pager::into_stream`].
     #[must_use = "returns a lazy iterator; nothing is fetched until it is iterated"]
     pub fn into_stream(self) -> BlockingStream<T>
     where

@@ -4,5 +4,5 @@
     "person_generation": "ALLOW_ADULT"
   },
   "expected": null,
-  "expected_error": "field `person_generation` is only supported by the Vertex AI backend"
+  "expected_error": "person_generation parameter is only supported in Gemini Enterprise Agent Platform mode, not in Gemini Developer API mode."
 }

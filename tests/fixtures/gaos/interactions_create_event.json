@@ -1,0 +1,35 @@
+{
+  "event_id": "sample-event_id",
+  "event_type": "interaction.completed",
+  "interaction": {
+    "agent": "sample-agent",
+    "continuation_token": "sample-continuation_token",
+    "created": "sample-created",
+    "id": "sample-id",
+    "model": "sample-model",
+    "object": "sample-object",
+    "service_tier": "flex",
+    "status": "in_progress",
+    "steps": [
+      {
+        "id": "sample-id",
+        "signature": "sample-signature",
+        "type": "code_execution_call"
+      }
+    ],
+    "updated": "sample-updated",
+    "usage": {
+      "cached_tokens_by_modality": [],
+      "grounding_tool_count": [],
+      "input_tokens_by_modality": [],
+      "output_tokens_by_modality": [],
+      "tool_use_tokens_by_modality": [],
+      "total_cached_tokens": 1,
+      "total_input_tokens": 1,
+      "total_output_tokens": 1,
+      "total_thought_tokens": 1,
+      "total_tokens": 1,
+      "total_tool_use_tokens": 1
+    }
+  }
+}

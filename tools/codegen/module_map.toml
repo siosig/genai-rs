@@ -1,0 +1,199 @@
+# Upstream module -> Rust file(s). See specs/008-python-genai-rust-conformance/
+# contracts/module-map.md. `rust` entries are repo-relative paths or globs
+# (`**` = any depth). `converters = true` marks modules whose `_X_to_mldev` /
+# `_X_from_mldev` functions are generated into src/converters/generated/<stem>.rs
+# (the leading underscore of the upstream module name is dropped).
+# `out_of_scope = true` modules need `reason_code` and `reason`.
+
+[[module]]
+upstream = "__init__"
+rust = ["src/lib.rs"]
+
+[[module]]
+upstream = "version"
+rust = ["src/lib.rs"]
+
+[[module]]
+upstream = "client"
+rust = ["src/client.rs"]
+
+[[module]]
+upstream = "_base_url"
+rust = ["src/base_url.rs"]
+
+[[module]]
+upstream = "_api_client"
+rust = ["src/api_client/**"]
+
+[[module]]
+upstream = "_api_module"
+out_of_scope = true
+reason_code = "structural"
+reason = "Python base class for the resource modules; Rust resource handles hold a shared API client instead."
+
+[[module]]
+upstream = "_common"
+rust = ["src/common.rs"]
+
+[[module]]
+upstream = "_base_transformers"
+rust = ["src/base_transformers.rs"]
+
+[[module]]
+upstream = "_transformers"
+rust = ["src/transformers.rs"]
+
+[[module]]
+upstream = "_extra_utils"
+rust = ["src/extra_utils.rs"]
+
+[[module]]
+upstream = "_automatic_function_calling_util"
+rust = ["src/automatic_function_calling_util.rs"]
+
+[[module]]
+upstream = "_mcp_utils"
+rust = ["src/mcp_utils.rs"]
+
+[[module]]
+upstream = "_adapters"
+out_of_scope = true
+reason_code = "python_only"
+reason = "Python MCP session adapter class; Rust exposes MCP tools through mcp_utils::mcp_tools."
+
+[[module]]
+upstream = "_live_converters"
+rust = ["src/converters/generated/live_converters.rs"]
+converters = true
+
+[[module]]
+upstream = "_tokens_converters"
+rust = ["src/converters/generated/tokens_converters.rs"]
+converters = true
+
+[[module]]
+upstream = "_operations_converters"
+rust = ["src/converters/generated/operations_converters.rs"]
+converters = true
+
+[[module]]
+upstream = "models"
+rust = ["src/models.rs"]
+converters = true
+
+[[module]]
+upstream = "batches"
+rust = ["src/batches.rs"]
+converters = true
+
+[[module]]
+upstream = "caches"
+rust = ["src/caches.rs"]
+converters = true
+
+[[module]]
+upstream = "files"
+rust = ["src/files.rs"]
+converters = true
+
+[[module]]
+upstream = "tunings"
+rust = ["src/tunings.rs"]
+converters = true
+
+[[module]]
+upstream = "file_search_stores"
+rust = ["src/file_search_stores.rs"]
+converters = true
+
+[[module]]
+upstream = "documents"
+rust = ["src/documents.rs"]
+converters = true
+
+[[module]]
+upstream = "operations"
+rust = ["src/operations.rs"]
+converters = true
+
+[[module]]
+upstream = "chats"
+rust = ["src/chats.rs"]
+converters = true
+
+[[module]]
+upstream = "pagers"
+rust = ["src/pagers.rs"]
+
+[[module]]
+upstream = "errors"
+rust = ["src/errors.rs"]
+
+[[module]]
+upstream = "tokens"
+rust = ["src/tokens.rs"]
+converters = true
+
+[[module]]
+upstream = "live"
+rust = ["src/live.rs"]
+
+[[module]]
+upstream = "live_music"
+rust = ["src/live_music.rs"]
+
+[[module]]
+upstream = "types"
+rust = ["src/types/**"]
+
+[[module]]
+upstream = "agents"
+rust = ["src/agents.rs", "src/gaos/**"]
+
+[[module]]
+upstream = "environments"
+rust = ["src/environments.rs", "src/gaos/**"]
+
+[[module]]
+upstream = "triggers"
+rust = ["src/triggers.rs", "src/gaos/**"]
+
+[[module]]
+upstream = "webhooks"
+rust = ["src/webhooks.rs", "src/gaos/**"]
+
+[[module]]
+upstream = "voices"
+rust = ["src/voices.rs", "src/gaos/**"]
+
+[[module]]
+upstream = "credentials"
+rust = ["src/credentials.rs", "src/gaos/**"]
+
+[[module]]
+upstream = "interactions"
+rust = ["src/interactions.rs", "src/gaos/**"]
+
+[[module]]
+upstream = "local_tokenizer"
+out_of_scope = true
+reason_code = "python_only"
+reason = "Local tokenizer needs a downloaded sentencepiece model; no API request behavior."
+
+[[module]]
+upstream = "_local_tokenizer_loader"
+out_of_scope = true
+reason_code = "python_only"
+reason = "Loader for the local tokenizer's sentencepiece model files."
+
+[[module]]
+upstream = "_replay_api_client"
+out_of_scope = true
+reason_code = "replay_infra"
+reason = "Test-infrastructure client that replays recorded HTTP sessions."
+
+[[module]]
+upstream = "_test_api_client"
+out_of_scope = true
+reason_code = "replay_infra"
+reason = "Test-infrastructure API client used by upstream's own tests."

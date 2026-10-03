@@ -1,0 +1,38 @@
+{
+  "agent_config": {
+    "max_total_tokens": "1",
+    "model": "sample-model",
+    "type": "antigravity"
+  },
+  "base_agent": "sample-base_agent",
+  "base_environment": {
+    "env": {
+      "key": {
+        "credential": "sample-credential",
+        "value": "sample-value"
+      }
+    },
+    "environment_id": "sample-environment_id",
+    "network": {
+      "allowlist": []
+    },
+    "sources": [
+      {
+        "content": "sample-content",
+        "encoding": "sample-encoding",
+        "source": "sample-source",
+        "target": "sample-target",
+        "type": "gcs"
+      }
+    ],
+    "type": "remote"
+  },
+  "description": "sample-description",
+  "id": "sample-id",
+  "system_instruction": "sample-system_instruction",
+  "tools": [
+    {
+      "type": "code_execution"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "batch": {
+                "displayName": "test_batch",
+                "inputConfig": {
+                  "fileName": "files/s0pa54alni6w"
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:batchGenerateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_union_generate_content_with_file",
+      "parameters": {
+        "config": {
+          "displayName": "test_batch"
+        },
+        "model": "gemini-2.5-flash",
+        "src": {
+          "fileName": "files/s0pa54alni6w"
+        }
+      },
+      "response_body": {}
+    },
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": {
+              "batch": {
+                "displayName": "test_batch",
+                "inputConfig": {
+                  "fileName": "files/s0pa54alni6w"
+                }
+              }
+            },
+            "method": "POST",
+            "path": "/v1beta/models/gemini-2.5-flash:batchGenerateContent",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_generate_content_with_file",
+      "parameters": {
+        "config": {
+          "displayName": "test_batch"
+        },
+        "model": "gemini-2.5-flash",
+        "src": {
+          "fileName": "files/s0pa54alni6w"
+        }
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "batches/test_create_with_file.py",
+  "test_method": "batches.create",
+  "upstream_version": "2.28.0"
+}

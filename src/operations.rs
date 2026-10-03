@@ -6,74 +6,11 @@ use serde_json::Value;
 
 use crate::{
     client::Client,
-    converters::generated::{operations as conv, operations_converters as op_conv},
-    error::{Error, Result},
+    converters::generated::operations as conv,
+    errors::{Error, Result},
 };
 
-/// A long-running operation that can be polled via
-/// [`Operations::get`].
-///
-/// Implemented for every operation type this crate's methods return:
-/// [`crate::types::GenerateVideosOperation`] (from
-/// `models().generate_videos`), [`crate::types::ImportFileOperation`] (from
-/// `file_search_stores().import_file`), and
-/// [`crate::types::UploadToFileSearchStoreOperation`] (from
-/// `file_search_stores().upload_to_file_search_store`). Mirrors Python's
-/// `operations.get`, which is generic over `TypeVar('T', bound=types.Operation)`.
-pub trait OperationLike: Sized {
-    /// The operation's resource name (e.g. `operations/abc123`).
-    fn name(&self) -> Option<&str>;
-
-    /// Rebuilds this operation from a raw poll response body.
-    ///
-    /// Mirrors Python's `Operation.from_api_response` classmethod, which
-    /// dispatches to the *type-specific* `_X_Operation_from_mldev`
-    /// converter. That step is load-bearing, not cosmetic: the wire shape
-    /// nests the payload under keys the Rust type doesn't name directly
-    /// (e.g. a completed video operation arrives as
-    /// `response.generateVideoResponse.generatedSamples[]`, which the
-    /// converter remaps onto `response.generated_videos[]`), so
-    /// deserializing the raw body would silently yield an operation with
-    /// an empty result.
-    ///
-    /// # Errors
-    /// Returns [`crate::Error::Json`] if `wire` doesn't match this
-    /// operation's expected shape.
-    fn from_api_response(wire: &Value) -> Result<Self>;
-}
-
-impl OperationLike for crate::types::GenerateVideosOperation {
-    fn name(&self) -> Option<&str> {
-        self.name.as_deref()
-    }
-
-    fn from_api_response(wire: &Value) -> Result<Self> {
-        let mldev = op_conv::generate_videos_operation_from_mldev(wire, None, None)?;
-        Ok(serde_json::from_value(mldev)?)
-    }
-}
-
-impl OperationLike for crate::types::ImportFileOperation {
-    fn name(&self) -> Option<&str> {
-        self.name.as_deref()
-    }
-
-    fn from_api_response(wire: &Value) -> Result<Self> {
-        let mldev = op_conv::import_file_operation_from_mldev(wire, None, None)?;
-        Ok(serde_json::from_value(mldev)?)
-    }
-}
-
-impl OperationLike for crate::types::UploadToFileSearchStoreOperation {
-    fn name(&self) -> Option<&str> {
-        self.name.as_deref()
-    }
-
-    fn from_api_response(wire: &Value) -> Result<Self> {
-        let mldev = op_conv::upload_to_file_search_store_operation_from_mldev(wire, None, None)?;
-        Ok(serde_json::from_value(mldev)?)
-    }
-}
+pub use crate::types::Operation as OperationLike;
 
 /// Handle for `client.operations()`.
 #[derive(Clone)]
@@ -180,6 +117,6 @@ mod tests {
         };
         let operation = GenerateVideosOperation::default();
         let err = ops.get(&operation).await.unwrap_err();
-        assert!(matches!(err, crate::error::Error::Validation(_)));
+        assert!(matches!(err, crate::errors::Error::Validation(_)));
     }
 }

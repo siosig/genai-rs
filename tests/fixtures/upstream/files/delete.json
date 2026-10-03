@@ -1,0 +1,27 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "DELETE",
+            "path": "/v1beta/files/1g583ke2xdsn",
+            "query": []
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_delete",
+      "parameters": {
+        "config": null,
+        "name": "files/1g583ke2xdsn"
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "files/test_delete.py",
+  "test_method": "files.delete",
+  "upstream_version": "2.28.0"
+}

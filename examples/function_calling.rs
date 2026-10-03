@@ -9,8 +9,7 @@
 //! ```
 
 use gemini_genai::{
-    Client, Result,
-    afc::function_tool,
+    Client, Result, function_tool,
     types::{GenerateContentConfig, Tool},
 };
 use schemars::JsonSchema;

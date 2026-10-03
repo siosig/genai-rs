@@ -1,0 +1,33 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "error_contains": null,
+        "requests": [
+          {
+            "body": null,
+            "method": "GET",
+            "path": "/v1beta/files",
+            "query": [
+              [
+                "pageSize",
+                "2"
+              ]
+            ]
+          }
+        ],
+        "server_error": null
+      },
+      "name": "test_list_files",
+      "parameters": {
+        "config": {
+          "pageSize": 2
+        }
+      },
+      "response_body": {}
+    }
+  ],
+  "source": "shared/files/test_list.py",
+  "test_method": "files.list",
+  "upstream_version": "2.28.0"
+}
